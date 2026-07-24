@@ -1,0 +1,120 @@
+/* ================================================================
+   Product change page — فروشندگان محصول (ProductVendor inline)
+   Compact summary rows, collapsed by default. Scoped under
+   #product_vendors-group / .pv- prefix so nothing here can leak onto
+   any other inline or page.
+================================================================= */
+
+#product_vendors-group .pv-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px 16px;
+    direction: rtl;
+    cursor: default;
+}
+
+#product_vendors-group .pv-summary-main {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    min-width: 0;
+}
+
+#product_vendors-group .pv-summary-vendor-link {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--purple);
+    text-decoration: none;
+}
+#product_vendors-group .pv-summary-vendor-link:hover { text-decoration: underline; }
+#product_vendors-group .pv-summary-vendor-link:focus-visible {
+    outline: 2px solid var(--purple);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+#product_vendors-group .pv-summary-badges {
+    display: inline-flex;
+    gap: 6px;
+}
+
+#product_vendors-group .pv-badge {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+#product_vendors-group .pv-badge--primary  { background: var(--purple-light); color: var(--purple); }
+#product_vendors-group .pv-badge--active   { background: var(--green-bg); color: var(--green); }
+#product_vendors-group .pv-badge--inactive { background: var(--red-bg); color: var(--red); }
+
+#product_vendors-group .pv-summary-meta {
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+#product_vendors-group .pv-summary-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+#product_vendors-group .pv-summary-btn {
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: var(--radius-sm, 6px);
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+}
+#product_vendors-group .pv-summary-btn:hover {
+    background: var(--bg);
+    border-color: var(--purple);
+    color: var(--purple);
+}
+#product_vendors-group .pv-summary-btn--delete:hover {
+    background: var(--red-bg);
+    border-color: var(--red);
+    color: var(--red);
+}
+
+/* Collapsed relation: summary visible, real fieldset hidden (still in the
+   DOM/form — only display:none, so its inputs still submit normally). */
+#product_vendors-group .inline-related.pv-collapsible.pv-collapsed > fieldset.module {
+    display: none;
+}
+#product_vendors-group .inline-related.pv-collapsible:not(.pv-collapsed) .pv-summary {
+    border-bottom: 1px solid var(--border);
+}
+
+/* Marked for deletion — visual feedback only; the real checkbox already
+   carries the actual DELETE state Django submits. */
+#product_vendors-group .inline-related.pv-marked-deleted .pv-summary-vendor-link {
+    text-decoration: line-through;
+    color: var(--muted);
+}
+#product_vendors-group .inline-related.pv-marked-deleted {
+    opacity: .65;
+}
+
+@media (max-width: 900px) {
+    #product_vendors-group .pv-summary {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    #product_vendors-group .pv-summary-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}

@@ -1,0 +1,1421 @@
+/* ================================================================
+   RTL Responsive Polish — Surgery Clinic Admin
+   Loaded last (after custom_admin.css and page-specific CSS).
+   Breakpoints: ≤1200px laptop  ≤900px tablet  ≤768px compact tablet
+================================================================= */
+
+/* ── Global layout safety ───────────────────────────────────────── */
+/*
+ * border-box everywhere — prevents padded elements from overflowing
+ * their containers. Django admin/css/base.css already sets this but
+ * we reinforce in our own cascade to be safe.
+ */
+*, *::before, *::after { box-sizing: border-box; }
+
+/*
+ * Responsive media — SVGs and images must never exceed their container.
+ * Inline SVGs without explicit width/height attributes default to 300×150
+ * which can break narrow layouts. This rule is the universal safety net.
+ * Scoped to content areas to avoid conflicting with icon containers
+ * (.ca-sidebar-brand-icon, .ca-devcard-contact-icon) that manage their
+ * own child SVG sizing explicitly.
+ */
+img { max-width: 100%; height: auto; }
+.ca-main img, .ca-main svg { max-width: 100%; }
+
+/* Prevent horizontal page overflow ────────────────────────────── */
+html, body { max-width: 100%; }
+html { overflow-x: hidden; }
+
+/* ── Navbar: prevent brand text overflow ───────────────────────── */
+.ca-brand {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 1;
+}
+
+/* Hide username label on very small screens — logout button stays */
+@media (max-width: 600px) {
+    .ca-navbar-user { display: none; }
+}
+
+/* ── Main content: reduce padding on tablet ─────────────────────── */
+@media (max-width: 900px) {
+    .ca-main { padding: 16px; }
+}
+@media (max-width: 768px) {
+    .ca-main { padding: 12px 14px; }
+}
+
+/* ── Table wrappers: horizontal scroll ──────────────────────────── */
+/*
+ * Page-specific CSS uses overflow:hidden on table wrappers for border-radius
+ * clipping. Setting overflow-x:auto here (cascade wins — this file loads last)
+ * overrides just the x-axis, giving horizontal scroll on narrow screens while
+ * border-radius clipping on the y-axis is preserved.
+ */
+.em-table-wrap,
+.sh-table-wrap,
+.pl-table-wrap,
+.pu-table-wrap,
+.ct-table-wrap,
+.py-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ── Tab bars: horizontal scroll on small screens ───────────────── */
+@media (max-width: 768px) {
+    .ed-tab-bar,
+    .shd-tab-bar,
+    .pd-tab-bar,
+    .pl-tab-bar,
+    .ct-tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding-bottom: 2px; /* prevent bottom border from clipping */
+    }
+    .ed-tab-bar::-webkit-scrollbar,
+    .shd-tab-bar::-webkit-scrollbar,
+    .pd-tab-bar::-webkit-scrollbar,
+    .pl-tab-bar::-webkit-scrollbar,
+    .ct-tabs::-webkit-scrollbar { display: none; }
+}
+
+/* ── Filter rows: better layout on tablet ───────────────────────── */
+@media (max-width: 900px) {
+    .em-filter-row,
+    .sh-filter-row,
+    .pl-filter-row,
+    .pu-filter-row {
+        row-gap: 8px;
+    }
+
+    .em-filter-select,
+    .em-filter-input,
+    .sh-filter-select,
+    .pl-filter-select,
+    .pl-filter-number,
+    .pu-filter-select,
+    .pu-filter-date {
+        flex: 1 1 auto;
+        min-width: 120px;
+    }
+}
+
+/* ── Detail page header cards: stack on small screens ──────────── */
+@media (max-width: 600px) {
+    .ed-header-card,
+    .shd-header-card,
+    .pd-header-card {
+        flex-direction: column;
+    }
+
+    .ed-header-actions,
+    .shd-header-actions,
+    .pd-header-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+
+/* ── Pagination: stack on phone-width ───────────────────────────── */
+@media (max-width: 600px) {
+    .em-pagination,
+    .sh-pagination,
+    .pl-pagination,
+    .pu-pagination {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+    }
+
+    .em-pagination-pages,
+    .sh-pagination-pages,
+    .pl-pagination-pages,
+    .pu-pagination-pages {
+        justify-content: center;
+    }
+
+    .em-pagination-size,
+    .sh-pagination-size,
+    .pl-pagination-size,
+    .pu-pagination-size {
+        justify-content: flex-end;
+    }
+
+    /* Clear-filters button: remove auto margin when stacked */
+    .em-clear-filters.em-visible,
+    .sh-clear-filters.sh-visible,
+    .pl-clear-filters.pl-visible,
+    .pu-clear-filters.pu-visible {
+        margin-inline-start: 0;
+    }
+}
+
+/* ── Finance dashboard: design-system colors + responsive ────────── */
+
+/* Primary button: align with the purple design system */
+.fd-btn--primary {
+    background: var(--purple);
+    border-color: var(--purple);
+    color: #fff;
+}
+.fd-btn--primary:hover {
+    background: var(--purple-dark);
+    border-color: var(--purple-dark);
+}
+
+/* Ensure RTL-aware font and text direction on inputs/labels */
+.fd-label  { text-align: right; }
+.fd-input  {
+    font-family: "Vazir", Vazirmatn, "IRANSans", Tahoma, system-ui, sans-serif;
+    direction: rtl;
+    text-align: right;
+}
+
+/* Legend dot: logical margin (works in both RTL and LTR) */
+.fd-legend-dot {
+    margin-inline-end: 4px;
+    margin-left: 0;
+}
+
+/* Finance dashboard responsive breakpoints */
+@media (max-width: 900px) {
+    #finance-dashboard-root { padding: 12px 16px; }
+    .fd-cards                { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 600px) {
+    .fd-cards { grid-template-columns: 1fr; }
+
+    .fd-filters-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .fd-filter-group {
+        width: 100%;
+    }
+
+    .fd-input--narrow {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .fd-btn {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .fd-chart-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .fd-chart-legend { flex-wrap: wrap; }
+
+    /* Slightly shorter chart on small screens */
+    .fd-chart-wrap { height: 240px; }
+}
+
+/* ── Modals: full-width cap on small screens ───────────────────── */
+.ed-modal,
+.pd-modal {
+    max-width: calc(100vw - 32px);
+    box-sizing: border-box;
+}
+.pu-modal { box-sizing: border-box; }
+
+/* ── Search spinners: use logical end position (RTL-safe) ─────────
+ *  Inputs are direction:rtl so inline-end = physical left.
+ *  Current code already places spinners at left:12px which is correct;
+ *  we reinforce with the logical property for forward-compatibility.
+ */
+.pl-search-spinner,
+.em-search-spinner,
+.sh-search-spinner,
+.pu-search-spinner,
+.ct-spinner {
+    inset-inline-end: 12px;
+    inset-inline-start: auto;
+    left: auto;
+}
+
+/* ── Focus styles: accessibility ─────────────────────────────────── */
+*:focus-visible {
+    outline: 2px solid var(--purple);
+    outline-offset: 2px;
+    border-radius: 3px;
+}
+
+/* Remove default focus ring on elements that have their own styling */
+.em-page-btn:focus-visible,
+.sh-page-btn:focus-visible,
+.pl-page-btn:focus-visible,
+.pu-page-btn:focus-visible,
+.ed-tab:focus-visible,
+.shd-tab:focus-visible,
+.pd-tab:focus-visible,
+.pl-tab:focus-visible,
+.ct-tab:focus-visible {
+    outline-offset: 0;
+}
+
+/* ── Laptop layout (≤1200px): minor padding reduction ────────────── */
+@media (max-width: 1200px) {
+    .ca-main { padding: 20px; }
+}
+
+/* ── Summary rows: 2-column at compact tablet ───────────────────── */
+@media (max-width: 768px) {
+    .pu-summary-row,
+    .em-summary-row,
+    .sh-summary-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .pu-summary-row,
+    .em-summary-row,
+    .sh-summary-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── Filter rows: full-width on small screens ───────────────────── */
+@media (max-width: 768px) {
+    .pl-filter-row,
+    .pu-filter-row,
+    .em-filter-row,
+    .sh-filter-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .pl-filter-label,
+    .pu-filter-label,
+    .em-filter-label,
+    .sh-filter-label {
+        margin-top: 4px;
+    }
+
+    .pl-filter-select,
+    .pl-filter-number,
+    .pu-filter-select,
+    .pu-filter-date,
+    .em-filter-select,
+    .em-filter-input,
+    .sh-filter-select {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Clear-filter button full width on mobile */
+    .pl-clear-filters,
+    .pu-clear-filters,
+    .em-clear-filters,
+    .sh-clear-filters {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* ── adm-page-header: stack actions below title on small screens ─── */
+@media (max-width: 600px) {
+    .adm-page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .adm-page-actions {
+        width: 100%;
+    }
+
+    .adm-page-actions .adm-btn,
+    .adm-page-actions .pl-add-btn,
+    .adm-page-actions .pu-add-btn,
+    .adm-page-actions .em-add-btn,
+    .adm-page-actions .ct-add-btn {
+        width: 100%;
+        justify-content: center;
+        box-sizing: border-box;
+    }
+}
+
+/* ── Finance dashboard filter bar: stagger at 768px ────────────── */
+@media (max-width: 768px) {
+    .fd-filters-bar {
+        row-gap: 10px;
+    }
+
+    .fd-filter-group {
+        flex: 1 1 140px;
+        min-width: 0;
+    }
+}
+
+/* ── adm-hero-card + detail header cards: stack earlier ─────────── */
+@media (max-width: 768px) {
+    .adm-hero-card,
+    .ed-header-card,
+    .shd-header-card,
+    .pd-header-card {
+        flex-direction: column;
+    }
+
+    .adm-hero-actions,
+    .ed-header-actions,
+    .shd-header-actions,
+    .pd-header-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+
+/* ================================================================
+   Django Admin Change Form — RTL overrides & layout polish
+   Applied globally to all /change/ and /add/ views.
+   Django admin renders forms inside #content-main inside our
+   #ca-content block. These rules make them look consistent with
+   the rest of our custom admin design.
+================================================================= */
+
+/* ── Outer wrapper ──────────────────────────────────────────────── */
+/*
+ * Django's base.css sets float:left; width:100% on #content-main for LTR.
+ * Django's rtl.css (which we do NOT load) overrides it to float:right.
+ * Our layout is RTL flexbox — no float is needed; removing it prevents
+ * #content-main from anchoring to the physical-left (trailing) side and
+ * creating a gap on the physical-right (leading/start) side.
+ */
+#content-main {
+    float: none;
+    width: 100%;
+    direction: rtl;
+    font-family: 'Vazirmatn', sans-serif;
+    max-width: 100%;
+}
+
+/* ── Breadcrumbs from Django admin (we hide ours via base.html block,
+       but Django's generic change_form.html may inject its own) ─── */
+#content-main .breadcrumbs { display: none !important; }
+
+/* ── Object-tools bar (History, View on site) ───────────────────── */
+ul.object-tools {
+    direction: rtl;
+    text-align: right;
+    list-style: none;
+    margin: 0 0 16px;
+    padding: 0;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+ul.object-tools li { margin: 0; }
+ul.object-tools a {
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    color: var(--text);
+    background: var(--card);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: inherit;
+    transition: background .15s, border-color .15s, color .15s;
+}
+ul.object-tools a:hover {
+    background: var(--bg);
+    border-color: var(--purple);
+    color: var(--purple);
+}
+
+/* ── Fieldsets ──────────────────────────────────────────────────── */
+#content-main fieldset {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0 0 16px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+    direction: rtl;
+}
+
+#content-main fieldset h2 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    border-radius: var(--radius) var(--radius) 0 0;
+    padding: 10px 16px;
+    margin: 0 0 4px;
+    letter-spacing: .3px;
+    text-align: right;
+    direction: rtl;
+}
+
+/* ── Collapsible fieldsets ──────────────────────────────────────── */
+#content-main fieldset.collapsed { padding-bottom: 0; }
+#content-main fieldset.collapsed h2 {
+    border-bottom: none;
+    border-radius: var(--radius);
+}
+/* Django's collapse toggle */
+#content-main fieldset .collapse-toggle {
+    color: var(--purple);
+    text-decoration: none;
+    font-size: 12px;
+    margin-inline-start: 8px;
+}
+
+/* ── Form rows ──────────────────────────────────────────────────── */
+#content-main .form-row {
+    direction: rtl;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 6px;
+}
+#content-main .form-row:last-child { border-bottom: none; }
+
+/* Django's TabularInline (edit_inline/tabular.html) puts class="form-row"
+   on each <tr>, not just on StackedInline's <div class="form-row"> field
+   wrappers the rule above was written for. Applying display:flex to a
+   <tr> detaches it from the table's column layout — every <td> then wraps
+   onto its own line inside a narrow flex column (the "values stacked in
+   one column" Product stock-movement-history bug). Restore normal table
+   semantics for any form-row that is actually a table row; this affects
+   every TabularInline in the project (StockMovement, PurchaseItem,
+   VendorProduct, etc.), fixing the same latent bug wherever it occurs. */
+#content-main table tr.form-row {
+    display: table-row;
+    padding: 0;
+    border-bottom: 0;
+    gap: 0;
+}
+#content-main table tr.form-row > th,
+#content-main table tr.form-row > td {
+    display: table-cell;
+}
+
+/* ── Labels ─────────────────────────────────────────────────────── */
+#content-main label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    direction: rtl;
+    text-align: right;
+    margin-inline-end: 8px;
+    display: inline-block;
+    min-width: 130px;
+    flex-shrink: 0;
+}
+
+/* ── Override Django's LTR float-based .aligned layout ─────────── */
+#content-main .aligned label {
+    float: none !important;
+    display: inline-block;
+    width: auto;
+    min-width: 130px;
+    text-align: right;
+    padding-inline-end: 8px;
+}
+
+/* ── Input fields ───────────────────────────────────────────────── */
+#content-main input[type="text"],
+#content-main input[type="number"],
+#content-main input[type="email"],
+#content-main input[type="url"],
+#content-main input[type="password"],
+#content-main input[type="date"],
+#content-main input[type="datetime-local"],
+#content-main input[type="time"],
+#content-main select,
+#content-main textarea {
+    direction: rtl;
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    padding: 8px 12px;
+    max-width: 100%;
+    box-sizing: border-box;
+    transition: border-color .15s, box-shadow .15s;
+}
+#content-main input[type="text"]:focus,
+#content-main input[type="number"]:focus,
+#content-main input[type="email"]:focus,
+#content-main input[type="url"]:focus,
+#content-main input[type="password"]:focus,
+#content-main input[type="date"]:focus,
+#content-main input[type="datetime-local"]:focus,
+#content-main input[type="time"]:focus,
+#content-main select:focus,
+#content-main textarea:focus {
+    outline: none;
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(0, 102, 179, .1);
+}
+
+/* Readonly field display (spans, not inputs) */
+#content-main .readonly {
+    font-size: 14px;
+    color: var(--muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    display: inline-block;
+    min-width: 200px;
+}
+
+/* Help text */
+#content-main .help {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+    display: block;
+    direction: rtl;
+}
+
+/* Error messages on fields */
+#content-main .errorlist {
+    list-style: none;
+    padding: 6px 10px;
+    margin: 4px 0 0;
+    background: var(--red-bg);
+    color: var(--red);
+    border-radius: 6px;
+    font-size: 13px;
+    direction: rtl;
+    text-align: right;
+}
+
+/* Inline error banner at the top of a form */
+#content-main .errornote {
+    background: var(--red-bg);
+    color: var(--red);
+    border: 1px solid var(--red);
+    border-radius: var(--radius);
+    padding: 10px 16px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    direction: rtl;
+    text-align: right;
+}
+
+/* Success messages */
+.ca-messages { list-style: none; padding: 0; margin: 0 0 16px; }
+.ca-msg {
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    margin-bottom: 8px;
+    direction: rtl;
+}
+.ca-msg--success { background: var(--green-bg); color: var(--green); border: 1px solid var(--green); }
+.ca-msg--warning { background: #fff7ed; color: #c2610c; border: 1px solid #c2610c; }
+.ca-msg--error   { background: var(--red-bg); color: var(--red); border: 1px solid var(--red); }
+
+/* ── Submit / Save buttons row ──────────────────────────────────── */
+div.submit-row {
+    direction: rtl;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    padding: 14px 0;
+    margin-top: 8px;
+    border-top: 1px solid var(--border);
+}
+
+div.submit-row input[type="submit"],
+div.submit-row button[type="submit"],
+div.submit-row a.deletelink {
+    padding: 9px 20px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    border: 1px solid transparent;
+    transition: background .15s, border-color .15s, box-shadow .15s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Primary save button */
+div.submit-row input[name="_save"],
+div.submit-row input[name="_continue"],
+div.submit-row input[name="_addanother"] {
+    background: var(--purple);
+    color: #fff;
+    border-color: var(--purple);
+}
+div.submit-row input[name="_save"]:hover,
+div.submit-row input[name="_continue"]:hover,
+div.submit-row input[name="_addanother"]:hover {
+    background: var(--purple-dark);
+    box-shadow: 0 2px 8px rgba(0, 102, 179, .3);
+}
+
+/* Delete button */
+div.submit-row a.deletelink {
+    background: var(--red-bg);
+    color: var(--red);
+    border-color: var(--red);
+    margin-inline-start: auto;
+}
+div.submit-row a.deletelink:hover {
+    background: var(--red);
+    color: #fff;
+}
+
+/* ── Inline admin tables (e.g., PurchaseItem, ProductVendor) ──── */
+#content-main .inline-group {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    direction: rtl;
+}
+
+#content-main .inline-group h2 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 16px;
+    margin: 0;
+    text-align: right;
+    direction: rtl;
+}
+
+#content-main .inline-related table {
+    width: 100%;
+    border-collapse: collapse;
+    direction: rtl;
+    font-size: 13px;
+}
+
+#content-main .inline-related table th,
+#content-main .inline-related table td {
+    padding: 8px 12px;
+    text-align: right;
+    border-bottom: 1px solid var(--border);
+}
+
+#content-main .inline-related table th {
+    background: var(--bg);
+    font-weight: 600;
+    color: var(--muted);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+#content-main .inline-related table tr:last-child td { border-bottom: none; }
+#content-main .inline-related table tr:hover td { background: var(--bg); }
+
+/* "Add another" inline link */
+#content-main .inline-related .add-row a,
+#content-main .add-row td a {
+    color: var(--purple);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 8px 12px;
+    display: inline-block;
+}
+#content-main .inline-related .add-row a:hover { text-decoration: underline; }
+
+/* Delete row checkbox in inlines */
+#content-main .inline-deletelink {
+    color: var(--red);
+    font-size: 12px;
+}
+
+/* ── Responsive: stack form rows on mobile ──────────────────────── */
+@media (max-width: 768px) {
+    #content-main .form-row {
+        flex-direction: column;
+        gap: 4px;
+    }
+    #content-main label,
+    #content-main .aligned label {
+        min-width: auto;
+        width: 100%;
+    }
+    #content-main input[type="text"],
+    #content-main input[type="number"],
+    #content-main input[type="email"],
+    #content-main select,
+    #content-main textarea {
+        width: 100%;
+    }
+    div.submit-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    div.submit-row input[type="submit"],
+    div.submit-row a.deletelink {
+        width: 100%;
+        justify-content: center;
+        box-sizing: border-box;
+    }
+    div.submit-row a.deletelink { margin-inline-start: 0; }
+}
+
+/* ================================================================
+   Select / Dropdown / Option — Low-contrast readability fix
+   Loaded last so it overrides all upstream selects across every page.
+   Only touches color, background-color, opacity, and cursor.
+   No layout, no form logic, no backend changes.
+================================================================= */
+
+/* ── 1. Global native <select> + <option> + <optgroup> ─────────────
+ *  Browsers render the OS-native popup for <select> options using
+ *  system colours, not the element's computed CSS color.  Explicitly
+ *  setting color/background-color on option/optgroup forces a
+ *  consistent, readable popup in Chromium/Firefox on Windows & Linux.
+ */
+select {
+    color: var(--text);            /* #1F2A38 — dark readable text    */
+    background-color: var(--card); /* #ffffff — crisp white field     */
+}
+
+select option {
+    color: #111827;                /* near-black — maximum contrast   */
+    background-color: #ffffff;
+    font-family: 'Vazirmatn', sans-serif;
+}
+
+select optgroup {
+    color: #374151;
+    background-color: #f9fafb;
+    font-weight: 700;
+}
+
+select optgroup option {
+    color: #111827;
+    background-color: #ffffff;
+    font-weight: 400;
+}
+
+/* ── 2. Empty / placeholder option ─────────────────────────────────
+ *  Django renders the blank choice as value="" or "---------".
+ *  Keep it visually muted so it reads as a hint, not a real value.
+ */
+select option[value=""],
+select option[value="---------"] {
+    color: #6b7280;
+}
+
+/* ── 3. Disabled select element ─────────────────────────────────────
+ *  Default browser opacity (.5 on most browsers) can make disabled
+ *  selects nearly unreadable.  We pin opacity:1 and use a grey tint
+ *  instead so the field is visibly inactive but still legible.
+ */
+select:disabled {
+    color: #6b7280;
+    background-color: #f9fafb;
+    opacity: 1;                    /* kill browser's built-in .5 fade */
+    cursor: not-allowed;
+}
+
+/* ── 4. Disabled <option> inside a select ───────────────────────────
+ *  Lighter than normal but still clearly readable (not invisible).
+ */
+select option:disabled {
+    color: #9ca3af;
+    background-color: #f9fafb;
+}
+
+/* ── 5. Django Admin change_form — reinforced scope ────────────────
+ *  #content-main select already carries color:var(--text) from the
+ *  block above in this file, but the OS-native option popup ignores
+ *  that.  Scope the option/optgroup rules here to be safe.
+ */
+#content-main select option {
+    color: #111827;
+    background-color: #ffffff;
+    font-family: 'Vazirmatn', sans-serif;
+}
+
+#content-main select optgroup {
+    color: #374151;
+    background-color: #f9fafb;
+    font-weight: 700;
+}
+
+#content-main select option:disabled {
+    color: #9ca3af;
+    background-color: #f9fafb;
+}
+
+/* ── 6. Shared filter-bar .adm-select ──────────────────────────────
+ *  .adm-select sets color:var(--text) on the element but not on its
+ *  child <option>s.  Fix the popup colour here.
+ */
+.adm-select option {
+    color: #111827;
+    background-color: #ffffff;
+    font-family: 'Vazirmatn', sans-serif;
+}
+
+.adm-select optgroup {
+    color: #374151;
+    background-color: #f9fafb;
+    font-weight: 700;
+}
+
+/* ── 7. Page-specific filter & pagination selects ───────────────────
+ *  Each page's select already has correct color on the <select> itself
+ *  but not on its options.  One grouped rule covers all pages.
+ */
+.pl-filter-select option,
+.pl-page-size-select option,
+.pu-filter-select option,
+.pu-page-size-select option,
+.em-filter-select option,
+.em-page-size-select option,
+.sh-filter-select option,
+.sh-page-size-select option,
+.vl-filter-select option {
+    color: #111827;
+    background-color: #ffffff;
+    font-family: 'Vazirmatn', sans-serif;
+}
+
+/* ── 8. Django Admin Select2 autocomplete widget ────────────────────
+ *  inventory & surgery admin forms use autocomplete_fields which
+ *  renders via Django's bundled Select2.  Select2 draws its dropdown
+ *  with JS-created DOM (.select2-results__option) that ignores native
+ *  <option> colour rules — style those classes explicitly.
+ */
+
+/* Dropdown list items */
+.select2-results__option {
+    color: #111827;
+    background-color: #ffffff;
+    font-family: 'Vazirmatn', sans-serif;
+    direction: rtl;
+    text-align: right;
+    padding: 6px 12px;
+}
+
+/* Hover / keyboard-focused item */
+.select2-results__option--highlighted,
+.select2-results__option--highlighted[aria-selected] {
+    background-color: var(--purple-light) !important; /* #E8F1FA */
+    color: var(--purple) !important;
+}
+
+/* Already-selected item shown in the list */
+.select2-results__option[aria-selected="true"] {
+    background-color: var(--purple-light) !important;
+    color: var(--purple) !important;
+    font-weight: 600;
+}
+
+/* Disabled option in Select2 list */
+.select2-results__option--disabled,
+.select2-results__option[aria-disabled="true"] {
+    color: #9ca3af !important;
+    background-color: #f9fafb !important;
+    opacity: 1 !important;         /* visible but clearly inactive    */
+}
+
+/* Option group label in Select2 */
+.select2-results__group {
+    color: #374151;
+    background-color: #f9fafb;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 4px 12px;
+}
+
+/* Search box inside the Select2 dropdown */
+.select2-search--dropdown .select2-search__field {
+    direction: rtl;
+    font-family: 'Vazirmatn', sans-serif;
+    color: #111827;
+    background-color: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+}
+
+.select2-search--dropdown .select2-search__field:focus {
+    outline: none;
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(0, 102, 179, .1);
+}
+
+/* Selected-value display inside the Select2 widget */
+.select2-selection__rendered {
+    color: var(--text) !important;
+    font-family: 'Vazirmatn', sans-serif !important;
+    direction: rtl;
+}
+
+.select2-selection--single {
+    background-color: var(--card) !important;
+    border-color: var(--border) !important;
+    color: var(--text) !important;
+}
+
+/* Placeholder text in the Select2 widget */
+.select2-selection__placeholder {
+    color: #6b7280 !important;
+}
+
+/* ================================================================
+   Anchor / Link-state Button Contrast Fix
+
+   ROOT CAUSE: Django admin base.css declares:
+       a:link, a:visited { color: var(--link-fg); }   /* = #417893 */
+   That selector's specificity is [0,1,1] (pseudo-class + element).
+   Class-only selectors like .adm-btn--primary have specificity
+   [0,1,0] and LOSE to it for <a> elements — even though our files
+   load later — because specificity beats source order.
+
+   FIX: Add :link and :visited pseudo-classes to every button/link
+   selector that must control its own text colour on <a> elements.
+   This raises their specificity to [0,2,0]–[0,2,2], which beats
+   Django's [0,1,1].
+
+   Only color (and where unavoidable, background-color) are touched.
+   No layout, spacing, border-radius, font-size, or display values
+   are changed.
+================================================================= */
+
+/* ── Primary CTA buttons (blue/purple background → white text) ─────
+ * These are <a> tags on every list page:
+ *   pl-add-btn, pu-add-btn, em-add-btn, sh-add-btn, ct-add-btn,
+ *   vl-add-btn — all carry the adm-btn--primary class.
+ */
+.adm-btn--primary:link,
+.adm-btn--primary:visited {
+    color: #ffffff;
+}
+
+/* ── Secondary/outline buttons (light background → dark text) ───────
+ * Used for "مشاهده همه" and similar light-style CTA links.
+ */
+.adm-btn--secondary:link,
+.adm-btn--secondary:visited {
+    color: var(--text);
+}
+
+/* ── Danger-styled anchor buttons ───────────────────────────────── */
+.adm-btn--danger:link,
+.adm-btn--danger:visited {
+    color: var(--red);
+}
+
+/* ── Empty-state "add first item" CTA links (purple bg → white) ─────
+ * <a> variants: em-add-first-btn, pu-add-first-btn, sh-add-first-btn
+ * pl-empty-btn is a <button> on the product page but include for
+ * consistency in case it is ever rendered as an <a>.
+ */
+.pl-empty-btn:link, .pl-empty-btn:visited,
+.pu-empty-btn:link, .pu-empty-btn:visited,
+.em-empty-btn:link, .em-empty-btn:visited,
+.sh-empty-btn:link, .sh-empty-btn:visited {
+    color: #ffffff;
+}
+
+/* ── Sidebar navigation links (dark navy bg → white/near-white) ─────
+ * .ca-nav-link and .ca-sidebar-link have colour rules in
+ * custom_admin.css but those are [0,1,0] and lose to a:link.
+ */
+.ca-nav-link:link,
+.ca-nav-link:visited {
+    color: rgba(255, 255, 255, .60);
+}
+.ca-nav-link.is-active:link,
+.ca-nav-link.is-active:visited {
+    color: #ffffff;
+}
+.ca-sidebar-link:link,
+.ca-sidebar-link:visited {
+    color: rgba(255, 255, 255, .68);
+}
+.ca-sidebar-link--active:link,
+.ca-sidebar-link--active:visited {
+    color: #ffffff;
+}
+
+/* ── Navbar brand link ───────────────────────────────────────────── */
+.ca-brand:link,
+.ca-brand:visited {
+    color: var(--purple);
+}
+
+/* ── Breadcrumb links (already equal-specificity with a:link in
+ *  custom_admin.css, but reinforce here for forward safety) ──────── */
+.ca-breadcrumbs a:link,
+.ca-breadcrumbs a:visited {
+    color: var(--purple);
+}
+
+/* ── Django admin object-tools (History / View on site links) ───────
+ * Django's .object-tools a:link specificity is [0,2,1].
+ * Our ul.object-tools a is [0,1,2] and loses; adding :link/:visited
+ * raises it to [0,2,2] which wins.
+ */
+ul.object-tools a:link,
+ul.object-tools a:visited {
+    color: var(--text);
+    background: var(--card);
+}
+
+/* ── Developer contact links in footer card ──────────────────────── */
+.ca-devcard-contact:link,
+.ca-devcard-contact:visited {
+    color: var(--text);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   CLI-67  RTL filter / select text-clipping fix  (v2 — deterministic)
+
+   VERIFIED before writing this revision:
+   • Dev server (config.settings.development, DEBUG=True) serves
+     static/admin/css/rtl_responsive.css through the staticfiles finder.
+     `curl http://127.0.0.1:8000/static/admin/css/rtl_responsive.css`
+     → HTTP 200 and the response DID contain the rule. So the file +
+     serving path were never the problem; the right file was edited.
+   • The response carried only `Last-Modified` (no Cache-Control/ETag) and
+     the <link> had no `?v=` query → Chrome served the CSS from heuristic
+     cache, making earlier edits invisible without a hard reload.
+     base.html now appends `?v=2` to that <link> to bust the cache.
+   • The earlier rule leaned on the NATIVE <select> arrow position, which
+     on Chrome/Windows in RTL is inconsistent (arrow may render left OR
+     right). This revision removes that dependency.
+
+   Approach: `appearance: none` + a custom CSS chevron pinned to the LEFT
+   (the arrow side in RTL). Padding then becomes deterministic —
+   inline-end (left) clears the chevron, inline-start (right) is the RTL
+   text origin. min-height + line-height keep Persian glyphs vertically
+   centred and unclipped.
+
+   `select.<class>` = specificity [0,1,1], beats page CSS [0,1,0].
+══════════════════════════════════════════════════════════════════════ */
+
+select.pl-filter-select,
+select.pu-filter-select,
+select.em-filter-select,
+select.sh-filter-select {
+    -webkit-appearance: none;
+    -moz-appearance:    none;
+    appearance:         none;
+    box-sizing:         border-box;
+    min-width:          90px;
+    min-height:         34px;
+    line-height:        1.6;
+    direction:          rtl;
+    text-align:         right;
+    /* custom chevron on the LEFT — the arrow side in RTL */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%236b7888' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat:   no-repeat;
+    background-position: left 10px center;
+    background-size:     11px 7px;
+    padding-block:        6px;
+    padding-inline-start: 12px;   /* right edge — RTL text origin    */
+    padding-inline-end:   30px;   /* left edge  — clears the chevron */
+    overflow:       hidden;
+    text-overflow:  ellipsis;
+    white-space:    nowrap;
+}
+
+/* Jalali date text inputs (CLI-70) + number inputs are NOT <select> → no
+   chevron; just guarantee box sizing and vertical centring so glyphs never
+   clip.  `.jalali-date-input` is the shared hook on every converted date box. */
+.jalali-date-input,
+input[type="number"].pl-filter-number,
+input[type="number"].sh-filter-select {
+    box-sizing:    border-box;
+    min-height:    34px;
+    line-height:   1.6;
+    padding-block: 6px;
+}
+/* Date inputs need a readable minimum width for 'YYYY/MM/DD' */
+.jalali-date-input {
+    min-width: 130px;
+    cursor:    text;
+}
+
+/* Targeted min-widths where the longest Persian option is wide */
+#sh-filter-status  { min-width: 165px; }   /* برنامه‌ریزی شده  */
+#sh-filter-payment { min-width: 165px; }   /* در انتظار پرداخت */
+#sh-sort-by        { min-width: 150px; }   /* وضعیت پرداخت     */
+#pu-sort-by        { min-width: 130px; }   /* تاریخ خرید        */
+#em-sort-by        { min-width: 125px; }   /* تاریخ شروع        */
+#pl-filter-type    { min-width: 110px; }   /* تجهیزات            */
+
+/* Product type / category badges must never clip */
+.pl-type-badge {
+    flex-shrink: 0;
+    overflow:    visible;
+    max-width:   none;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   System Users (auth) admin changelist — RTL table alignment fixes
+   Body class: app-auth model-user change-list
+   URL: /admin/auth/user/
+
+   Extra complexity vs. patient page: UserAdmin has list_filter defined
+   so Django adds .filtered class and renders #changelist-filter sidebar.
+   Django's changelists.css uses LTR margin (margin: 0 0 0 30px) and
+   sets .change-list.filtered .results{width:auto} — both need RTL fixes.
+══════════════════════════════════════════════════════════════════ */
+
+/* Changelist outer container: explicit RTL and full width */
+body.app-auth.model-user.change-list #changelist {
+    direction: rtl;
+    width: 100%;
+}
+
+/* Form container (holds search bar + table): fill available flex space */
+body.app-auth.model-user.change-list .changelist-form-container {
+    width: 100%;
+    min-width: 0;
+}
+
+/*
+ * Django's changelists.css sets .change-list.filtered .results{width:auto}
+ * when a filter sidebar is present, shrinking the results div to content.
+ * Override to 100% so the table fills the form-container correctly in RTL.
+ */
+body.app-auth.model-user.change-list #changelist-form .results,
+body.app-auth.model-user.change-list #result_list {
+    width: 100%;
+    direction: rtl;
+}
+
+/*
+ * Filter sidebar RTL correction:
+ * Django's changelists.css uses margin:0 0 0 30px (physical left = LTR gap).
+ * In RTL the filter is on the physical LEFT; the gap must be on its RIGHT
+ * (between the filter and the table). Swap margin sides and remove LTR border.
+ */
+body.app-auth.model-user.change-list #changelist-filter {
+    margin-left: 0;
+    margin-right: 30px;
+    border-left: none;
+    border-right: none;
+}
+
+/* Table cell alignment: right for all cells (RTL default) */
+body.app-auth.model-user.change-list #result_list th,
+body.app-auth.model-user.change-list #result_list td {
+    text-align: right;
+}
+
+/*
+ * Username and email are LTR identifiers (ASCII), so render their cell
+ * content LTR while keeping them right-anchored under the RTL header.
+ */
+body.app-auth.model-user.change-list #result_list td.field-username,
+body.app-auth.model-user.change-list #result_list td.field-email {
+    direction: ltr;
+    text-align: right;
+    unicode-bidi: isolate;
+}
+
+/* Boolean icon columns (is_staff / is_active): center the SVG icon */
+body.app-auth.model-user.change-list #result_list th.column-is_staff,
+body.app-auth.model-user.change-list #result_list td.field-is_staff,
+body.app-auth.model-user.change-list #result_list th.column-is_active,
+body.app-auth.model-user.change-list #result_list td.field-is_active {
+    text-align: center;
+}
+
+/* Action checkbox column: keep centered (Django already centers td; ensure th matches) */
+body.app-auth.model-user.change-list #result_list th.action-checkbox-column,
+body.app-auth.model-user.change-list #result_list td.action-checkbox {
+    text-align: center;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   Product admin — فروشندگان محصول (ProductVendor) StackedInline
+   Inline group:  #product_vendors-group
+   Body class:    body.app-inventory.model-product
+
+   Switched from TabularInline → StackedInline.
+   No table, no fixed widths, no horizontal scroll.
+
+   DOM structure produced by StackedInline:
+   div.inline-group#product_vendors-group   ← global card styling
+     fieldset.module (OUTER)                ← RESET (already in card)
+       h2 "فروشندگان محصول"
+       div.inline-related (one per vendor)
+         h3 "فروشنده: Name"  +  span.delete
+         fieldset.module.aligned (INNER)    ← RESET
+           div.form-row.field-XXX (one per field)
+             div
+               div.flex-container
+                 label
+                 input / select / textarea
+══════════════════════════════════════════════════════════════════ */
+
+/* 1. Allow natural overflow — stacked items don't need h-scroll clip */
+body.app-inventory.model-product #product_vendors-group {
+    overflow: visible;
+}
+
+/* 2. OUTER fieldset.module wraps all items inside the already-styled
+      .inline-group card — remove its card border/bg to avoid double box. */
+body.app-inventory.model-product #product_vendors-group > fieldset.module {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* 3. Separator line between vendor items */
+body.app-inventory.model-product #product_vendors-group .inline-related {
+    border-top: 1px solid var(--border);
+    padding-bottom: 4px;
+}
+body.app-inventory.model-product #product_vendors-group .inline-related:first-of-type {
+    border-top: none;
+}
+
+/* 4. Per-item header: "فروشنده: VendorName"  +  Delete on the left */
+body.app-inventory.model-product #product_vendors-group .inline-related h3 {
+    direction: rtl;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+}
+
+/* Delete checkbox pushed to far left (inline-start: auto in RTL = right,
+   so margin-inline-start: auto pushes element toward inline-end = left) */
+body.app-inventory.model-product #product_vendors-group .inline-related h3 .delete {
+    margin-inline-start: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--red);
+    font-weight: 400;
+    font-size: 12px;
+}
+body.app-inventory.model-product #product_vendors-group .inline-related h3 .delete label {
+    font-weight: 400;
+    font-size: 12px;
+    color: var(--red);
+    min-width: auto;
+    margin-inline-end: 0;
+}
+
+/* 5. INNER fieldset.module.aligned (form fields container) — already inside
+      .inline-related which is inside the outer card; no card styling needed. */
+body.app-inventory.model-product #product_vendors-group .inline-related fieldset.module {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* 6. The <div> direct child of each form-row is the field content wrapper;
+      make it grow to fill the full row width. */
+body.app-inventory.model-product #product_vendors-group .form-row > div {
+    flex: 1;
+    min-width: 0;
+}
+
+/* 7. flex-container holds label + widget in the correct RTL order */
+body.app-inventory.model-product #product_vendors-group .flex-container {
+    display: flex;
+    align-items: center;
+    direction: rtl;
+    gap: 8px;
+}
+
+/* 8. Non-checkbox widgets expand to fill remaining space after the label */
+body.app-inventory.model-product #product_vendors-group .flex-container input:not([type="checkbox"]),
+body.app-inventory.model-product #product_vendors-group .flex-container select,
+body.app-inventory.model-product #product_vendors-group .flex-container textarea {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+    max-width: none;
+}
+
+/* 9. .related-widget-wrapper (Select2 outer div) must also flex-grow */
+body.app-inventory.model-product #product_vendors-group .related-widget-wrapper {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+}
+
+/* 10. Select2 container — override JS-injected style="width:Xpx" */
+body.app-inventory.model-product #product_vendors-group .select2-container {
+    width: 100% !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+    flex: 1;
+}
+
+/* 11. LTR content for date/code/numeric fields (values read left-to-right) */
+body.app-inventory.model-product #product_vendors-group .field-supplier_product_code input,
+body.app-inventory.model-product #product_vendors-group .field-unit_price input,
+body.app-inventory.model-product #product_vendors-group .field-last_price_date input,
+body.app-inventory.model-product #product_vendors-group .field-minimum_order_quantity input,
+body.app-inventory.model-product #product_vendors-group .field-lead_time_days input {
+    direction: ltr;
+    text-align: right;
+}
+
+/* 12. Notes textarea — taller and vertically resizable */
+body.app-inventory.model-product #product_vendors-group .field-notes textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+/* 13. Readonly Jalali date text — small, muted, LTR digits */
+body.app-inventory.model-product #product_vendors-group .field-created_at_jalali .readonly,
+body.app-inventory.model-product #product_vendors-group .field-updated_at_jalali .readonly {
+    font-size: 12px;
+    color: var(--muted);
+    direction: ltr;
+    display: inline-block;
+}
+
+/* Patient admin add/edit form and changelist CSS now live in their own
+   dedicated files (static/admin/css/patient_form.css, patient_list.css),
+   loaded only on those pages via PatientAdmin.change_form_template /
+   change_list_template — mirroring how Employee/SurgeryHistory/Doctor
+   already scope their own model-specific CSS, instead of growing this
+   shared file further. */

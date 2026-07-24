@@ -1,0 +1,95 @@
+/* ================================================================
+   Shared Empty State Styles — Surgery Clinic Admin
+   Classes: .es-state, .es-icon, .es-title, .es-desc, .es-actions, .es-btn
+   Depends on CSS variables defined in custom_admin.css.
+
+   Used by new or updated empty states across list pages.
+   Existing per-page .pl-empty-*, .pu-empty-*, etc. classes are
+   preserved for backward compatibility — they delegate visual style
+   to the same design tokens.
+================================================================= */
+
+/* ── Container ──────────────────────────────────────────────────── */
+.es-state {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--muted);
+    direction: rtl;
+}
+
+/* ── Icon ───────────────────────────────────────────────────────── */
+.es-icon {
+    font-size: 48px;
+    line-height: 1;
+    margin-bottom: 16px;
+    user-select: none;
+}
+
+/* ── Title ──────────────────────────────────────────────────────── */
+.es-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 10px;
+}
+
+/* ── Description ────────────────────────────────────────────────── */
+.es-desc {
+    font-size: 14px;
+    color: var(--muted);
+    margin: 0 0 24px;
+    line-height: 1.7;
+    max-width: 420px;
+    margin-inline: auto;
+}
+
+/* ── Actions row ────────────────────────────────────────────────── */
+.es-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* ── Primary button (purple, filled) ────────────────────────────── */
+.es-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 22px;
+    background: var(--purple);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    text-decoration: none;
+    transition: background .15s, color .15s;
+    white-space: nowrap;
+}
+.es-btn:hover {
+    background: var(--purple-dark);
+    color: #fff;
+}
+
+/* ── Outline variant (for secondary / clear actions) ────────────── */
+.es-btn--outline {
+    background: transparent;
+    color: var(--purple);
+    border: 1px solid var(--purple);
+}
+.es-btn--outline:hover {
+    background: var(--purple-light);
+    color: var(--purple);
+}
+
+/* ── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+    .es-state   { padding: 44px 16px; }
+    .es-icon    { font-size: 40px; }
+    .es-title   { font-size: 16px; }
+    .es-actions { flex-direction: column; align-items: center; }
+    .es-btn     { width: 100%; justify-content: center; }
+}

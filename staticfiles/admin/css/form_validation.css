@@ -1,0 +1,70 @@
+/* ================================================================
+   Form Validation Styles — Surgery Clinic Admin
+   Used by form_errors.js and any custom admin forms.
+   Depends on CSS variables defined in custom_admin.css.
+================================================================= */
+
+/* ── Error summary block ────────────────────────────────────────── */
+.fv-error-summary {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--red-bg);
+    border: 1px solid #fca5a5;
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    direction: rtl;
+    text-align: right;
+}
+
+.fv-error-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.fv-error-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex: 1;
+}
+
+.fv-error-list li {
+    font-size: 14px;
+    color: var(--red);
+    line-height: 1.6;
+}
+
+.fv-error-list li + li {
+    margin-top: 4px;
+}
+
+/* ── Field-level inline error ───────────────────────────────────── */
+.fv-field-error {
+    display: block;
+    font-size: 12px;
+    color: var(--red);
+    margin-top: 4px;
+    direction: rtl;
+    text-align: right;
+}
+
+/* ── Invalid input highlight ────────────────────────────────────── */
+.fv-input-invalid {
+    border-color: var(--red) !important;
+    background: var(--red-bg) !important;
+}
+.fv-input-invalid:focus {
+    outline-color: var(--red) !important;
+    border-color: var(--red) !important;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+    .fv-error-summary {
+        flex-direction: column;
+        gap: 6px;
+    }
+}

@@ -1,0 +1,414 @@
+/* ================================================================
+   Surgery History List Page — all classes scoped under .sh- prefix
+   Depends on CSS variables defined in custom_admin.css.
+================================================================= */
+
+/* ── Summary cards ──────────────────────────────────────────── */
+.sh-summary-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+@media (max-width: 900px) {
+    .sh-summary-row { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 500px) {
+    .sh-summary-row { grid-template-columns: 1fr; }
+}
+
+.sh-summary-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    box-shadow: var(--shadow);
+    border-right: 4px solid var(--border);
+}
+.sh-summary-card--total     { border-right-color: var(--blue); }
+.sh-summary-card--completed { border-right-color: var(--green); }
+.sh-summary-card--pending   { border-right-color: var(--orange); }
+.sh-summary-card--amount    { border-right-color: var(--purple); }
+
+.sh-summary-count {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+}
+
+.sh-summary-count--sm {
+    font-size: 18px;
+}
+
+.sh-summary-label {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.sh-summary-note {
+    font-size: 11px;
+    color: var(--muted);
+    opacity: .7;
+}
+
+/* ── Search + filters card ──────────────────────────────────── */
+.sh-search-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+}
+
+.sh-search-row {
+    position: relative;
+    margin-bottom: 12px;
+}
+
+.sh-search-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 16px 10px 40px;
+    font-size: 15px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text);
+    direction: rtl;
+    font-family: inherit;
+    transition: border-color .15s, background .15s;
+}
+.sh-search-input:focus {
+    outline: none;
+    border-color: var(--purple);
+    background: var(--card);
+}
+
+.sh-search-spinner {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--purple);
+    border-radius: 50%;
+    animation: sh-spin .6s linear infinite;
+    display: none;
+    pointer-events: none;
+}
+.sh-search-spinner.sh-visible { display: block; }
+@keyframes sh-spin { to { transform: translateY(-50%) rotate(360deg); } }
+
+.sh-filter-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.sh-filter-label {
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.sh-filter-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--purple);
+    display: none;
+    flex-shrink: 0;
+}
+.sh-filter-dot.sh-active { display: inline-block; }
+
+.sh-filter-select {
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    background: var(--bg);
+    color: var(--text);
+    direction: rtl;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color .15s;
+}
+.sh-filter-select:focus { outline: none; border-color: var(--purple); }
+
+.sh-clear-filters {
+    margin-inline-start: auto;
+    font-size: 13px;
+    color: var(--red);
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: inherit;
+    text-decoration: underline;
+    display: none;
+    padding: 0;
+}
+.sh-clear-filters.sh-visible { display: inline; }
+
+/* ── Table ──────────────────────────────────────────────────── */
+.sh-table-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.sh-table {
+    width: 100%;
+    border-collapse: collapse;
+    direction: rtl;
+}
+
+.sh-table th {
+    padding: 11px 16px;
+    background: var(--bg);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    text-align: right;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    user-select: none;
+}
+
+.sh-table td {
+    padding: 12px 16px;
+    font-size: 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+.sh-table tr:last-child td { border-bottom: none; }
+
+.sh-table tbody tr {
+    cursor: pointer;
+    transition: background .1s;
+}
+.sh-table tbody tr:hover { background: var(--bg); }
+
+.sh-td--ltr {
+    direction: ltr;
+    text-align: left;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+/* ── ردیف column — narrow, stable SurgeryHistory.pk display ──── */
+.sh-th--row-number {
+    width: 56px;
+}
+.sh-td--row-number {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.sh-name-link {
+    font-weight: 600;
+    color: var(--text);
+    text-decoration: none;
+}
+.sh-name-link:hover { color: var(--purple); text-decoration: underline; }
+
+.sh-muted { color: var(--muted); }
+
+/* Status badges */
+.sh-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.sh-badge--planned     { background: #E8F1FA; color: #0066B3; }
+.sh-badge--in-progress { background: #fff7ed; color: #d97706; }
+.sh-badge--completed   { background: var(--green-bg); color: var(--green); }
+.sh-badge--cancelled   { background: var(--red-bg);   color: var(--red); }
+.sh-badge--pending     { background: #fff7ed; color: #d97706; }
+.sh-badge--partial     { background: #E8F1FA; color: #0066B3; }
+.sh-badge--paid        { background: var(--green-bg); color: var(--green); }
+
+.sh-badge--surgery-type {
+    background: var(--purple-light);
+    color: var(--purple);
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* Row action buttons */
+.sh-actions {
+    display: flex;
+    gap: 4px;
+    justify-content: flex-end;
+}
+.sh-action-btn {
+    padding: 5px 10px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    font-size: 12px;
+    cursor: pointer;
+    background: var(--card);
+    color: var(--text);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    transition: background .1s, border-color .1s, color .1s;
+    font-family: inherit;
+    white-space: nowrap;
+}
+.sh-action-btn:hover {
+    background: var(--bg);
+    border-color: var(--purple);
+    color: var(--purple);
+}
+
+/* Loading skeleton rows */
+.sh-loading-row td { padding: 14px 16px; }
+.sh-skeleton {
+    height: 14px;
+    border-radius: 4px;
+    background: linear-gradient(
+        90deg,
+        var(--border) 25%,
+        var(--bg) 50%,
+        var(--border) 75%
+    );
+    background-size: 200% 100%;
+    animation: sh-shimmer 1.4s infinite;
+}
+@keyframes sh-shimmer { to { background-position: -200% 0; } }
+.sh-skeleton-sm  { width: 50%; }
+.sh-skeleton-med { width: 70%; }
+.sh-skeleton-lg  { width: 88%; }
+
+/* Empty state */
+.sh-empty-state {
+    text-align: center;
+    padding: 56px 20px;
+    color: var(--muted);
+}
+.sh-empty-icon  { font-size: 40px; margin-bottom: 10px; }
+.sh-empty-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.sh-empty-desc  { font-size: 14px; margin-bottom: 16px; }
+.sh-empty-btn {
+    display: inline-block;
+    padding: 8px 18px;
+    background: var(--purple);
+    color: #fff;
+    border-radius: var(--radius);
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+    margin: 4px;
+}
+.sh-empty-btn:hover { background: var(--purple-dark); color: #fff; }
+
+/* ── Pagination bar ─────────────────────────────────────────── */
+.sh-pagination {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    box-shadow: var(--shadow);
+}
+
+.sh-pagination-info {
+    font-size: 13px;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+.sh-pagination-pages {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    flex: 1;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.sh-page-btn {
+    min-width: 34px;
+    height: 34px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .1s, border-color .1s, color .1s;
+    font-family: inherit;
+    padding: 0 8px;
+}
+.sh-page-btn:hover:not(:disabled) {
+    background: var(--purple-light);
+    border-color: var(--purple);
+    color: var(--purple);
+}
+.sh-page-btn--active {
+    background: var(--purple) !important;
+    color: #fff !important;
+    border-color: var(--purple) !important;
+    font-weight: 600;
+}
+.sh-page-btn:disabled { opacity: .4; cursor: not-allowed; }
+.sh-page-btn--ellipsis {
+    border-color: transparent;
+    background: none;
+    cursor: default;
+    color: var(--muted);
+}
+
+.sh-pagination-size {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+.sh-page-size-select {
+    padding: 5px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    background: var(--bg);
+    color: var(--text);
+    direction: rtl;
+    font-family: inherit;
+    cursor: pointer;
+}
+.sh-page-size-select:focus { outline: none; border-color: var(--purple); }

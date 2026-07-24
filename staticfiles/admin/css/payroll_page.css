@@ -1,0 +1,512 @@
+/* Payroll Page — RTL, uses CSS variables from custom_admin.css */
+
+:root {
+  /* One restrained accent for the final result, one muted accent for
+     commission totals — everything else in the table is neutral text.
+     This intentionally replaces a previous per-component color for every
+     amount column ("rainbow" styling). */
+  --py-total-fg:      var(--purple, #0066B3);
+  --py-commission-fg: var(--green, #1E9E6A);
+}
+
+#payroll-root {
+  padding: 16px 0;
+  font-family: inherit;
+}
+
+/* ── Filters ──────────────────────────────────────────────────── */
+
+.py-filters-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+
+.py-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.py-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: .3px;
+}
+
+.py-input {
+  height: 36px;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  direction: rtl;
+  transition: border-color .15s;
+}
+.py-input:focus {
+  outline: none;
+  border-color: var(--purple);
+}
+
+.py-input--narrow { width: 110px; }
+
+.py-btn {
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  transition: background .15s, border-color .15s;
+  align-self: flex-end;
+}
+
+.py-btn:hover {
+  background: var(--bg);
+  border-color: var(--muted);
+}
+
+.py-btn--primary {
+  background: var(--purple);
+  color: #fff;
+  border-color: var(--purple);
+}
+.py-btn--primary:hover {
+  background: var(--purple-dark);
+  border-color: var(--purple-dark);
+}
+
+/* ── Cards ────────────────────────────────────────────────────── */
+
+.py-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.py-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px 20px;
+  text-align: center;
+  transition: box-shadow .2s;
+  border-top: 4px solid var(--border);
+}
+
+.py-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,.10);
+}
+
+.py-card-label {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.py-card-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.py-card-subvalue {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.py-card--total      { border-top-color: var(--py-total-fg); }
+.py-card--total .py-card-value { color: var(--py-total-fg); }
+
+/* The only visually "loud" card — everything else in the summary row
+   stays neutral so مجموع پرداختی reads as the headline figure. */
+.py-card--prominent {
+  border-top-width: 4px;
+}
+.py-card--prominent .py-card-value {
+  font-size: 26px;
+}
+
+.py-card--commission .py-card-value { color: var(--py-commission-fg); }
+
+.py-card--count      { border-top-color: var(--border); }
+
+/* ── Table heading ────────────────────────────────────────────── */
+
+.payroll-page .payroll-page__heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.payroll-page .payroll-page__heading-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-strong, var(--text));
+  margin: 0 0 4px;
+}
+
+.payroll-page .payroll-page__heading-subtitle {
+  font-size: 12.5px;
+  color: var(--muted);
+  margin: 0;
+}
+
+.payroll-page .payroll-page__expand-all {
+  height: 32px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--muted);
+  font-size: 12.5px;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s, border-color .15s;
+}
+.payroll-page .payroll-page__expand-all:hover {
+  background: var(--bg);
+  border-color: var(--muted);
+}
+
+/* ── Table ────────────────────────────────────────────────────── */
+
+/* Scroll wrapper: only this element scrolls horizontally, so the sidebar
+   and page layout never do. */
+.payroll-page .payroll-table__wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Six columns, sized to fit without horizontal scroll at ~1366px viewport
+   width (sidebar + content margins subtracted). table-layout:fixed makes
+   the browser honor these instead of resizing columns to content. */
+.payroll-page .payroll-table {
+  width: 100%;
+  min-width: 860px;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+}
+
+.payroll-page .payroll-table__col--name     { width: 200px; }
+.payroll-page .payroll-table__col--position { width: 140px; }
+.payroll-page .payroll-table__col--money    { width: 140px; }
+.payroll-page .payroll-table__col--hourly   { width: 150px; }
+.payroll-page .payroll-table__col--total    { width: 160px; }
+
+.payroll-page .payroll-table thead th {
+  background: var(--bg);
+  padding: 12px 16px;
+  text-align: right;
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: .3px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+/* Row rhythm: ~60px rows, vertically centered content, one subtle
+   separator per row — no zebra striping, no shadows. */
+.payroll-page .payroll-table tbody td {
+  height: 60px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  vertical-align: middle;
+  overflow-wrap: anywhere;
+}
+
+.payroll-page .payroll-table__detail-row td {
+  height: auto;
+  padding: 14px 20px;
+  background: var(--bg);
+}
+
+/* Every table cell/link/span is reset here so nothing in this table can
+   carry a stray underline, shadow, or generated ::before/::after content. */
+.payroll-page .payroll-table th,
+.payroll-page .payroll-table td,
+.payroll-page .payroll-table td a,
+.payroll-page .payroll-table td span {
+  text-decoration: none;
+  box-shadow: none;
+}
+.payroll-page .payroll-table th::before, .payroll-page .payroll-table th::after,
+.payroll-page .payroll-table td::before, .payroll-page .payroll-table td::after {
+  content: none;
+}
+
+.payroll-page .payroll-table tbody tr.payroll-table__row:hover {
+  background: var(--purple-light, var(--bg));
+}
+
+.payroll-page .payroll-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.payroll-page .py-table-loading {
+  text-align: center;
+  padding: 40px 16px !important;
+  color: var(--muted);
+}
+
+/* ── Employee name (sticky) ───────────────────────────────────── */
+
+.payroll-page .payroll-table__employee {
+  position: sticky;
+  right: 0;
+  z-index: 1;
+  background: var(--card);
+}
+.payroll-page .payroll-table tbody tr.payroll-table__row:hover .payroll-table__employee {
+  background: var(--purple-light, var(--bg));
+}
+
+.payroll-page .payroll-table__toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  text-align: right;
+}
+
+.payroll-page .payroll-table__chevron {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg);
+  transition: transform .15s;
+}
+.payroll-page .payroll-table__toggle[aria-expanded="true"] .payroll-table__chevron {
+  transform: rotate(-135deg);
+}
+
+.payroll-page .payroll-table__employee-link {
+  color: var(--text-strong, var(--text));
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.payroll-page .payroll-table__toggle:hover .payroll-table__employee-link {
+  color: var(--purple);
+}
+
+/* ── Position badge ───────────────────────────────────────────── */
+
+.payroll-page .payroll-table__badge {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-width: 72px;
+  max-width: 100%;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* ── Amounts ──────────────────────────────────────────────────── */
+
+.payroll-page .payroll-table__amount {
+  direction: ltr;
+  unicode-bidi: isolate;
+  color: var(--text);
+  font-weight: 500;
+  font-size: 13px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.payroll-page .payroll-table__amount--commission { color: var(--py-commission-fg); }
+
+.payroll-page .payroll-table__amount--total {
+  color: var(--py-total-fg);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.payroll-page .payroll-table__hourly {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.payroll-page .payroll-table__hourly-secondary {
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-size: 11.5px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* ── Detail row ───────────────────────────────────────────────── */
+
+.payroll-page .payroll-table__detail-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.payroll-page .payroll-table__detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.payroll-page .payroll-table__detail-label {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.payroll-page .payroll-table__detail-value {
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* ── Empty state ──────────────────────────────────────────────── */
+
+.py-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+}
+
+.py-empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.py-empty-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.py-empty-desc {
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.py-empty-btn {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--purple);
+  background: none;
+  border: 1px solid var(--purple);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background .15s;
+}
+
+.py-empty-btn:hover {
+  background: rgba(124, 58, 237, .08);
+}
+
+/* ── Pagination ───────────────────────────────────────────────── */
+
+.py-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.py-pagination-info {
+  font-weight: 500;
+}
+
+.py-pagination-pages {
+  display: flex;
+  gap: 4px;
+}
+
+.py-page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.py-page-btn:hover {
+  background: var(--bg);
+  border-color: var(--muted);
+}
+
+.py-page-btn--active {
+  background: var(--purple);
+  color: #fff;
+  border-color: var(--purple);
+}
+
+.py-page-btn--disabled {
+  opacity: .4;
+  pointer-events: none;
+}

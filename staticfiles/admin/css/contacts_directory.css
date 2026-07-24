@@ -1,0 +1,143 @@
+/* Contacts Directory Page — .ct- prefix */
+
+.ct-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    border-bottom: 2px solid var(--border);
+}
+.ct-tab {
+    padding: 10px 24px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color .15s, border-color .15s;
+    border-radius: var(--radius) var(--radius) 0 0;
+}
+.ct-tab:hover { color: var(--text); }
+.ct-tab--active { color: var(--purple); border-bottom-color: var(--purple); }
+
+.ct-search-wrap {
+    position: relative;
+    margin-bottom: 16px;
+}
+.ct-search-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 14px;
+    color: var(--text);
+    background: var(--card);
+    box-sizing: border-box;
+}
+.ct-search-input:focus {
+    outline: none;
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(111,90,167,.12);
+}
+.ct-spinner {
+    display: none;
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--purple);
+    border-radius: 50%;
+    animation: ct-spin .6s linear infinite;
+}
+@keyframes ct-spin { to { transform: translateY(-50%) rotate(360deg); } }
+
+.ct-panel { animation: ct-fadein .15s ease; }
+@keyframes ct-fadein { from { opacity: 0; } to { opacity: 1; } }
+
+.ct-table-wrap { overflow-x: auto; }
+.ct-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+.ct-table thead th {
+    padding: 10px 12px;
+    text-align: right;
+    font-weight: 600;
+    color: var(--muted);
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+    background: var(--bg);
+}
+.ct-table tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: middle;
+}
+.ct-table tbody tr:hover { background: rgba(111,90,167,.04); }
+
+.ct-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+.ct-badge--active   { background: #d4edda; color: #155724; }
+.ct-badge--inactive { background: #f8d7da; color: #721c24; }
+.ct-badge--pending  { background: #fff3cd; color: #856404; }
+
+.ct-edit-link {
+    color: var(--purple);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+}
+.ct-edit-link:hover { text-decoration: underline; }
+
+.ct-empty {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--muted);
+}
+.ct-empty-icon  { font-size: 40px; margin-bottom: 12px; }
+.ct-empty-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+.ct-empty-desc  { font-size: 14px; }
+
+.ct-pagination { margin-top: 16px; }
+.ct-pages {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.ct-page-btn {
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text);
+    transition: background .15s;
+}
+.ct-page-btn:hover { background: var(--bg); }
+.ct-page-info { font-size: 13px; color: var(--muted); }
+
+@media (max-width: 700px) {
+    .ct-tabs { overflow-x: auto; }
+    .ct-table thead { display: none; }
+    .ct-table tbody td {
+        display: block;
+        padding: 6px 12px;
+        border-bottom: none;
+    }
+    .ct-table tbody tr { border-bottom: 1px solid var(--border); }
+}

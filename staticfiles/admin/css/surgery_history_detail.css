@@ -1,0 +1,659 @@
+/* ================================================================
+   Surgery History Detail Page — all classes scoped under .shd- prefix
+   Depends on CSS variables defined in custom_admin.css.
+================================================================= */
+
+/* ── Header card ──────────────────────────────────────────────── */
+.shd-header-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.shd-header-skeleton { flex: 1; }
+
+.shd-header-meta {
+    flex: 1;
+    min-width: 0;
+}
+
+.shd-patient-name {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 10px;
+    line-height: 1.3;
+}
+
+.shd-header-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.shd-header-meta-row {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.shd-header-amount {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.shd-header-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    flex-shrink: 0;
+}
+
+/* ── Badges ───────────────────────────────────────────────────── */
+.shd-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.shd-badge--planned     { background: #E8F1FA; color: #0066B3; }
+.shd-badge--in-progress { background: #fff7ed; color: #d97706; }
+.shd-badge--completed   { background: var(--green-bg); color: var(--green); }
+.shd-badge--cancelled   { background: var(--red-bg);   color: var(--red); }
+.shd-badge--pending     { background: #fff7ed; color: #d97706; }
+.shd-badge--partial     { background: #E8F1FA; color: #0066B3; }
+.shd-badge--paid        { background: var(--green-bg); color: var(--green); }
+.shd-badge--confirmed   { background: var(--green-bg); color: var(--green); }
+.shd-badge--type        { background: var(--purple-light); color: var(--purple); }
+/* Same colors as product_detail.css's .pd-badge--medicine/--equipment —
+   used items show the same دارو/تجهیزات badge as the Product page. */
+.shd-badge--medicine    { background: var(--purple-light); color: var(--purple); }
+.shd-badge--equipment   { background: #e0f2fe; color: #0369a1; }
+.shd-badge--inactive    { background: var(--red-bg); color: var(--red); }
+
+/* ── Buttons ──────────────────────────────────────────────────── */
+.shd-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 16px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text) !important;
+    font-family: inherit;
+    transition: background .15s, border-color .15s, color .15s;
+    white-space: nowrap;
+}
+.shd-btn:link, .shd-btn:visited { color: var(--text) !important; }
+.shd-btn:hover {
+    background: var(--bg);
+    border-color: var(--purple);
+    color: var(--purple) !important;
+}
+.shd-btn--primary {
+    background: var(--purple);
+    color: #fff !important;
+    border-color: var(--purple);
+}
+.shd-btn--primary:link, .shd-btn--primary:visited { color: #fff !important; }
+.shd-btn--primary:hover {
+    background: var(--purple-dark);
+    color: #fff !important;
+    border-color: var(--purple-dark);
+}
+
+/* ── Tab bar ──────────────────────────────────────────────────── */
+.shd-tab-bar {
+    display: flex;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.shd-tab {
+    padding: 10px 18px;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: var(--muted);
+    position: relative;
+    bottom: -2px;
+    border-bottom: 2px solid transparent;
+    transition: color .15s;
+    font-family: inherit;
+    white-space: nowrap;
+}
+.shd-tab:hover { color: var(--purple); }
+.shd-tab--active {
+    color: var(--purple);
+    border-bottom-color: var(--purple);
+    font-weight: 600;
+}
+
+/* ── Tab panels ───────────────────────────────────────────────── */
+.shd-tab-panel { display: none; }
+.shd-tab-panel--active { display: block; }
+
+/* ── Field card ───────────────────────────────────────────────── */
+.shd-field-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.shd-field-table {
+    width: 100%;
+    border-collapse: collapse;
+    direction: rtl;
+}
+.shd-field-table th,
+.shd-field-table td {
+    padding: 12px 16px;
+    text-align: right;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+}
+.shd-field-table tr:last-child th,
+.shd-field-table tr:last-child td { border-bottom: none; }
+.shd-field-table th {
+    background: var(--bg);
+    color: var(--muted);
+    font-weight: 500;
+    width: 160px;
+    white-space: nowrap;
+}
+.shd-field-table td { color: var(--text); }
+
+.shd-ltr {
+    direction: ltr;
+    display: inline-block;
+    unicode-bidi: embed;
+}
+.shd-muted { color: var(--muted); }
+
+/* ── Inline links (Patient name, previous Surgery rows) ─────────── */
+.shd-link {
+    color: var(--purple);
+    text-decoration: none;
+    font-weight: 600;
+}
+.shd-link:hover { text-decoration: underline; }
+
+/* ── Previous Surgeries list (اعمال جراحی انجام‌شده) ─────────────── */
+.shd-prev-surgeries {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.shd-prev-surgeries li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* ── Section heading ──────────────────────────────────────────── */
+.shd-section-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 12px;
+    padding: 0;
+}
+
+/* ── Items tab: inner table ───────────────────────────────────── */
+.shd-items-table-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.shd-items-table {
+    width: 100%;
+    border-collapse: collapse;
+    direction: rtl;
+}
+
+.shd-items-table th {
+    padding: 10px 16px;
+    background: var(--bg);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    text-align: right;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+.shd-items-table td {
+    padding: 11px 16px;
+    font-size: 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+.shd-items-table tr:last-child td { border-bottom: none; }
+
+/* ── Commission / finance card ────────────────────────────────── */
+.shd-finance-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+}
+
+.shd-finance-highlight {
+    background: var(--purple-light);
+    border: 1px solid var(--purple);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.shd-finance-highlight-label {
+    font-size: 13px;
+    color: var(--purple);
+    font-weight: 500;
+}
+
+.shd-finance-highlight-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--purple);
+}
+
+/* ── Safe multi-line text (شرح عمل tab: تشخیص بعد از عمل /
+   شرح عمل و مشاهدات) — escaped text rendered via textContent-equivalent
+   (escapeHtml in JS), never raw innerHTML. pre-wrap preserves line breaks
+   from the textarea input; the break rules keep long unbroken Persian
+   words from causing horizontal overflow inside the field table. ──── */
+.shd-pre-wrap {
+    display: inline-block;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    line-height: 1.8;
+}
+
+/* ── Empty state ──────────────────────────────────────────────── */
+.shd-empty {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--muted);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+.shd-empty-icon  { font-size: 36px; margin-bottom: 10px; }
+.shd-empty-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+}
+.shd-empty-desc { font-size: 13px; }
+
+/* ── Skeleton loading ─────────────────────────────────────────── */
+.shd-skeleton {
+    border-radius: 4px;
+    background: linear-gradient(
+        90deg,
+        var(--border) 25%,
+        var(--bg) 50%,
+        var(--border) 75%
+    );
+    background-size: 200% 100%;
+    animation: shd-shimmer 1.4s infinite;
+}
+@keyframes shd-shimmer { to { background-position: -200% 0; } }
+
+.shd-skeleton-title { height: 22px; width: 40%; }
+.shd-skeleton-sub   { height: 14px; width: 28%; }
+.shd-skeleton-field { height: 14px; margin: 8px 0; }
+.shd-skeleton-sm    { width: 40%; }
+.shd-skeleton-med   { width: 65%; }
+.shd-skeleton-lg    { width: 85%; }
+.shd-panel-skeleton { padding: 20px; }
+
+/* ── Timeline / Activity ──────────────────────────────────────── */
+.shd-timeline {
+    margin-top: 24px;
+}
+
+.shd-timeline-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    box-shadow: var(--shadow);
+}
+
+.shd-timeline-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    margin: 0 0 12px;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+}
+
+.shd-timeline-log {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.shd-timeline-entry {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.shd-timeline-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    flex-shrink: 0;
+    margin-top: 4px;
+}
+
+.shd-timeline-action { color: var(--muted); }
+.shd-timeline-time   { color: var(--text); font-weight: 500; }
+
+/* ── Items tab: toolbar + operations column ───────────────────── */
+.shd-items-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+}
+
+.shd-row-actions {
+    display: flex;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.shd-row-action-btn {
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .15s, border-color .15s, color .15s;
+}
+.shd-row-action-btn:hover { background: var(--bg); border-color: var(--purple); color: var(--purple); }
+.shd-row-action-btn--danger:hover { border-color: var(--red); color: var(--red); }
+
+/* ── Modal (item add/edit form + delete confirm share this shell) ── */
+.shd-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .45);
+    z-index: 500;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.shd-modal-overlay.shd-open { display: flex; }
+
+.shd-modal {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 24px 24px 20px;
+    width: 460px;
+    max-width: 100%;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, .18);
+    direction: rtl;
+}
+.shd-modal--confirm { width: 400px; }
+
+.shd-modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 16px;
+}
+.shd-modal-msg {
+    font-size: 14px;
+    color: var(--muted);
+    margin: 0 0 20px;
+    line-height: 1.6;
+}
+.shd-modal-actions {
+    display: flex;
+    justify-content: flex-start;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+/* ── Form fields inside the item modal ────────────────────────── */
+.shd-form-group { margin-bottom: 16px; }
+.shd-form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+}
+.shd-form-input {
+    width: 100%;
+    height: 38px;
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    background: var(--bg);
+    color: var(--text);
+    box-sizing: border-box;
+    direction: rtl;
+}
+.shd-form-input:focus { outline: none; border-color: var(--purple); }
+textarea.shd-form-input { height: auto; min-height: 64px; resize: vertical; padding-top: 8px; }
+
+.shd-form-error {
+    font-size: 12.5px;
+    color: var(--red);
+    margin-top: 6px;
+}
+
+/* ── Searchable product picker ────────────────────────────────── */
+.shd-product-search { position: relative; }
+
+.shd-product-selected {
+    display: none;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg);
+    padding: 8px 12px;
+    font-size: 13.5px;
+}
+.shd-product-selected.shd-open { display: flex; }
+.shd-product-selected-info { min-width: 0; line-height: 1.6; }
+.shd-product-selected-change {
+    flex-shrink: 0;
+    border: none;
+    background: none;
+    color: var(--purple);
+    font-size: 12.5px;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.shd-product-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    left: 0;
+    max-height: 260px;
+    overflow-y: auto;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, .12);
+    z-index: 10;
+    display: none;
+}
+.shd-product-dropdown.shd-open { display: block; }
+
+.shd-product-option {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 9px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+}
+.shd-product-option:last-child { border-bottom: none; }
+.shd-product-option:hover { background: var(--bg); }
+.shd-product-option--disabled {
+    cursor: not-allowed;
+    opacity: .55;
+}
+.shd-product-option--disabled:hover { background: none; }
+
+.shd-product-option-name {
+    font-weight: 700;
+    color: var(--text);
+    font-size: 13.5px;
+    margin-bottom: 2px;
+}
+.shd-product-option-code {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 4px;
+}
+.shd-product-option-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--muted);
+}
+.shd-product-option-extra {
+    margin-top: 4px;
+    font-size: 11.5px;
+    color: var(--muted);
+}
+.shd-product-option-stock--ok  { color: var(--green); }
+.shd-product-option-stock--low { color: #c2610c; }
+.shd-product-option-stock--out { color: var(--red); font-weight: 600; }
+
+/* Keyboard-navigation cursor (arrow keys) — same visual language as :hover */
+.shd-product-option--focused { background: var(--bg); outline: 2px solid var(--purple-light); outline-offset: -2px; }
+
+.shd-product-option-empty,
+.shd-product-option-loading {
+    padding: 14px 12px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.shd-product-loadmore {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--purple);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+}
+.shd-product-loadmore:hover { background: var(--purple-light); }
+
+.shd-product-selected-label {
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-bottom: 2px;
+}
+.shd-product-inactive-badge { margin-right: 6px; }
+
+/* ── Stock preview (UI convenience only — backend is authoritative) ── */
+.shd-stock-preview {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin-bottom: 16px;
+}
+.shd-stock-preview-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 0;
+}
+.shd-stock-preview-row span:first-child { color: var(--muted); }
+.shd-stock-preview-row span:last-child  { direction: ltr; unicode-bidi: isolate; font-weight: 600; color: var(--text); }
+.shd-stock-preview-row--result span:last-child { color: var(--purple); }
+.shd-stock-preview-row--negative span:last-child { color: var(--red); }
+
+/* ── Toast ────────────────────────────────────────────────────── */
+.shd-toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 24px;
+    border-radius: 99px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 600;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .15);
+    white-space: nowrap;
+    pointer-events: none;
+}
+.shd-toast--success { background: var(--green); color: #fff; }
+.shd-toast--error   { background: var(--red);   color: #fff; }

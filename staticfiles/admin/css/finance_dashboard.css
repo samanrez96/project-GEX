@@ -1,0 +1,215 @@
+/* Finance Dashboard — RTL, uses CSS variables from custom_admin.css */
+
+:root {
+  --fd-income-fg:    #1E9E6A;
+  --fd-expense-fg:   #EB2D4B;
+}
+
+#finance-dashboard-root {
+  padding: 16px 0;
+  font-family: inherit;
+}
+
+/* ── Filters ──────────────────────────────────────────────────── */
+
+.fd-filters-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+
+.fd-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fd-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: .3px;
+}
+
+.fd-input {
+  height: 36px;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  direction: rtl;
+  transition: border-color .15s;
+}
+.fd-input:focus {
+  outline: none;
+  border-color: var(--purple);
+}
+
+.fd-input--narrow { width: 110px; }
+
+.fd-btn {
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  transition: background .15s, border-color .15s;
+  align-self: flex-end;
+}
+
+.fd-btn:hover {
+  background: var(--bg);
+  border-color: var(--muted);
+}
+
+.fd-btn--primary {
+  background: var(--purple);
+  color: #fff;
+  border-color: var(--purple);
+}
+.fd-btn--primary:hover {
+  background: var(--purple-dark);
+  border-color: var(--purple-dark);
+}
+
+/* ── Cards ────────────────────────────────────────────────────── */
+
+.fd-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  grid-auto-rows: minmax(110px, auto);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.fd-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px 20px;
+  text-align: center;
+  transition: box-shadow .2s;
+  border-top: 4px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.fd-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,.10);
+}
+
+.fd-card-label {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.fd-card-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.fd-card--income     { border-top-color: #1E9E6A; }
+.fd-card--income .fd-card-value { color: var(--fd-income-fg); }
+
+.fd-card--expense    { border-top-color: #EB2D4B; }
+.fd-card--expense .fd-card-value { color: var(--fd-expense-fg); }
+
+.fd-card--balance    { border-top-color: #0066B3; }
+.fd-card--employee   { border-top-color: #7c3aed; }
+.fd-card--equipment  { border-top-color: #ea580c; }
+.fd-card--medicine   { border-top-color: #0891b2; }
+.fd-card--commission      { border-top-color: #65a30d; }
+.fd-card--university      { border-top-color: #d97706; }
+.fd-card--anesthesia      { border-top-color: #0f766e; }
+.fd-card--daily-supplies  { border-top-color: #b45309; }
+
+.fd-card--balance.fd-positive .fd-card-value { color: var(--fd-income-fg); }
+.fd-card--balance.fd-negative .fd-card-value { color: var(--fd-expense-fg); }
+
+/* ── Chart ────────────────────────────────────────────────────── */
+
+.fd-chart-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+
+.fd-chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.fd-chart-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: .2px;
+}
+
+.fd-chart-legend {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.fd-legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-inline-end: 4px;
+}
+
+.fd-legend-dot--income  { background: #1E9E6A; }
+.fd-legend-dot--expense { background: #EB2D4B; }
+
+.fd-chart-wrap {
+  position: relative;
+  height: 320px;
+}
+
+#fd-trend-chart {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.fd-chart-empty {
+  text-align: center;
+  padding: 80px 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* ── Loading state ────────────────────────────────────────────── */
+
+.fd-loading .fd-card-value { color: var(--border) !important; }
