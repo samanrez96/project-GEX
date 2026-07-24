@@ -1,0 +1,185 @@
+/* Main Dashboard — custom admin index, Persian RTL */
+
+/* ── Row 1 & 2: 4-column KPI grid ─────────────────────────── */
+
+.md-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+/* ── Card header: label + icon side-by-side ────────────────── */
+.md-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+/* Icon block in top-right of card */
+.md-card-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.md-card-icon--income    { background: #E6F6EF; color: #1E9E6A; }
+.md-card-icon--expense   { background: #FDEAED; color: #EB2D4B; }
+.md-card-icon--balance   { background: #E8F1FA; color: #0066B3; }
+.md-card-icon--surgery   { background: #EDE9F7; color: #7c3aed; }
+.md-card-icon--employee  { background: #EEF0FE; color: #6366f1; }
+.md-card-icon--equipment { background: #FEF0E8; color: #ea580c; }
+.md-card-icon--medicine  { background: #E1F7FB; color: #0891b2; }
+.md-card-icon--commission{ background: #F2F8E4; color: #65a30d; }
+
+/* Color accent top border per card type */
+.md-card--income     { border-top: 3px solid #1E9E6A; }
+.md-card--expense    { border-top: 3px solid #EB2D4B; }
+.md-card--balance    { border-top: 3px solid #0066B3; }
+.md-card--surgery    { border-top: 3px solid #7c3aed; }
+.md-card--employee   { border-top: 3px solid #6366f1; }
+.md-card--equipment  { border-top: 3px solid #ea580c; }
+.md-card--medicine   { border-top: 3px solid #0891b2; }
+.md-card--commission { border-top: 3px solid #65a30d; }
+
+/* Income card value color */
+.md-card--income .adm-metric-card__value { color: #1E9E6A; }
+
+/* Balance: colored when positive/negative state is known */
+.md-card--balance.md-positive .adm-metric-card__value { color: #1E9E6A; }
+.md-card--balance.md-negative .adm-metric-card__value { color: #EB2D4B; }
+
+/* Surgery count: value not a currency */
+.md-card--surgery .adm-metric-card__value {
+    direction: rtl;
+    unicode-bidi: normal;
+}
+
+/* ── Dashboard card value override ──────────────────────────── */
+
+#main-dashboard-root .adm-metric-card {
+    padding: 18px 18px 14px;
+}
+
+#main-dashboard-root .adm-metric-card__label {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0;
+    text-transform: none;
+    margin-bottom: 0;
+}
+
+#main-dashboard-root .adm-metric-card__value {
+    font-size: 23px;
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: -.5px;
+    color: var(--text-strong, #0F2B46);
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#main-dashboard-root .adm-metric-card__helper {
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 6px;
+}
+
+/* ── Bottom section: cost breakdown + recent surgeries ───────── */
+
+.md-bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    gap: 14px;
+    margin-top: 14px;
+}
+
+/* ── Cost breakdown section ─────────────────────────────────── */
+
+.md-cb-list {
+    padding: 4px 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.md-cb-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.md-cb-row-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.md-cb-label {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: #36424F;
+}
+
+.md-cb-val {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text-strong, #0F2B46);
+    direction: ltr;
+    unicode-bidi: isolate;
+}
+
+.md-cb-bar-track {
+    height: 8px;
+    background: #EDF1F6;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.md-cb-bar {
+    height: 100%;
+    width: 0;
+    border-radius: 999px;
+    transition: width 0.6s ease;
+}
+
+.md-cb-bar--equipment { background: #ea580c; }
+.md-cb-bar--medicine  { background: #0891b2; }
+.md-cb-bar--employee  { background: #6366f1; }
+.md-cb-bar--other     { background: #97A4B5; }
+
+/* ── Recent surgeries table wrapper ─────────────────────────── */
+
+.md-table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.md-table-loading {
+    text-align: center;
+    padding: 28px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+
+@media (max-width: 1200px) {
+    .md-cards { grid-template-columns: repeat(4, 1fr); }
+}
+
+@media (max-width: 900px) {
+    .md-cards { grid-template-columns: repeat(2, 1fr); }
+    .md-bottom-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+    .md-cards { grid-template-columns: 1fr; }
+}

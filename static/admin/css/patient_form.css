@@ -1,0 +1,208 @@
+/* ================================================================
+   Patient add/edit form — نام و نام خانوادگی / کد ملی / کد پرونده /
+   کد داخلی بیمار / سن بیمار / جنسیت / شماره موبایل / توضیحات
+
+   Loaded only on the Patient add/change page (see PatientAdmin.
+   change_form_template → templates/admin/surgeries/patient/
+   patient_edit_form.html). No template rewrite: Django's own
+   fieldset/form-row rendering is kept as-is (CSRF, validation, permission
+   gating, error rendering all stay exactly Django's) — this file turns
+   that existing markup into a real CSS grid instead of the generic flex
+   rows rtl_responsive.css gives every other admin form.
+
+   Scoping: everything below is scoped under
+   body.app-surgeries.model-patient fieldset.patient-form-card /
+   fieldset.patient-status-section — two CSS-only hook classes added to
+   PatientAdmin.get_fieldsets()'s existing fieldsets (see surgeries/admin.py).
+   No broad .form-row{}/input{}/select{}/textarea{} rule is added; only
+   this project's own generic rtl_responsive.css rules (unchanged) apply
+   outside these two fieldsets, exactly as for every other admin form
+   (Employee's add/change form, the reference for this page, uses none of
+   its own layout CSS and is untouched by this file).
+
+   Row layout produced (matches PatientAdmin.get_fieldsets order exactly):
+     1. نام و نام خانوادگی        — full width
+     2. کد ملی / کد پرونده / کد داخلی بیمار — three equal columns
+     3. سن بیمار / جنسیت           — two balanced columns (1fr / 1.2fr)
+     4. شماره موبایل               — capped width, aligned with the grid
+     5. توضیحات                   — full width textarea
+================================================================= */
+
+/* ── Card shell ──────────────────────────────────────────────────── */
+body.app-surgeries.model-patient fieldset.patient-form-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg, 16px);
+    box-shadow: var(--shadow);
+    padding: 22px 24px 6px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+body.app-surgeries.model-patient fieldset.patient-form-card > h2.fieldset-heading {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 4px;
+    padding: 0 0 14px;
+    border-bottom: 1px solid var(--border);
+}
+body.app-surgeries.model-patient fieldset.patient-form-card > .form-row {
+    margin: 0;
+    padding: 0;
+    border-bottom: none; /* the card's own `gap` replaces Django's per-row divider */
+}
+
+/* ── The two grouped rows become real grids ─────────────────────────
+   Django renders a fieldset tuple ("a", "b", "c") as ONE .form-row whose
+   direct child is a single .flex-container.form-multiline wrapping one
+   <div> per field — that wrapper is what becomes the grid; each field's
+   own label/input/help/error stays completely inside its own grid cell,
+   so an error on one field can never widen or break the whole row. ── */
+body.app-surgeries.model-patient fieldset.patient-form-card
+    .form-row.field-national_id.field-case_code.field-internal_code
+    > .flex-container.form-multiline {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+body.app-surgeries.model-patient fieldset.patient-form-card
+    .form-row.field-age.field-gender
+    > .flex-container.form-multiline {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 16px;
+}
+/* Reset Django's default fieldBox margin — the grid's own `gap` handles
+   spacing now, correctly mirrored for RTL. */
+body.app-surgeries.model-patient fieldset.patient-form-card .form-multiline > div {
+    margin: 0;
+}
+
+/* ── Every field: label / input / help / error, stacked consistently ──
+   Applies uniformly to single-field rows (نام و نام خانوادگی، شماره
+   موبایل) and to each cell of the two grouped rows above — one shared
+   internal structure for every field on this form. */
+body.app-surgeries.model-patient fieldset.patient-form-card .flex-container {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    width: 100%;
+}
+body.app-surgeries.model-patient fieldset.patient-form-card label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    min-width: 0;
+    margin: 0;
+    float: none;
+}
+body.app-surgeries.model-patient fieldset.patient-form-card input,
+body.app-surgeries.model-patient fieldset.patient-form-card select {
+    width: 100%;
+    height: 38px;
+    box-sizing: border-box;
+}
+body.app-surgeries.model-patient fieldset.patient-form-card textarea {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* Help text — attached directly under its own input, never a detached
+   full-row caption; a subtle size so a long sentence doesn't inflate the
+   row (or, for the code/age-gender grids, its own column). */
+body.app-surgeries.model-patient fieldset.patient-form-card .help {
+    margin: 0;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: var(--muted);
+}
+
+/* Validation errors stay inside their own field's cell. */
+body.app-surgeries.model-patient fieldset.patient-form-card ul.errorlist {
+    margin: 0 0 4px;
+    padding: 0;
+    list-style: none;
+    color: var(--red);
+    font-size: 12.5px;
+}
+
+/* Codes and mobile number read left-to-right regardless of the form's RTL
+   direction (matches how these are shown everywhere else in the project). */
+body.app-surgeries.model-patient fieldset.patient-form-card .field-national_id input,
+body.app-surgeries.model-patient fieldset.patient-form-card .field-case_code input,
+body.app-surgeries.model-patient fieldset.patient-form-card .field-internal_code input,
+body.app-surgeries.model-patient fieldset.patient-form-card .field-phone_number input {
+    direction: ltr;
+    text-align: right;
+}
+
+/* نام و نام خانوادگی / شماره موبایل — capped width so the single-field
+   row doesn't read as a mostly-empty full-bleed row, while staying
+   aligned to the same grid/card as everything else. */
+body.app-surgeries.model-patient fieldset.patient-form-card .form-row.field-full_name input {
+    max-width: 480px;
+}
+body.app-surgeries.model-patient fieldset.patient-form-card .form-row.field-phone_number input {
+    max-width: 320px;
+}
+
+/* ── Compact status area (hidden-Patient control, superuser-only) ───
+   A small, visually distinct card below the main form — not another
+   full-size fieldset competing with it. */
+body.app-surgeries.model-patient fieldset.patient-status-section {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius, 10px);
+    padding: 14px 18px 4px;
+    margin-bottom: 16px;
+}
+body.app-surgeries.model-patient fieldset.patient-status-section > h2.fieldset-heading {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    margin: 0 0 10px;
+    padding: 0;
+    border: none;
+}
+body.app-surgeries.model-patient fieldset.patient-status-section .flex-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+body.app-surgeries.model-patient fieldset.patient-status-section label {
+    margin: 0;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+    body.app-surgeries.model-patient fieldset.patient-form-card
+        .form-row.field-national_id.field-case_code.field-internal_code
+        > .flex-container.form-multiline {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 720px) {
+    body.app-surgeries.model-patient fieldset.patient-form-card {
+        padding: 18px 16px 4px;
+    }
+    body.app-surgeries.model-patient fieldset.patient-form-card
+        .form-row.field-national_id.field-case_code.field-internal_code
+        > .flex-container.form-multiline,
+    body.app-surgeries.model-patient fieldset.patient-form-card
+        .form-row.field-age.field-gender
+        > .flex-container.form-multiline {
+        grid-template-columns: 1fr;
+    }
+    body.app-surgeries.model-patient fieldset.patient-form-card .form-row.field-full_name input,
+    body.app-surgeries.model-patient fieldset.patient-form-card .form-row.field-phone_number input {
+        max-width: 100%;
+    }
+}

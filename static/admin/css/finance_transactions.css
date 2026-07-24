@@ -1,0 +1,351 @@
+/* Finance Transactions — RTL, uses CSS variables from custom_admin.css */
+
+:root {
+  --ft-income-fg:    #1E9E6A;
+  --ft-expense-fg:   #EB2D4B;
+}
+
+#finance-transactions-root {
+  padding: 16px 0;
+  font-family: inherit;
+}
+
+/* ── Cards ────────────────────────────────────────────────────── */
+
+.ft-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.ft-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px 20px;
+  text-align: center;
+  transition: box-shadow .2s;
+  border-top: 4px solid var(--border);
+}
+
+.ft-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,.10);
+}
+
+.ft-card-label {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.ft-card-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.ft-card--income     { border-top-color: #1E9E6A; }
+.ft-card--income .ft-card-value { color: var(--ft-income-fg); }
+
+.ft-card--expense    { border-top-color: #EB2D4B; }
+.ft-card--expense .ft-card-value { color: var(--ft-expense-fg); }
+
+.ft-card--balance    { border-top-color: #0066B3; }
+.ft-card--count      { border-top-color: #7c3aed; }
+
+.ft-card--balance.ft-positive .ft-card-value { color: var(--ft-income-fg); }
+.ft-card--balance.ft-negative .ft-card-value { color: var(--ft-expense-fg); }
+
+/* ── Filters ──────────────────────────────────────────────────── */
+
+.ft-filters-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+
+.ft-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ft-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: .3px;
+}
+
+.ft-input {
+  height: 36px;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  direction: rtl;
+  transition: border-color .15s;
+}
+.ft-input:focus {
+  outline: none;
+  border-color: var(--purple);
+}
+
+.ft-btn {
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  transition: background .15s, border-color .15s;
+  align-self: flex-end;
+}
+
+.ft-btn:hover {
+  background: var(--bg);
+  border-color: var(--muted);
+}
+
+.ft-btn--primary {
+  background: var(--purple);
+  color: #fff;
+  border-color: var(--purple);
+}
+.ft-btn--primary:hover {
+  background: var(--purple-dark);
+  border-color: var(--purple-dark);
+}
+
+/* ── Table ────────────────────────────────────────────────────── */
+
+.ft-table-wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.ft-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.ft-table thead th {
+  background: var(--bg);
+  padding: 12px 16px;
+  text-align: right;
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: .3px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.ft-table tbody td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  vertical-align: middle;
+}
+
+.ft-table tbody tr:hover {
+  background: var(--bg);
+}
+
+.ft-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.ft-table-loading {
+  text-align: center;
+  padding: 40px 16px !important;
+  color: var(--muted);
+}
+
+/* ── Badges ───────────────────────────────────────────────────── */
+
+.ft-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .2px;
+}
+
+.ft-badge--income {
+  background: #E6F6EF;
+  color: #178055;
+}
+
+.ft-badge--expense {
+  background: #FDE8EC;
+  color: #B91C3A;
+}
+
+.ft-badge--pending {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+.ft-badge--partial {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+.ft-badge--paid {
+  background: #E6F6EF;
+  color: #178055;
+}
+
+.ft-badge--cancelled {
+  background: #F3F4F6;
+  color: #6B7280;
+}
+
+/* ── Amount ───────────────────────────────────────────────────── */
+
+.ft-amount {
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.ft-amount--income { color: var(--ft-income-fg); }
+.ft-amount--expense { color: var(--ft-expense-fg); }
+
+/* ── Actions ──────────────────────────────────────────────────── */
+
+.ft-action-link {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--purple);
+  text-decoration: none;
+  transition: background .15s;
+}
+
+.ft-action-link:hover {
+  background: rgba(124, 58, 237, .08);
+}
+
+/* ── Empty state ──────────────────────────────────────────────── */
+
+.ft-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+}
+
+.ft-empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.ft-empty-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.ft-empty-desc {
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.ft-empty-btn {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--purple);
+  background: none;
+  border: 1px solid var(--purple);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background .15s;
+}
+
+.ft-empty-btn:hover {
+  background: rgba(124, 58, 237, .08);
+}
+
+/* ── Pagination ───────────────────────────────────────────────── */
+
+.ft-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.ft-pagination-info {
+  font-weight: 500;
+}
+
+.ft-pagination-pages {
+  display: flex;
+  gap: 4px;
+}
+
+.ft-page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.ft-page-btn:hover {
+  background: var(--bg);
+  border-color: var(--muted);
+}
+
+.ft-page-btn--active {
+  background: var(--purple);
+  color: #fff;
+  border-color: var(--purple);
+}
+
+.ft-page-btn--disabled {
+  opacity: .4;
+  pointer-events: none;
+}

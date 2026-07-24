@@ -1,0 +1,366 @@
+/* ================================================================
+   Patient list page — Django's native changelist, restyled to match
+   the same visual language as the Employee list page (see
+   employee_list.css): card-wrapped search+filter box, card-wrapped
+   table with the same header/row padding and font sizes, card-wrapped
+   pagination.
+
+   Unlike Employee, Patient's list page still uses Django's own
+   search/actions/table/pagination rendering (see templates/admin/
+   surgeries/patient/change_list.html — it only overrides the
+   `object-tools` and `search` blocks, everything else — bulk actions,
+   the results table, pagination — is Django's default). This is
+   deliberate: Employee's custom page has no bulk-select/action feature
+   at all, and Patient's bulk delete + (superuser-only) hide/restore
+   actions must keep working, so #changelist-form / .actions /
+   #result_list / paginator markup is Django's own and is only ever
+   restyled here, never replaced.
+
+   The one exception is the superuser-only "وضعیت نمایش" (visible/hidden)
+   filter: instead of Django's native #changelist-filter sidebar (a
+   separate column beside the table — visually disconnected from the
+   Employee-style integrated search/filter card this page now matches),
+   it is rendered inline, directly under the search box, as a compact
+   <select> — see PatientVisibilityFilter.template
+   (visibility_filter_select.html) and the `search`/`filters` block
+   overrides in change_list.html. The filter's own logic (queryset
+   scoping via SimpleListFilter, superuser-only gating via
+   get_list_filter) is completely unchanged — only where and how its
+   choices are rendered changed. Because there is no longer a sidebar
+   at all, #changelist is a single column and needs no flex/grid
+   two-column layout, RTL margin correction, or responsive
+   stacking/container-query — all of that complexity from the previous
+   sidebar-based layout is gone along with the sidebar itself.
+
+   All rules scoped under body.app-surgeries.model-patient.change-list.
+================================================================= */
+
+body.app-surgeries.model-patient.change-list #changelist {
+    direction: rtl;
+    width: 100%;
+}
+
+body.app-surgeries.model-patient.change-list .changelist-form-container {
+    width: 100%;
+    min-width: 0;
+}
+
+/* ── Page header (object-tools block override — see change_list.html) ── */
+body.app-surgeries.model-patient.change-list .patient-list-header {
+    margin-bottom: 16px;
+}
+
+/* ── Search + filter card → same card language as .em-search-wrap ───── */
+body.app-surgeries.model-patient.change-list #toolbar {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px;
+    margin: 0 0 16px;
+}
+body.app-surgeries.model-patient.change-list #changelist-search {
+    display: block;
+    max-width: 420px;
+}
+body.app-surgeries.model-patient.change-list #changelist-search > div {
+    display: flex;
+    align-items: stretch;
+    direction: rtl;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+body.app-surgeries.model-patient.change-list #changelist-search label {
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    border-inline-start: 1px solid var(--border);
+    margin: 0;
+}
+body.app-surgeries.model-patient.change-list #changelist-search #searchbar {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--text);
+    direction: rtl;
+}
+body.app-surgeries.model-patient.change-list #changelist-search #searchbar:focus {
+    outline: none;
+}
+body.app-surgeries.model-patient.change-list #changelist-search input[type="submit"] {
+    border: none;
+    background: var(--purple);
+    color: #fff;
+    padding: 0 18px;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background .15s;
+}
+body.app-surgeries.model-patient.change-list #changelist-search input[type="submit"]:hover {
+    background: var(--purple-dark);
+}
+
+/* ── Inline visibility filter row (superuser-only) ────────────────────
+   Rendered only when cl.filter_specs is non-empty (see change_list.html
+   `search` block) — visually joined to the search card above it (flat
+   shared edge, no gap) so the two read as one "search + filter" card,
+   the same grouped feeling as the Employee list page's search+filter
+   block. Absent entirely for non-superusers: no filter row, no reserved
+   space, #toolbar keeps its own full rounded corners below. */
+body.app-surgeries.model-patient.change-list .pt-search-wrap #toolbar {
+    border-radius: var(--radius) var(--radius) 0 0;
+    border-bottom: none;
+    box-shadow: none;
+    margin-bottom: 0;
+}
+body.app-surgeries.model-patient.change-list .pt-filter-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-top: 1px solid var(--border);
+    border-radius: 0 0 var(--radius) var(--radius);
+    box-shadow: var(--shadow);
+    padding: 10px 16px;
+    margin: 0 0 16px;
+    direction: rtl;
+}
+body.app-surgeries.model-patient.change-list .pt-filter-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+body.app-surgeries.model-patient.change-list .pt-filter-label {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 600;
+    white-space: nowrap;
+}
+body.app-surgeries.model-patient.change-list .pt-filter-select {
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    background: var(--bg);
+    color: var(--text);
+    direction: rtl;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color .15s;
+}
+body.app-surgeries.model-patient.change-list .pt-filter-select:focus {
+    outline: none;
+    border-color: var(--purple);
+}
+
+/* ── Bulk action row (اقدام / برو / تعداد انتخاب‌شده) ────────────────── */
+body.app-surgeries.model-patient.change-list #changelist-form .actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 16px;
+    margin: 0 0 16px;
+    direction: rtl;
+}
+body.app-surgeries.model-patient.change-list #changelist-form .actions label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 600;
+}
+body.app-surgeries.model-patient.change-list #changelist-form .actions select {
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--card);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+}
+body.app-surgeries.model-patient.change-list #changelist-form .actions button {
+    padding: 7px 18px;
+    border-radius: 6px;
+    border: 1px solid var(--purple);
+    background: var(--purple);
+    color: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .15s;
+}
+body.app-surgeries.model-patient.change-list #changelist-form .actions button:hover {
+    background: var(--purple-dark);
+}
+body.app-surgeries.model-patient.change-list #changelist-form .actions .action-counter {
+    margin-inline-start: auto;
+    font-size: 12.5px;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+/* ── Table card → same values as .em-table-wrap / .em-table ─────────── */
+body.app-surgeries.model-patient.change-list .results {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    width: 100%;
+    direction: rtl;
+    /* The dedicated horizontal-scroll container: at narrow widths the
+       table (which has a genuine per-column min-width floor below) may
+       exceed this box's width — it scrolls *here*, never at the page
+       level. */
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+body.app-surgeries.model-patient.change-list #result_list {
+    width: 100%;
+    /* table-layout:auto (not fixed) + per-cell min-width below: each
+       column keeps a practical floor, and the table's own intrinsic
+       width naturally adapts to however many columns are rendered — the
+       same 7 data columns for everyone now that the visibility column
+       has been removed entirely, no per-role math needed. */
+    table-layout: auto;
+    border-collapse: collapse;
+    direction: rtl;
+}
+
+body.app-surgeries.model-patient.change-list #result_list thead th {
+    background: var(--bg);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+body.app-surgeries.model-patient.change-list #result_list tbody td,
+body.app-surgeries.model-patient.change-list #result_list tbody th {
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+body.app-surgeries.model-patient.change-list #result_list tbody tr:last-child td,
+body.app-surgeries.model-patient.change-list #result_list tbody tr:last-child th {
+    border-bottom: none;
+}
+
+body.app-surgeries.model-patient.change-list #result_list tbody tr:hover {
+    background: var(--bg);
+}
+
+/* Ensure thead <th> and tbody <td>/<th> share consistent column directions. */
+body.app-surgeries.model-patient.change-list #result_list th,
+body.app-surgeries.model-patient.change-list #result_list td {
+    text-align: right;
+}
+
+/* Practical per-column minimum widths — table-layout:auto respects
+   min-width (unlike width, which is only a hint under auto layout), so
+   these are real floors: a column never gets squeezed thinner than this
+   even when the table as a whole has to scroll to honor them. With the
+   visibility column gone, these 7 columns expand to fill the remaining
+   width naturally (auto layout distributes extra space proportionally
+   once every column's floor is satisfied). */
+body.app-surgeries.model-patient.change-list #result_list .action-checkbox-column,
+body.app-surgeries.model-patient.change-list #result_list .action-checkbox {
+    min-width: 44px;
+    width: 44px;
+}
+body.app-surgeries.model-patient.change-list #result_list .column-case_code,
+body.app-surgeries.model-patient.change-list #result_list .field-case_code {
+    min-width: 130px;
+}
+body.app-surgeries.model-patient.change-list #result_list .column-internal_code,
+body.app-surgeries.model-patient.change-list #result_list .field-internal_code {
+    min-width: 120px;
+}
+body.app-surgeries.model-patient.change-list #result_list .column-full_name,
+body.app-surgeries.model-patient.change-list #result_list .field-full_name {
+    min-width: 160px;
+}
+body.app-surgeries.model-patient.change-list #result_list .column-national_id,
+body.app-surgeries.model-patient.change-list #result_list .field-national_id {
+    min-width: 120px;
+}
+body.app-surgeries.model-patient.change-list #result_list .column-phone_number,
+body.app-surgeries.model-patient.change-list #result_list .field-phone_number {
+    min-width: 130px;
+}
+body.app-surgeries.model-patient.change-list #result_list .column-get_latest_surgery_date,
+body.app-surgeries.model-patient.change-list #result_list .field-get_latest_surgery_date {
+    min-width: 125px;
+}
+body.app-surgeries.model-patient.change-list #result_list .column-get_latest_doctor,
+body.app-surgeries.model-patient.change-list #result_list .field-get_latest_doctor {
+    min-width: 140px;
+}
+
+/* Short, fixed-format identifier cells (national id, phone — always the
+   same length) stay single-line with ellipsis as a last-resort safety
+   net. case_code / internal_code are deliberately NOT included here:
+   real codes vary in length and must stay fully readable per the design
+   requirement, so they wrap onto a second line instead of silently
+   truncating to "DEMO…" when a column is narrower than the value. */
+body.app-surgeries.model-patient.change-list #result_list .field-national_id,
+body.app-surgeries.model-patient.change-list #result_list .field-phone_number {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/*
+ * Numeric / code fields: case_code, internal_code, national_id,
+ * phone_number, and the Jalali surgery date should render left-to-right so
+ * codes like "P-0001" and dates like "۱۴۰۲/۰۱/۱۵" display in their natural
+ * reading order. text-align:right keeps them visually anchored under the
+ * RTL header. case_code/internal_code render as <th>, not <td>, hence both
+ * selectors below.
+ */
+body.app-surgeries.model-patient.change-list #result_list th.field-case_code,
+body.app-surgeries.model-patient.change-list #result_list td.field-case_code,
+body.app-surgeries.model-patient.change-list #result_list td.field-internal_code,
+body.app-surgeries.model-patient.change-list #result_list td.field-national_id,
+body.app-surgeries.model-patient.change-list #result_list td.field-phone_number,
+body.app-surgeries.model-patient.change-list #result_list td.field-get_latest_surgery_date {
+    direction: ltr;
+    text-align: right;
+    unicode-bidi: isolate;
+}
+
+/* ── Paginator / row-count footer ("۵ بیمار") → same card treatment as
+   .em-pagination ───────────────────────────────────────────────────── */
+body.app-surgeries.model-patient.change-list .paginator {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin: 0;
+    padding: 12px 16px;
+    color: var(--muted);
+    font-size: 13px;
+    text-align: right;
+    direction: rtl;
+}
