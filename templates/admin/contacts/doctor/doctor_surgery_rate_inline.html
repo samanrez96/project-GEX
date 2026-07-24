@@ -1,0 +1,74 @@
+{% load i18n admin_urls static %}
+<div class="inline-group doctor-rates-wrapper" id="{{ inline_admin_formset.formset.prefix }}-group"
+     data-inline-type="doctor-rates">
+  <div class="doctor-rates-related">
+    {{ inline_admin_formset.formset.management_form }}
+    <fieldset class="module" aria-labelledby="{{ inline_admin_formset.formset.prefix }}-heading">
+      <h2 id="{{ inline_admin_formset.formset.prefix }}-heading" class="inline-heading">
+        {{ inline_admin_formset.opts.verbose_name_plural|capfirst }}
+      </h2>
+      {{ inline_admin_formset.formset.non_form_errors }}
+
+      <table class="doctor-rates-table">
+        <thead>
+          <tr>
+            <th class="dsr-col-surgery-type">نوع عمل</th>
+            <th class="dsr-col-rate">نرخ هر عمل (تومان)</th>
+            <th class="dsr-col-delete">حذف</th>
+          </tr>
+        </thead>
+        <tbody id="doctor-rates-body">
+          {% for inline_admin_form in inline_admin_formset %}
+          <tr class="dsr-row">
+            {% if inline_admin_form.form.non_field_errors %}
+            <td colspan="3">{{ inline_admin_form.form.non_field_errors }}</td>
+            {% endif %}
+            {% if inline_admin_form.needs_explicit_pk_field %}{{ inline_admin_form.pk_field.field }}{% endif %}
+            {% if inline_admin_form.fk_field %}{{ inline_admin_form.fk_field.field }}{% endif %}
+            <td class="dsr-cell dsr-cell--surgery-type">
+              {{ inline_admin_form.form.surgery_type.errors }}
+              {{ inline_admin_form.form.surgery_type }}
+            </td>
+            <td class="dsr-cell dsr-cell--rate">
+              {{ inline_admin_form.form.rate.errors }}
+              {{ inline_admin_form.form.rate }}
+            </td>
+            <td class="dsr-cell dsr-cell--delete">
+              {% if inline_admin_formset.formset.can_delete and inline_admin_formset.has_delete_permission and inline_admin_form.original %}
+              <label class="dsr-delete-label">
+                {{ inline_admin_form.deletion_field.field }}
+                <span>حذف</span>
+              </label>
+              {% else %}
+              <button type="button" class="dsr-remove-row">حذف</button>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <template id="doctor-rate-empty-form">
+        <tr class="dsr-row">
+          {{ inline_admin_formset.formset.empty_form.id }}
+          {{ inline_admin_formset.formset.empty_form.doctor }}
+          <td class="dsr-cell dsr-cell--surgery-type">
+            {{ inline_admin_formset.formset.empty_form.surgery_type }}
+          </td>
+          <td class="dsr-cell dsr-cell--rate">
+            {{ inline_admin_formset.formset.empty_form.rate }}
+          </td>
+          <td class="dsr-cell dsr-cell--delete">
+            <button type="button" class="dsr-remove-row">حذف</button>
+          </td>
+        </tr>
+      </template>
+
+      {% if inline_admin_formset.has_add_permission %}
+      <div class="dsr-add-row">
+        <a href="#" id="doctor-rate-add-row" class="addlink">افزودن نرخ</a>
+      </div>
+      {% endif %}
+    </fieldset>
+  </div>
+</div>

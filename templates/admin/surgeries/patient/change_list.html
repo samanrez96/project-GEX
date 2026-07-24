@@ -1,0 +1,52 @@
+{% extends "admin/change_list.html" %}
+{% load i18n static admin_list %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin/css/patient_list.css' %}">
+{% endblock %}
+
+{# The object-tools block (the page header/action buttons) is replaced with
+   the same adm-page-header/adm-btn components the Employee list page uses.
+   Bulk actions, the results table, and pagination below are untouched —
+   still Django's own change_list.html rendering, so nothing about their
+   behavior (including Patient's existing bulk-delete + hide/restore
+   actions) changes.
+
+   The `search` block IS overridden (see below) to move the visibility
+   filter out of Django's native sidebar and into an inline filter row
+   directly under the search box, matching the Employee list page's
+   integrated search+filter card — see visibility_filter_select.html and
+   PatientVisibilityFilter.template. The filter's own logic (queryset
+   scoping, superuser-only gating via get_list_filter) is untouched. #}
+{% block object-tools %}
+<div class="adm-page-header patient-list-header">
+  <div class="adm-page-header__info">
+    <span class="adm-page-section-label">بیماران</span>
+    <h1 class="adm-page-title">مدیریت بیماران</h1>
+  </div>
+  <div class="adm-page-actions">
+    <a class="pt-export-btn adm-btn" href="{% url 'admin:surgeries_patient_export_excel' %}?{{ request.GET.urlencode }}" title="بیماران مخفی در خروجی عادی اکسل قرار نمی‌گیرند.">⬇ خروجی اکسل</a>
+    {% if has_add_permission %}
+    <a class="pt-add-btn adm-btn adm-btn--primary" href="{% url 'admin:surgeries_patient_add' %}">+ افزودن بیمار</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block search %}
+{% if cl.filter_specs %}
+<div class="pt-search-wrap">
+  {% search_form cl %}
+  <div class="pt-filter-row">
+    {% for spec in cl.filter_specs %}{% admin_list_filter cl spec %}{% endfor %}
+  </div>
+</div>
+{% else %}
+{% search_form cl %}
+{% endif %}
+{% endblock %}
+
+{# Django's own sidebar rendering — replaced above by the inline filter
+   row, so nothing renders here. #}
+{% block filters %}{% endblock %}

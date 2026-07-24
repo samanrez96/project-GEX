@@ -1,0 +1,9 @@
+{% load i18n %}
+<div class="pt-filter-item">
+  <span class="pt-filter-label">{{ title }}</span>
+  <select class="pt-filter-select" onchange="location.href=this.value">
+    {% for choice in choices %}
+    <option value="{{ choice.query_string }}"{% if choice.selected %} selected{% endif %}>{{ choice.display }}</option>
+    {% endfor %}
+  </select>
+</div>

@@ -1,0 +1,66 @@
+{% load i18n admin_urls static %}
+<div class="inline-group employee-documents-wrapper" id="{{ inline_admin_formset.formset.prefix }}-group"
+     data-inline-type="employee-documents">
+  <div class="employee-documents-related">
+    {{ inline_admin_formset.formset.management_form }}
+    <fieldset class="module" aria-labelledby="{{ inline_admin_formset.formset.prefix }}-heading">
+      <h2 id="{{ inline_admin_formset.formset.prefix }}-heading" class="inline-heading">
+        {{ inline_admin_formset.opts.verbose_name_plural|capfirst }}
+      </h2>
+      {{ inline_admin_formset.formset.non_form_errors }}
+
+      <table class="employee-documents-table">
+        <thead>
+          <tr>
+            <th class="edoc-col-file">مدرک</th>
+            <th class="edoc-col-delete">حذف</th>
+          </tr>
+        </thead>
+        <tbody id="employee-documents-body">
+          {% for inline_admin_form in inline_admin_formset %}
+          <tr class="edoc-row">
+            {% if inline_admin_form.form.non_field_errors %}
+            <td colspan="2">{{ inline_admin_form.form.non_field_errors }}</td>
+            {% endif %}
+            {% if inline_admin_form.needs_explicit_pk_field %}{{ inline_admin_form.pk_field.field }}{% endif %}
+            {% if inline_admin_form.fk_field %}{{ inline_admin_form.fk_field.field }}{% endif %}
+            <td class="edoc-cell edoc-cell--file">
+              {{ inline_admin_form.form.file.errors }}
+              {{ inline_admin_form.form.file }}
+            </td>
+            <td class="edoc-cell edoc-cell--delete">
+              {% if inline_admin_formset.formset.can_delete and inline_admin_formset.has_delete_permission and inline_admin_form.original %}
+              <label class="edoc-delete-label">
+                {{ inline_admin_form.deletion_field.field }}
+                <span>حذف</span>
+              </label>
+              {% else %}
+              <button type="button" class="edoc-remove-row">حذف</button>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <template id="employee-document-empty-form">
+        <tr class="edoc-row">
+          {{ inline_admin_formset.formset.empty_form.id }}
+          {{ inline_admin_formset.formset.empty_form.employee }}
+          <td class="edoc-cell edoc-cell--file">
+            {{ inline_admin_formset.formset.empty_form.file }}
+          </td>
+          <td class="edoc-cell edoc-cell--delete">
+            <button type="button" class="edoc-remove-row">حذف</button>
+          </td>
+        </tr>
+      </template>
+
+      {% if inline_admin_formset.has_add_permission %}
+      <div class="edoc-add-row">
+        <a href="#" id="employee-document-add-row" class="addlink">افزودن مدرک</a>
+      </div>
+      {% endif %}
+    </fieldset>
+  </div>
+</div>

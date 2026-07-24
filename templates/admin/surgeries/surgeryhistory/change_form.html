@@ -1,0 +1,70 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}{% if original %}{{ original.patient.full_name }} | {% endif %}تاریخچه عمل | مرکز جراحی — مدیریت{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'admin/css/surgery_history_detail.css' %}?v={{ surgery_history_detail_css_version }}">
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="ca-breadcrumbs">
+  <a href="{% url 'admin:index' %}">خانه</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <a href="{% url 'admin:surgeries_surgeryhistory_changelist' %}">تاریخچه عمل های جراحی</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <span id="shd-breadcrumb-name">{% if original %}{{ original.patient.full_name }}{% else %}تاریخچه عمل{% endif %}</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<noscript>
+  <p style="text-align:center;padding:40px;color:var(--red)">این صفحه نیاز به JavaScript دارد.</p>
+</noscript>
+
+<div id="surgery-history-detail-root" data-surgery-id="{{ original.pk }}">
+
+  {# ── Header card ──────────────────────────────────────────────── #}
+  <div class="shd-header-card adm-hero-card" id="shd-header">
+    <div class="shd-header-skeleton">
+      <div class="shd-skeleton shd-skeleton-title"></div>
+      <div class="shd-skeleton shd-skeleton-sub" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  {# ── Tab bar ──────────────────────────────────────────────────── #}
+  <div class="shd-tab-bar">
+    <button class="shd-tab shd-tab--active" data-tab="info"       type="button">اطلاعات عمومی عمل</button>
+    <button class="shd-tab"                 data-tab="procedure"  type="button">شرح عمل</button>
+    <button class="shd-tab"                 data-tab="items"      type="button">اقلام مصرفی</button>
+    <button class="shd-tab"                 data-tab="commission" type="button">کمیسیون مرکز</button>
+  </div>
+
+  {# ── Tab panels ───────────────────────────────────────────────── #}
+  <div class="shd-tab-panel shd-tab-panel--active" data-tab="info" id="shd-panel-info">
+    {# Populated by JS: renderInfoTab() #}
+  </div>
+
+  <div class="shd-tab-panel" data-tab="procedure" id="shd-panel-procedure">
+    {# Populated by JS: renderProcedureTab() on first click #}
+  </div>
+
+  <div class="shd-tab-panel" data-tab="items" id="shd-panel-items">
+    {# Populated by JS: renderItemsTab() on first click #}
+  </div>
+
+  <div class="shd-tab-panel" data-tab="commission" id="shd-panel-commission">
+    {# Populated by JS: renderCommissionTab() on first click #}
+  </div>
+
+  {# ── Timeline / Activity ──────────────────────────────────────── #}
+  <div class="shd-timeline" id="shd-timeline">
+    {# Populated by JS: renderTimeline() #}
+  </div>
+
+</div>{# /#surgery-history-detail-root #}
+{% endblock %}
+
+{% block extrascript %}
+<script src="{% static 'admin/js/surgery_history_detail.js' %}?v={{ surgery_history_detail_js_version }}"></script>
+{% endblock %}

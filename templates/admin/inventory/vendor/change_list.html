@@ -1,0 +1,89 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}تامین‌کنندگان | مرکز جراحی — مدیریت{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'admin/css/vendor_list.css' %}">
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="ca-breadcrumbs">
+  <a href="{% url 'admin:index' %}">خانه</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <span>تامین‌کنندگان</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<noscript>
+  <p style="text-align:center;padding:40px;color:var(--red)">این صفحه نیاز به JavaScript دارد.</p>
+</noscript>
+
+<div id="vendor-list-root" dir="rtl">
+
+  {# ── Page header ──────────────────────────────────────────────── #}
+  <div class="adm-page-header">
+    <div class="adm-page-header__info">
+      <span class="adm-page-section-label">موجودی</span>
+      <h1 class="adm-page-title">تامین‌کنندگان</h1>
+    </div>
+    {% if has_add_permission %}
+    <div class="adm-page-actions">
+      <a class="vl-add-btn adm-btn adm-btn--primary" href="{% url 'admin:inventory_vendor_add' %}">+ افزودن تامین‌کننده</a>
+    </div>
+    {% endif %}
+  </div>
+
+  {# ── Search ───────────────────────────────────────────────────── #}
+  <div class="vl-search-wrap">
+    <div class="vl-search-row">
+      <input
+        id="vl-search"
+        class="vl-search-input"
+        type="search"
+        placeholder="🔎 جستجو بر اساس نام، تلفن، ایمیل..."
+        autocomplete="off"
+        dir="rtl"
+        data-global-search
+        data-search-param="search"
+        data-search-delay="300"
+      >
+      <div id="vl-spinner" class="vl-search-spinner" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  {# ── Vendor table ──────────────────────────────────────────────── #}
+  <div class="vl-table-wrap">
+    <table class="vl-table" id="vl-table">
+      <thead>
+        <tr>
+          <th>نام فروشنده</th>
+          <th>شماره تماس</th>
+          <th>ایمیل</th>
+          <th>آدرس تامین‌کننده</th>
+          <th>توضیحات</th>
+        </tr>
+      </thead>
+      <tbody id="vl-tbody">
+        {# Rows rendered by vendor_list.js #}
+      </tbody>
+    </table>
+    <div id="vl-empty" class="vl-empty-state" style="display:none">
+      <div class="vl-empty-icon">🏭</div>
+      <div class="vl-empty-title">تامین‌کننده‌ای یافت نشد</div>
+      <div class="vl-empty-desc">هنوز تامین‌کننده‌ای ثبت نشده یا فیلترها را تغییر دهید.</div>
+    </div>
+  </div>
+
+  <div id="vl-pagination" class="vl-pagination" style="display:none">
+    <span id="vl-info" class="vl-pagination-info"></span>
+    <div id="vl-pages" class="vl-pagination-pages"></div>
+  </div>
+
+</div>{# /#vendor-list-root #}
+{% endblock %}
+
+{% block extrascript %}
+<script src="{% static 'admin/js/vendor_list.js' %}"></script>
+{% endblock %}

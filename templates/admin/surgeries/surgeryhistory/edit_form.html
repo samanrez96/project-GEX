@@ -1,0 +1,26 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin/css/doctor_specialty.css' %}?v={{ anesthesia_type_css_version }}">
+<link rel="stylesheet" href="{% static 'admin/css/patient_metadata.css' %}?v={{ patient_metadata_css_version }}">
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<script>
+  window.ANESTHESIA_TYPE_CONFIG = {
+    createUrl: "{{ anesthesia_type_create_url }}",
+    deleteUrlTemplate: "{{ anesthesia_type_delete_url_template }}",
+    deactivateUrlTemplate: "{{ anesthesia_type_deactivate_url_template }}",
+    activateUrlTemplate: "{{ anesthesia_type_activate_url_template }}",
+    currentAnesthesiaTypeId: {{ surgery_current_anesthesia_type_id|default_if_none:"null" }},
+    canAdd: {{ can_add_anesthesiatype|yesno:"true,false" }},
+    canDelete: {{ can_delete_anesthesiatype|yesno:"true,false" }},
+    canChange: {{ can_change_anesthesiatype|yesno:"true,false" }}
+  };
+</script>
+<script src="{% static 'admin/js/anesthesia_type.js' %}?v={{ anesthesia_type_js_version }}"></script>
+<script src="{% static 'admin/js/patient_metadata.js' %}?v={{ patient_metadata_js_version }}"></script>
+{% endblock %}

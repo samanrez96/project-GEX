@@ -1,0 +1,377 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static jalali_filters %}
+
+{% block title %}
+  {% if original %}ویرایش تامین‌کننده — {{ original.name }}{% else %}افزودن تامین‌کننده{% endif %} | مرکز جراحی
+{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'admin/css/vendor_form.css' %}?v=2">
+<link rel="stylesheet" href="{% static 'admin/css/vendor_detail.css' %}?v=2">
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="ca-breadcrumbs">
+  <a href="{% url 'admin:index' %}">خانه</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <a href="{% url 'admin:inventory_vendor_changelist' %}">تامین‌کنندگان</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <span>{% if original %}{{ original.name }}{% else %}تامین‌کننده جدید{% endif %}</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="vendor-form-root" dir="rtl">
+
+  {# ── Page header ──────────────────────────────────────────────── #}
+  <div class="adm-page-header">
+    <div class="adm-page-header__info">
+      <span class="adm-page-section-label">موجودی</span>
+      <h1 class="adm-page-title">
+        {% if original %}ویرایش تامین‌کننده — {{ original.name }}{% else %}افزودن تامین‌کننده{% endif %}
+      </h1>
+    </div>
+    <div class="adm-page-actions">
+      <a href="{% url 'admin:inventory_vendor_changelist' %}" class="adm-btn adm-btn--secondary adm-btn--sm">بازگشت</a>
+    </div>
+  </div>
+
+  {# ── Form-level errors ────────────────────────────────────────── #}
+  {% if adminform.form.non_field_errors %}
+  <div class="vf-error-box">
+    {% for e in adminform.form.non_field_errors %}<p>{{ e }}</p>{% endfor %}
+  </div>
+  {% endif %}
+
+  <form id="vf-main-form" method="post" novalidate>
+    {% csrf_token %}
+
+    {# Hidden fields #}
+    {% for hidden in adminform.form.hidden_fields %}
+    {{ hidden }}
+    {% endfor %}
+
+    {# Inline formset management forms — must live inside <form> #}
+    {% for ifs in inline_admin_formsets %}
+    {{ ifs.formset.management_form }}
+    {% endfor %}
+
+    {# ── Card 1: Basic information ─────────────────────────────── #}
+    <div class="vf-card">
+      <div class="vf-card-header">
+        <h2 class="vf-card-title">اطلاعات اصلی</h2>
+      </div>
+      <div class="vf-card-body">
+        <div class="vf-field-grid">
+
+          {# Name — full width #}
+          <div class="vf-field-group vf-field-group--full">
+            <label class="vf-label vf-label--required" for="id_name">نام تامین‌کننده</label>
+            {{ adminform.form.name }}
+            {% if adminform.form.name.errors %}
+            <ul class="vf-field-errors">{% for e in adminform.form.name.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+            {% endif %}
+          </div>
+
+          {# ── Phone section (primary + additional) ────────────── #}
+          <div class="vf-field-group" id="vf-phone-primary-group">
+            <label class="vf-label" for="id_phone_number">شماره تلفن اصلی</label>
+            <div class="vf-phone-input-wrap">
+              {{ adminform.form.phone_number }}
+              <button type="button" id="vf-phone-add-btn" class="vf-phone-add-btn"
+                      title="افزودن شماره تلفن" aria-label="افزودن شماره تلفن">+</button>
+            </div>
+            {% if adminform.form.phone_number.errors %}
+            <ul class="vf-field-errors">{% for e in adminform.form.phone_number.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+            {% endif %}
+          </div>
+
+          {# Email #}
+          <div class="vf-field-group">
+            <label class="vf-label" for="id_email">ایمیل</label>
+            {{ adminform.form.email }}
+            {% if adminform.form.email.errors %}
+            <ul class="vf-field-errors">{% for e in adminform.form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+            {% endif %}
+          </div>
+
+          {# ── Additional phones formset ─────────────────────── #}
+          {% if inline_admin_formsets %}
+          {% with phones_ifs=inline_admin_formsets.0 %}
+          <div class="vf-field-group vf-field-group--full vf-phones-extra-section{% if phones_ifs.formset.forms or phones_ifs.formset.non_form_errors %} has-phones{% endif %}"
+               id="vf-phones-extra-section">
+
+            {# Formset-level errors (e.g. duplicate phone) #}
+            {% if phones_ifs.formset.non_form_errors %}
+            <div class="vf-phone-formset-errors">
+              {% for e in phones_ifs.formset.non_form_errors %}<p>{{ e }}</p>{% endfor %}
+            </div>
+            {% endif %}
+
+            <div id="vf-additional-phones">
+              {% for form in phones_ifs.formset.forms %}
+              <div class="vf-phone-extra-row" id="vf-phone-row-{{ forloop.counter0 }}"{% if form.DELETE.value %} style="display:none"{% endif %}>
+                <div style="display:none">{{ form.id }}</div>
+                <label class="vf-label">شماره تلفن دیگر</label>
+                <div class="vf-phone-input-wrap">
+                  {{ form.phone }}
+                  <button type="button" class="vf-phone-remove-btn"
+                          title="حذف شماره تلفن"
+                          data-row-index="{{ forloop.counter0 }}">×</button>
+                </div>
+                <div class="vf-phone-delete-field" style="display:none">{{ form.DELETE }}</div>
+                {% if form.phone.errors %}
+                <ul class="vf-field-errors">{% for e in form.phone.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                {% endif %}
+              </div>
+              {% endfor %}
+            </div>
+
+            {# Empty form template — cloned by JS when user clicks + #}
+            <template id="vf-phone-empty-form">
+              <div class="vf-phone-extra-row" id="vf-phone-row-__prefix__">
+                <div style="display:none">{{ phones_ifs.formset.empty_form.id }}</div>
+                <label class="vf-label">شماره تلفن دیگر</label>
+                <div class="vf-phone-input-wrap">
+                  {{ phones_ifs.formset.empty_form.phone }}
+                  <button type="button" class="vf-phone-remove-btn"
+                          title="حذف شماره تلفن"
+                          data-row-index="__prefix__">×</button>
+                </div>
+              </div>
+            </template>
+
+          </div>
+          {% endwith %}
+          {% endif %}
+
+          {# Address — full width #}
+          <div class="vf-field-group vf-field-group--full">
+            <label class="vf-label" for="id_address">آدرس</label>
+            {{ adminform.form.address }}
+          </div>
+
+          {# Notes — full width #}
+          <div class="vf-field-group vf-field-group--full">
+            <label class="vf-label" for="id_notes">یادداشت</label>
+            {{ adminform.form.notes }}
+          </div>
+
+          {# is_active #}
+          <div class="vf-field-group">
+            <label class="vf-checkbox-label">
+              {{ adminform.form.is_active }}
+              <span>فعال</span>
+            </label>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    {# ── Card 2: Financial information (collapsible) ───────────── #}
+    <details class="vf-card vf-card--collapsible">
+      <summary class="vf-card-header vf-card-header--summary">
+        <h2 class="vf-card-title">اطلاعات مالی</h2>
+        <span class="vf-card-toggle-icon"></span>
+      </summary>
+      <div class="vf-card-body">
+        <div class="vf-field-grid">
+
+          <div class="vf-field-group">
+            <label class="vf-label" for="id_opening_balance">موجودی اولیه (تومان)</label>
+            {{ adminform.form.opening_balance }}
+            <span class="vf-hint">مانده اولیه هنگام ثبت فروشنده</span>
+          </div>
+
+          <div class="vf-field-group">
+            <label class="vf-label" for="id_current_balance">موجودی جاری (تومان)</label>
+            {{ adminform.form.current_balance }}
+            <span class="vf-hint">مثبت: کلینیک بدهکار است | منفی: کلینیک طلبکار است</span>
+          </div>
+
+          <div class="vf-field-group">
+            <label class="vf-label" for="id_tax_id">کد مالیاتی / اقتصادی</label>
+            {{ adminform.form.tax_id }}
+          </div>
+
+          <div class="vf-field-group vf-field-group--full">
+            <label class="vf-label" for="id_bank_account">اطلاعات حساب بانکی</label>
+            {{ adminform.form.bank_account }}
+            <span class="vf-hint">شماره شبا یا شماره حساب جاری</span>
+          </div>
+
+        </div>
+      </div>
+    </details>
+
+    {# ── Submit bar ───────────────────────────────────────────────── #}
+    <div class="vf-submit-bar">
+      <button type="submit" name="_save" value="1" class="adm-btn adm-btn--primary">ذخیره</button>
+      <button type="submit" name="_continue" value="1" class="adm-btn adm-btn--secondary">ذخیره و ادامه ویرایش</button>
+      {% if original and has_delete_permission %}
+      <a href="{% url 'admin:inventory_vendor_delete' original.pk %}"
+         class="adm-btn adm-btn--danger"
+         style="margin-right: auto">حذف فروشنده</a>
+      {% endif %}
+    </div>
+
+  </form>
+
+  {# ── محصولات این تامین‌کننده (server-side, derived from CONFIRMED purchases) ── #}
+  {% if original %}
+  <div class="vf-card vf-card--products-purchased" id="vf-purchased-products-section">
+    <div class="vf-card-header">
+      <h2 class="vf-card-title">
+        محصولات این تامین‌کننده
+        <span class="vd-product-count">({{ purchased_products|length }})</span>
+      </h2>
+    </div>
+    <div class="vf-card-body vf-card-body--no-pad">
+      {% if purchased_products %}
+      <table class="vd-products-table vd-purchased-table" id="vf-purchased-table">
+        <thead>
+          <tr>
+            <th>محصول</th>
+            <th>کد داخلی</th>
+            <th>نوع محصول</th>
+            <th>آخرین قیمت (تومان)</th>
+            <th>مجموع مقدار</th>
+            <th>دفعات خرید</th>
+            <th>تاریخ آخرین خرید</th>
+            <th>موجودی فعلی</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in purchased_products %}
+          <tr>
+            <td>
+              <a class="vd-product-link" href="/admin/inventory/product/{{ p.pk }}/detail/">
+                {{ p.name }}
+              </a>
+            </td>
+            <td><span class="vd-code">{{ p.internal_code|default:"—" }}</span></td>
+            <td><span class="vd-type-badge">{{ p.get_product_type_display }}</span></td>
+            <td>{% if p.last_unit_price %}{{ p.last_unit_price|floatformat:"0" }}{% else %}—{% endif %}</td>
+            <td>{{ p.total_quantity|default:"—" }}</td>
+            <td>{{ p.purchase_count }}</td>
+            <td>{{ p.last_purchase_date|jalali_date|default:"—" }}</td>
+            <td>{{ p.current_stock }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="vd-no-products" id="vf-no-purchased-products">
+        هنوز محصولی از این تأمین‌کننده خریداری نشده است.
+        {% if can_add_purchase %}
+        <br>
+        <a href="{% url 'admin:inventory_purchase_add' %}?vendor={{ original.pk }}"
+           class="adm-btn adm-btn--primary adm-btn--sm vd-new-purchase-btn"
+           style="margin-top:12px;display:inline-block">
+          ثبت خرید جدید
+        </a>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  {# ── تنظیمات تجاری محصولات (ProductVendor — commercial metadata, API-driven) ── #}
+  {% if original %}
+  <div class="vf-products-card" id="vf-products-section">
+    <div class="vf-products-header">
+      <h2 class="vf-products-title">
+        تنظیمات تجاری محصولات
+        <span class="vf-products-count" id="vf-products-count">۰</span>
+      </h2>
+      <button type="button" id="vf-add-product-btn"
+              class="adm-btn adm-btn--primary adm-btn--sm">+ افزودن رابطه</button>
+    </div>
+
+    {# Inline add/edit form (hidden by default) #}
+    <div id="vf-product-form" class="vf-product-form" style="display:none">
+      <div id="vf-product-form-error" class="vf-product-form-error" style="display:none"></div>
+      <div class="vf-product-form-grid">
+        <div class="vf-product-field vf-product-field--wide">
+          <label class="vf-product-label">
+            محصول <span style="color:var(--red)">*</span>
+          </label>
+          <div style="position:relative">
+            <input id="vf-product-search" class="vf-product-input" type="text"
+                   placeholder="جستجوی نام یا کد محصول..." autocomplete="off">
+            <input type="hidden" id="vf-product-id" value="">
+            <div id="vf-product-dropdown" class="vf-product-dropdown"
+                 style="display:none;position:absolute;top:100%;right:0;left:0;
+                        background:var(--card,#fff);border:1px solid var(--border,#ddd);
+                        border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.12);
+                        z-index:9999;max-height:220px;overflow-y:auto;margin-top:2px">
+            </div>
+          </div>
+        </div>
+        <div class="vf-product-field">
+          <label class="vf-product-label" for="vf-product-price">قیمت واحد (تومان)</label>
+          <input id="vf-product-price" class="vf-product-input" type="number" min="0" step="1" placeholder="۰">
+        </div>
+        <div class="vf-product-field vf-product-field--checkbox">
+          <label class="vf-product-label vf-checkbox-label">
+            <input id="vf-product-primary" type="checkbox"> فروشنده اصلی این محصول
+          </label>
+        </div>
+      </div>
+      <div class="vf-product-form-actions">
+        <button class="adm-btn adm-btn--primary" id="vf-product-save-btn" type="button">ذخیره</button>
+        <button class="adm-btn adm-btn--secondary" id="vf-product-cancel-btn" type="button">انصراف</button>
+      </div>
+    </div>
+
+    {# Products table body rendered by JS #}
+    <div id="vf-products-body" class="vf-products-body">
+      <div class="vf-products-skeleton">
+        <div class="vf-skeleton vf-skeleton-lg"></div>
+        <div class="vf-skeleton vf-skeleton-med" style="margin-top:8px"></div>
+        <div class="vf-skeleton vf-skeleton-sm" style="margin-top:8px"></div>
+      </div>
+    </div>
+  </div>
+
+  {# ── Readonly metadata ─────────────────────────────────────────── #}
+  <div class="vf-meta-row">
+    <span class="vf-meta-item">
+      <span class="vf-meta-label">تاریخ ایجاد:</span>
+      <span class="vf-meta-value">{{ original.created_at|date:"Y-m-d H:i" }}</span>
+    </span>
+    <span class="vf-meta-item">
+      <span class="vf-meta-label">آخرین ویرایش:</span>
+      <span class="vf-meta-value">{{ original.updated_at|date:"Y-m-d H:i" }}</span>
+    </span>
+  </div>
+  {% endif %}
+
+  {# ── Confirmation modal ───────────────────────────────────────── #}
+  <div class="vf-modal-overlay" id="vf-modal-overlay" style="display:none">
+    <div class="vf-modal" role="dialog" aria-modal="true">
+      <div class="vf-modal-title">آیا مطمئن هستید؟</div>
+      <p class="vf-modal-msg" id="vf-modal-msg"></p>
+      <div class="vf-modal-actions">
+        <button class="adm-btn" id="vf-modal-cancel" type="button">انصراف</button>
+        <button class="adm-btn adm-btn--danger" id="vf-modal-confirm" type="button">تأیید حذف</button>
+      </div>
+    </div>
+  </div>
+
+</div>{# /#vendor-form-root #}
+{% endblock %}
+
+{% block extrascript %}
+<script>
+  {% if inline_admin_formsets %}window.VF_PHONES_PREFIX = "{{ inline_admin_formsets.0.formset.prefix }}";{% else %}window.VF_PHONES_PREFIX = "additional_phones";{% endif %}
+</script>
+{% if original %}
+<script>
+  window.VF_VENDOR_ID = {{ original.pk }};
+</script>
+{% endif %}
+<script src="{% static 'admin/js/vendor_form.js' %}?v=6"></script>
+{% endblock %}
