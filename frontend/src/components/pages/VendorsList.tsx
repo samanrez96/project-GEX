@@ -8,7 +8,7 @@ const PAGE_SIZE = 20;
 
 const EMPTY_VENDOR = { name: "", phone_number: "", email: "", address: "", notes: "" };
 
-export default function VendorsPage() {
+export default function VendorsList() {
   const [items, setItems] = useState<Vendor[]>([]);
   const [count, setCount] = useState(0);
   const [page, setPage] = useState(1);

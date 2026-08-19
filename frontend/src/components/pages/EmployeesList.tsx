@@ -34,7 +34,7 @@ const EMPTY_FORM: EmployeeForm = {
   monthly_amount: "",
 };
 
-export default function EmployeesPage() {
+export default function EmployeesList() {
   const [items, setItems] = useState<Employee[]>([]);
   const [count, setCount] = useState(0);
   const [page, setPage] = useState(1);
@@ -125,19 +125,16 @@ export default function EmployeesPage() {
         empId = created.id;
       }
 
-      // Handle payroll setup
+      // Handle payroll setup (only for new employees)
       if (!editTarget && form.wage_type !== "none") {
         try {
-          // Get the auto-created payroll config
           const config = await get<{ id: number; has_monthly_wage: boolean; has_commission: boolean }>(
             `/payroll/configs/by_employee/?employee=${empId}`
           );
-          // Update config
           await patch(`/payroll/configs/${config.id}/`, {
             has_monthly_wage: form.wage_type === "fixed",
             has_commission: form.wage_type === "commission",
           });
-          // If fixed wage, create MonthlyWage record
           if (form.wage_type === "fixed" && form.monthly_amount) {
             await post("/payroll/wages/", {
               employee: empId,
@@ -147,7 +144,6 @@ export default function EmployeesPage() {
             });
           }
         } catch {
-          // Payroll setup failed but employee was created — show warning
           setSuccess(editTarget ? "کارمند ویرایش شد." : "کارمند افزوده شد (تنظیمات حقوقی ممکن است کامل نشده باشد).");
           closeModal();
           setPage(1);

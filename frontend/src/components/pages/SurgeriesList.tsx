@@ -2,22 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { get, post, type PaginatedResponse, type SurgeryHistory, type SurgeryType, type Doctor, type Patient } from "@/lib/api";
-import { formatCurrency, formatDate, toPersianDigits } from "@/lib/utils";
-
-const STATUS_MAP: Record<string, { cls: string; label: string }> = {
-  planned:     { cls: "bg-purple-light text-purple", label: "برنامه‌ریزی شده" },
-  in_progress: { cls: "bg-amber-bg text-amber",     label: "در حال انجام" },
-  completed:   { cls: "bg-green-bg text-green",     label: "انجام شده" },
-  cancelled:   { cls: "bg-red-bg text-red",         label: "لغو شده" },
-};
-
-const PAYMENT_STATUS_MAP: Record<string, { cls: string; label: string }> = {
-  PENDING: { cls: "bg-amber-bg text-amber", label: "در انتظار پرداخت" },
-  PARTIAL: { cls: "bg-purple-light text-purple", label: "پرداخت ناقص" },
-  PAID:    { cls: "bg-green-bg text-green",  label: "پرداخت شده" },
-};
+import { formatCurrency, formatDate, toPersianDigits, getPaymentStatusLabel, getPaymentStatusColor, getSurgeryStatusLabel } from "@/lib/utils";
 
 const PAGE_SIZE = 20;
+
+const SURGERY_STATUS_STYLES: Record<string, string> = {
+  PLANNED: "bg-purple-light text-purple",
+  IN_PROGRESS: "bg-amber-bg text-amber",
+  COMPLETED: "bg-green-bg text-green",
+  CANCELLED: "bg-red-bg text-red",
+};
 
 interface SurgeryForm {
   patient_id: string;
@@ -51,7 +45,7 @@ const EMPTY_FORM: SurgeryForm = {
   use_new_patient: false,
 };
 
-export default function SurgeriesPage() {
+export default function SurgeriesList() {
   const [items, setItems] = useState<SurgeryHistory[]>([]);
   const [count, setCount] = useState(0);
   const [page, setPage] = useState(1);
@@ -88,7 +82,6 @@ export default function SurgeriesPage() {
     setError("");
     setPatientSearch("");
     setShowModal(true);
-    // Load dropdowns
     get<PaginatedResponse<SurgeryType>>("/surgeries/types/?page_size=100&is_active=true")
       .then((d) => setSurgeryTypes(d.results || []))
       .catch(() => {});
@@ -118,7 +111,6 @@ export default function SurgeriesPage() {
     try {
       let patientId = form.patient_id;
 
-      // Create new patient if needed
       if (form.use_new_patient) {
         if (!form.patient_name_new.trim()) { setError("نام بیمار الزامی است."); setSaving(false); return; }
         if (!form.case_code_new.trim()) { setError("کد پرونده بیمار الزامی است."); setSaving(false); return; }
@@ -163,7 +155,7 @@ export default function SurgeriesPage() {
     <div dir="rtl">
       <div className="flex items-start justify-between gap-4 mb-7 flex-wrap">
         <div className="flex-1 min-w-0">
-          <span className="block text-[11px] font-bold text-purple tracking-widest uppercase mb-1 opacity-85">جراحی‌ها</span>
+          <span className="block text-[11px] font-bold text-purple tracking-widest uppercase mb-1 opacity-85">عمل‌های جراحی</span>
           <h1 className="text-[26px] font-bold text-text leading-tight m-0">عمل‌های جراحی</h1>
         </div>
         <div className="flex gap-2 items-center shrink-0 pt-1.5">
@@ -231,8 +223,7 @@ export default function SurgeriesPage() {
                 <tr><td colSpan={6} className="text-center py-7 text-muted text-sm">عمل جراحی‌ای یافت نشد</td></tr>
               ) : (
                 items.map((s) => {
-                  const stKey = (s.status || "").toLowerCase();
-                  const st = STATUS_MAP[stKey] || { cls: "bg-gray-100 text-gray-600", label: s.status_display || s.status };
+                  const statusClass = SURGERY_STATUS_STYLES[s.status] || "bg-gray-100 text-gray-600";
                   return (
                     <tr key={s.id} className="hover:bg-bg-page">
                       <td className="px-4 py-3 text-sm font-semibold text-text border-b border-border/55">{s.patient_name || "—"}</td>
@@ -241,7 +232,9 @@ export default function SurgeriesPage() {
                       <td className="px-4 py-3 text-sm text-text border-b border-border/55">{formatDate(s.surgery_date)}</td>
                       <td className="px-4 py-3 text-sm font-bold text-text border-b border-border/55 text-left" dir="ltr">{formatCurrency(parseFloat(s.amount || "0"))}</td>
                       <td className="px-4 py-3 border-b border-border/55">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${st.cls}`}>{st.label}</span>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${statusClass}`}>
+                          {getSurgeryStatusLabel(s.status)}
+                        </span>
                       </td>
                     </tr>
                   );
@@ -274,7 +267,6 @@ export default function SurgeriesPage() {
                 <div className="bg-red-bg border border-red/30 text-red rounded-xl px-4 py-3 text-sm">{error}</div>
               )}
 
-              {/* Patient Section */}
               <div className="text-xs font-bold text-purple uppercase tracking-widest">اطلاعات بیمار</div>
               <div className="flex gap-2">
                 <button
@@ -336,7 +328,6 @@ export default function SurgeriesPage() {
                 </div>
               )}
 
-              {/* Surgery Details */}
               <div className="border-t border-border pt-4">
                 <div className="text-xs font-bold text-purple uppercase tracking-widest mb-3">جزئیات عمل</div>
                 <div className="grid grid-cols-2 gap-4">
@@ -361,7 +352,7 @@ export default function SurgeriesPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4 mt-3">
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-muted">تاریخ پرداخت <span className="text-red">*</span></label>
+                    <label className="text-xs font-semibold text-muted">تاریخ عمل <span className="text-red">*</span></label>
                     <input type="datetime-local" value={form.surgery_date} onChange={(e) => setForm({ ...form, surgery_date: e.target.value })}
                       className="h-[38px] px-3 border border-border rounded-xl text-sm text-text bg-bg-page outline-none focus:border-purple transition-all" dir="ltr" />
                   </div>
@@ -378,7 +369,6 @@ export default function SurgeriesPage() {
                 </div>
               </div>
 
-              {/* Financial Info */}
               <div className="border-t border-border pt-4">
                 <div className="text-xs font-bold text-purple uppercase tracking-widest mb-3">اطلاعات مالی</div>
                 <div className="grid grid-cols-2 gap-4">

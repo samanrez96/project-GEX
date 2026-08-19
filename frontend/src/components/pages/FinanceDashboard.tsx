@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { get, type BalanceReport, type PaginatedResponse, type Transaction, type FinanceTrend } from "@/lib/api";
+import { get, type BalanceReport, type FinanceTrend } from "@/lib/api";
 import { formatCurrency, toPersianDigits } from "@/lib/utils";
 
-export default function FinanceDashboardPage() {
+export default function FinanceDashboard() {
   const [balance, setBalance] = useState<BalanceReport | null>(null);
   const [trend, setTrend] = useState<FinanceTrend[]>([]);
 
@@ -22,10 +22,10 @@ export default function FinanceDashboardPage() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-5">
         {[
-          { label: "مجموع درآمد", value: balance?.total_income, color: "#1E9E6A" },
-          { label: "مجموع هزینه", value: balance?.total_expense, color: "#EB2D4B" },
-          { label: "سود خالص", value: balance?.final_balance, color: "#0066B3" },
-          { label: "کمیسیون مرکز", value: balance?.center_commission_income, color: "#65a30d" },
+          { label: "مجموع درآمد", value: balance?.total_income_period, color: "#1E9E6A" },
+          { label: "مجموع هزینه", value: balance?.total_expense_period, color: "#EB2D4B" },
+          { label: "سود خالص", value: balance?.final_balance_cumulative, color: "#0066B3" },
+          { label: "کمیسیون مرکز", value: balance?.center_commission_income_period, color: "#65a30d" },
         ].map((item) => (
           <div
             key={item.label}
@@ -52,6 +52,11 @@ export default function FinanceDashboardPage() {
                     <span className="text-green font-bold">{formatCurrency(t.income)}</span>
                     <span className="text-muted mx-1">/</span>
                     <span className="text-red font-bold">{formatCurrency(t.expense)}</span>
+                    {t.cumulative_balance !== undefined && (
+                      <span className="block text-xs text-purple font-medium mt-0.5">
+                        موجودی: {formatCurrency(t.cumulative_balance)}
+                      </span>
+                    )}
                   </div>
                 </div>
               ))}

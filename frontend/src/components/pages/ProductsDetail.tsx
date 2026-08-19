@@ -11,9 +11,7 @@ const STOCK_STATUS_STYLE: Record<string, string> = {
   "ناموجود":   "bg-red-bg text-red",
 };
 
-export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id: productId } = use(params);
-
+export default function ProductsDetail({ id }: { id?: string }) {
   const [product, setProduct] = useState<ProductDetail | null>(null);
   const [vendors, setVendors] = useState<ProductVendorLink[]>([]);
   const [allVendors, setAllVendors] = useState<Vendor[]>([]);
@@ -23,24 +21,24 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // Edit form state
   const [editForm, setEditForm] = useState<Partial<ProductDetail>>({});
 
-  // Add vendor form
   const [showAddVendor, setShowAddVendor] = useState(false);
   const [newVendorId, setNewVendorId] = useState("");
   const [newVendorPrice, setNewVendorPrice] = useState("0");
   const [addVendorError, setAddVendorError] = useState("");
   const [addingVendor, setAddingVendor] = useState(false);
 
-  // Stock adjustment
   const [showAdjust, setShowAdjust] = useState(false);
   const [adjustQty, setAdjustQty] = useState("0");
   const [adjustType, setAdjustType] = useState<"IN" | "OUT">("IN");
   const [adjustNote, setAdjustNote] = useState("");
   const [adjusting, setAdjusting] = useState(false);
 
+  const productId = id ? parseInt(id) : null;
+
   const fetchProduct = async () => {
+    if (!productId) return;
     try {
       const p = await get<ProductDetail>(`/inventory/products/${productId}/`);
       setProduct(p);
@@ -58,6 +56,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   };
 
   const fetchVendors = async () => {
+    if (!productId) return;
     try {
       const pv = await get<PaginatedResponse<ProductVendorLink>>(`/inventory/product-vendors/?product=${productId}&page_size=50`);
       setVendors(pv.results || []);
@@ -72,9 +71,26 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   };
 
   useEffect(() => {
+    if (!productId) {
+      setLoading(false);
+      return;
+    }
     Promise.all([fetchProduct(), fetchVendors(), fetchAllVendors()])
       .finally(() => setLoading(false));
   }, [productId]);
+
+  if (loading) {
+    return <div dir="rtl" className="py-10 text-center text-muted text-sm">در حال بارگذاری…</div>;
+  }
+
+  if (!product || !productId) {
+    return (
+      <div dir="rtl" className="py-10 text-center">
+        <div className="text-muted text-sm mb-4">محصول یافت نشد.</div>
+        <Link href="/inventory/products" className="text-purple text-sm hover:underline">← بازگشت به محصولات</Link>
+      </div>
+    );
+  }
 
   const handleSave = async () => {
     setError("");
@@ -98,7 +114,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     setAddVendorError("");
     try {
       await post("/inventory/product-vendors/", {
-        product: parseInt(productId),
+        product: productId,
         vendor: parseInt(newVendorId),
         unit_price: newVendorPrice || "0",
         is_primary: vendors.length === 0,
@@ -131,7 +147,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     setAdjusting(true);
     try {
       await post("/inventory/stock-movements/", {
-        product: parseInt(productId),
+        product: productId,
         quantity: qty,
         unit: product?.unit || "عدد",
         movement_type: adjustType,
@@ -151,24 +167,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     }
   };
 
-  if (loading) {
-    return <div dir="rtl" className="py-10 text-center text-muted text-sm">در حال بارگذاری…</div>;
-  }
-
-  if (!product) {
-    return (
-      <div dir="rtl" className="py-10 text-center">
-        <div className="text-muted text-sm mb-4">محصول یافت نشد.</div>
-        <Link href="/inventory/products" className="text-purple text-sm hover:underline">← بازگشت به محصولات</Link>
-      </div>
-    );
-  }
-
   const stockStatus = product.is_out_of_stock ? "ناموجود" : product.is_low_stock ? "کم‌موجودی" : "موجود";
 
   return (
     <div dir="rtl">
-      {/* Breadcrumb */}
       <div className="flex items-center gap-2 mb-5 text-sm text-muted">
         <Link href="/inventory/products" className="hover:text-purple transition-colors">محصولات</Link>
         <span>/</span>
@@ -182,7 +184,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         <div className="mb-4 bg-red-bg border border-red/30 text-red rounded-xl px-4 py-3 text-sm">{error}</div>
       )}
 
-      {/* Header */}
       <div className="flex items-start justify-between gap-4 mb-6 flex-wrap">
         <div>
           <span className="block text-[11px] font-bold text-purple tracking-widest uppercase mb-1 opacity-85">
@@ -223,7 +224,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* General Info */}
         <div className="lg:col-span-2 space-y-4">
           <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
             <h2 className="text-sm font-bold text-text mb-4">اطلاعات کلی</h2>
@@ -317,7 +317,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             </div>
           </div>
 
-          {/* Suppliers Section */}
           <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-bold text-text">تامین‌کنندگان</h2>
@@ -394,7 +393,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           </div>
         </div>
 
-        {/* Stock Panel */}
         <div className="space-y-4">
           <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
             <h2 className="text-sm font-bold text-text mb-4">وضعیت موجودی</h2>

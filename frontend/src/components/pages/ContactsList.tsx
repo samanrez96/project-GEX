@@ -17,7 +17,7 @@ interface Contact {
 
 const PAGE_SIZE = 20;
 
-export default function ContactsPage() {
+export default function ContactsList() {
   const [items, setItems] = useState<Contact[]>([]);
   const [count, setCount] = useState(0);
   const [page, setPage] = useState(1);

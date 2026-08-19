@@ -38,7 +38,7 @@ const EMPTY_FORM: AddProductForm = {
   initial_quantity: "0",
 };
 
-export default function ProductsPage() {
+export default function ProductsList() {
   const [items, setItems] = useState<Product[]>([]);
   const [count, setCount] = useState(0);
   const [page, setPage] = useState(1);
@@ -82,7 +82,6 @@ export default function ProductsPage() {
         internal_notes: form.internal_notes.trim(),
       };
       const created = await post<{ id: number }>("/inventory/products/", payload);
-      // If initial quantity provided, create a stock movement
       const initQty = parseFloat(form.initial_quantity || "0");
       if (initQty > 0) {
         await post("/inventory/stock-movements/", {
