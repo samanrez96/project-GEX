@@ -40,9 +40,9 @@ const navSections = [
   },
   {
     key: "surgeries",
-    label: "جراحی‌ها",
+    label: "عمل‌های جراحی", // ← اصلاح شده (قبلاً: "جراحی‌ها")
     links: [
-      { href: "/surgeries", label: "عمل‌های جراحی" },
+      { href: "/surgeries", label: "عمل‌های جراحی" }, // ← اصلاح شده
     ],
   },
   {
