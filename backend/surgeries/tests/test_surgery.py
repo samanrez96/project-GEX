@@ -11,8 +11,8 @@ from rest_framework.test import APIClient
 from inventory.models import Product, ProductType, StockMovement
 from surgeries.models import Surgery, SurgeryConsumptionItem, SurgeryStatus
 
-SURGERY_LIST_URL = "/api/v1/surgeries/surgeries/"
-ITEMS_URL        = "/api/v1/surgeries/consumption-items/"
+SURGERY_LIST_URL = "/api/v2/surgeries/surgeries/"
+ITEMS_URL        = "/api/v2/surgeries/consumption-items/"
 
 
 # ---------------------------------------------------------------------------

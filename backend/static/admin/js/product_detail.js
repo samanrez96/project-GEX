@@ -14,9 +14,9 @@
 const ProductDetailApp = (function () {
     'use strict';
 
-    var API_URL          = '/api/v1/inventory/products/';
-    var PRODUCT_VENDOR_API = '/api/v1/inventory/product-vendors/';
-    var VENDORS_API      = '/api/v1/inventory/vendors/';
+    var API_URL          = '/api/v2/inventory/products/';
+    var PRODUCT_VENDOR_API = '/api/v2/inventory/product-vendors/';
+    var VENDORS_API      = '/api/v2/inventory/vendors/';
 
     var productId   = null;
     var productData = null;
@@ -668,7 +668,7 @@ const ProductDetailApp = (function () {
 
     // ── Chart tab ─────────────────────────────────────────────────
 
-    var PRICE_HISTORY_API = '/api/v1/inventory/products/';
+    var PRICE_HISTORY_API = '/api/v2/inventory/products/';
     var _chartInstance    = null;
 
     function renderChartTab() {

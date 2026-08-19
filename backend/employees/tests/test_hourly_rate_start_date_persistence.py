@@ -239,7 +239,7 @@ class HourlyStartDateOnlyChangeDirectFormTest(TestCase):
 
         api_client = APIClient()
         api_client.force_authenticate(user=self.user)
-        resp = api_client.get(f'/api/v1/employees/{emp.pk}/')
+        resp = api_client.get(f'/api/v2/employees/{emp.pk}/')
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(Decimal(resp.data['current_hourly_rate']), form.initial.get('hourly_rate_amount'))
         self.assertEqual(

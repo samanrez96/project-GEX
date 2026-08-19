@@ -346,7 +346,7 @@ class ProductApiPriceFieldTest(TestCase):
 
     def test_product_detail_api_includes_purchase_price(self):
         product  = _product(purchase_price=Decimal("3500"))
-        response = self.client.get(f"/api/v1/inventory/products/{product.pk}/")
+        response = self.client.get(f"/api/v2/inventory/products/{product.pk}/")
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertIn("purchase_price", data)
@@ -354,7 +354,7 @@ class ProductApiPriceFieldTest(TestCase):
 
     def test_product_list_api_includes_purchase_price(self):
         product  = _product(purchase_price=Decimal("1200"))
-        response = self.client.get("/api/v1/inventory/products/")
+        response = self.client.get("/api/v2/inventory/products/")
         self.assertEqual(response.status_code, 200)
         data     = response.json()
         results  = data.get("results", [])
@@ -365,7 +365,7 @@ class ProductApiPriceFieldTest(TestCase):
 
     def test_product_api_price_zero_for_new_product(self):
         product  = _product()
-        response = self.client.get(f"/api/v1/inventory/products/{product.pk}/")
+        response = self.client.get(f"/api/v2/inventory/products/{product.pk}/")
         data     = response.json()
         self.assertEqual(Decimal(data["purchase_price"]), Decimal("0"))
 
@@ -417,7 +417,7 @@ class ProductAddFormDuplicateDetectionTest(TestCase):
     def test_search_api_returns_exact_name_match(self):
         n       = _uid_next()
         product = _product(name=f"آیفون {n}", purchase_price=Decimal("50000000"))
-        response = self.client.get(f"/api/v1/inventory/products/?search={product.name}")
+        response = self.client.get(f"/api/v2/inventory/products/?search={product.name}")
         self.assertEqual(response.status_code, 200)
         data  = response.json()
         names = [r["name"] for r in data.get("results", [])]
@@ -432,7 +432,7 @@ class ProductAddFormDuplicateDetectionTest(TestCase):
         """
         n       = _uid_next()
         _product(name=f"ست لاپاراسکوپی کامل {n}")
-        response = self.client.get("/api/v1/inventory/products/?search=ست")
+        response = self.client.get("/api/v2/inventory/products/?search=ست")
         data     = response.json()
         # At least one result is returned (partial match works)
         # But no result has name == 'ست' exactly (JS would not trigger auto-fill)
@@ -480,7 +480,7 @@ class ProductAddFormDuplicateDetectionTest(TestCase):
         count_before = Product.objects.count()
 
         # Simulate what the JS does: call the search API
-        self.client.get(f"/api/v1/inventory/products/?search={product.name}")
+        self.client.get(f"/api/v2/inventory/products/?search={product.name}")
 
         self.assertEqual(
             Product.objects.count(), count_before,
@@ -515,7 +515,7 @@ class ProductAddFormDuplicateDetectionTest(TestCase):
             name=f"پنس جراحی {n}",
             purchase_price=Decimal("12500"),
         )
-        response = self.client.get(f"/api/v1/inventory/products/?search={product.name}")
+        response = self.client.get(f"/api/v2/inventory/products/?search={product.name}")
         self.assertEqual(response.status_code, 200)
         data   = response.json()
         result = next(

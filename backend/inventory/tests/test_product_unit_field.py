@@ -284,14 +284,14 @@ class PurchaseUnitCompatibilityTest(TestCase):
 
     def test_product_api_returns_unit(self):
         product = _make_product(unit="ویال")
-        resp = self.client.get(f"/api/v1/inventory/products/{product.pk}/")
+        resp = self.client.get(f"/api/v2/inventory/products/{product.pk}/")
         self.assertEqual(resp.status_code, 200)
         data = resp.json()
         self.assertEqual(data["unit"], "ویال")
 
     def test_product_api_returns_empty_unit_when_blank(self):
         product = _make_product(unit="")
-        resp = self.client.get(f"/api/v1/inventory/products/{product.pk}/")
+        resp = self.client.get(f"/api/v2/inventory/products/{product.pk}/")
         self.assertEqual(resp.status_code, 200)
         data = resp.json()
         self.assertEqual(data["unit"], "")
@@ -331,7 +331,7 @@ class PurchaseUnitCompatibilityTest(TestCase):
     def test_unit_field_available_in_products_list_api(self):
         product = _make_product(unit="قرص")
         resp = self.client.get(
-            "/api/v1/inventory/products/",
+            "/api/v2/inventory/products/",
             {"search": product.internal_code},
         )
         self.assertEqual(resp.status_code, 200)

@@ -743,7 +743,7 @@ class InactiveSpecialtyApiValidationTest(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='ds_api_user', password='pass')
         self.client.force_authenticate(user=self.user)
-        self.url = '/api/v1/contacts/doctors/'
+        self.url = '/api/v2/contacts/doctors/'
 
     def test_cannot_create_doctor_via_api_with_inactive_specialty(self):
         inactive = make_specialty('API تخصص غیرفعال جدید')

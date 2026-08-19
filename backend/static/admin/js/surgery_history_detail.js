@@ -11,9 +11,9 @@
 const SurgeryHistoryDetailApp = (function () {
     'use strict';
 
-    var API_URL        = '/api/v1/surgeries/history/';
-    var USED_ITEMS_URL = '/api/v1/surgeries/used-items/';
-    var PRODUCTS_URL   = '/api/v1/inventory/products/';
+    var API_URL        = '/api/v2/surgeries/history/';
+    var USED_ITEMS_URL = '/api/v2/surgeries/used-items/';
+    var PRODUCTS_URL   = '/api/v2/inventory/products/';
 
     var surgeryId   = null;
     var surgeryData = null;

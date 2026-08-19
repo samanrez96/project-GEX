@@ -21,7 +21,7 @@ from employees.models import Employee, JobPosition
 from payroll.models import CommissionRule, CommissionTransaction, MonthlyWage
 from surgeries.models import Patient, SurgeryHistory, SurgeryType
 
-REPORT_URL = '/api/v1/payroll/report/'
+REPORT_URL = '/api/v2/payroll/report/'
 
 
 # ---------------------------------------------------------------------------

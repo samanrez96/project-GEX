@@ -75,9 +75,9 @@ _LIST_ACTIONS = frozenset({"list", "low_stock", "export_ids"})
 class ProductCategoryViewSet(ReadOnlyModelViewSet):
     """Read-only viewset for product categories.
 
-    list     GET  /api/v1/inventory/categories/
-    retrieve GET  /api/v1/inventory/categories/{id}/
-    tree     GET  /api/v1/inventory/categories/tree/
+    list     GET  /api/v2/inventory/categories/
+    retrieve GET  /api/v2/inventory/categories/{id}/
+    tree     GET  /api/v2/inventory/categories/tree/
     """
 
     permission_classes = [IsAuthenticated]
@@ -146,10 +146,10 @@ class ProductOrderingFilter(OrderingFilter):
 class ProductViewSet(ExcelExportMixin, viewsets.ModelViewSet):
     """Production-grade product search, filter, and CRUD viewset.
 
-    GET/POST  /api/v1/inventory/products/
-    GET/PUT/PATCH/DELETE  /api/v1/inventory/products/{id}/
-    GET  /api/v1/inventory/products/low_stock/
-    GET  /api/v1/inventory/products/export_ids/
+    GET/POST  /api/v2/inventory/products/
+    GET/PUT/PATCH/DELETE  /api/v2/inventory/products/{id}/
+    GET  /api/v2/inventory/products/low_stock/
+    GET  /api/v2/inventory/products/export_ids/
 
     Search (single ?search= param):
       name, internal_code, barcode, category__name
@@ -238,7 +238,7 @@ class ProductViewSet(ExcelExportMixin, viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="purge-preview")
     def purge_preview(self, request, pk=None):
-        """GET /api/v1/inventory/products/{id}/purge-preview/
+        """GET /api/v2/inventory/products/{id}/purge-preview/
 
         Superuser-only. Read-only dependency-graph preview — see
         ProductPurgeService.preview(). Recomputed fresh on every call, so
@@ -251,7 +251,7 @@ class ProductViewSet(ExcelExportMixin, viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"], url_path="purge")
     def purge(self, request, pk=None):
-        """POST /api/v1/inventory/products/{id}/purge/
+        """POST /api/v2/inventory/products/{id}/purge/
 
         Superuser-only permanent deletion. Body must include
         {"confirmation_code": "<product.internal_code>"} — a client-supplied
@@ -294,7 +294,7 @@ class ProductViewSet(ExcelExportMixin, viewsets.ModelViewSet):
     def vendor_price_history(self, request, pk=None):
         """Per-product vendor price history derived from confirmed purchase items.
 
-        GET /api/v1/inventory/products/{id}/vendor-price-history/
+        GET /api/v2/inventory/products/{id}/vendor-price-history/
 
         Optional query parameters:
           vendor_id  — filter to a single vendor (integer PK)
@@ -530,8 +530,8 @@ class ProductViewSet(ExcelExportMixin, viewsets.ModelViewSet):
 class VendorViewSet(viewsets.ModelViewSet):
     """CRUD viewset for vendors / suppliers.
 
-    GET/POST             /api/v1/inventory/vendors/
-    GET/PUT/PATCH/DELETE /api/v1/inventory/vendors/{id}/
+    GET/POST             /api/v2/inventory/vendors/
+    GET/PUT/PATCH/DELETE /api/v2/inventory/vendors/{id}/
 
     Search (?search=):
       name, phone_number, email, tax_id
@@ -569,7 +569,7 @@ class VendorViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="purchased-products")
     def purchased_products(self, request, pk=None):
-        """GET /api/v1/inventory/vendors/{id}/purchased-products/
+        """GET /api/v2/inventory/vendors/{id}/purchased-products/
 
         Products purchased from this vendor based on CONFIRMED purchase history.
         Each product appears once regardless of how many confirmed purchases it
@@ -605,8 +605,8 @@ class VendorViewSet(viewsets.ModelViewSet):
 class ProductVendorViewSet(viewsets.ModelViewSet):
     """CRUD viewset for product–vendor relationships (through table).
 
-    GET/POST             /api/v1/inventory/product-vendors/
-    GET/PUT/PATCH/DELETE /api/v1/inventory/product-vendors/{id}/
+    GET/POST             /api/v2/inventory/product-vendors/
+    GET/PUT/PATCH/DELETE /api/v2/inventory/product-vendors/{id}/
 
     Filters (?product=&vendor=&is_active=&is_primary=):
       product, vendor, is_active, is_primary
@@ -717,9 +717,9 @@ class StockMovementViewSet(
 ):
     """Append-only viewset for stock/inventory movements.
 
-    POST   /api/v1/inventory/stock-movements/         — record a movement
-    GET    /api/v1/inventory/stock-movements/         — paginated history
-    GET    /api/v1/inventory/stock-movements/{id}/    — single record
+    POST   /api/v2/inventory/stock-movements/         — record a movement
+    GET    /api/v2/inventory/stock-movements/         — paginated history
+    GET    /api/v2/inventory/stock-movements/{id}/    — single record
 
     PUT / PATCH / DELETE are intentionally excluded — the movement log is
     the audit trail and must not be altered after creation.
@@ -775,9 +775,9 @@ class StockMovementViewSet(
 class PurchaseViewSet(ExcelExportMixin, viewsets.ModelViewSet):
     """CRUD viewset for purchase orders with a confirm action.
 
-    GET/POST             /api/v1/inventory/purchases/
-    GET/PUT/PATCH/DELETE /api/v1/inventory/purchases/{id}/
-    POST                 /api/v1/inventory/purchases/{id}/confirm/
+    GET/POST             /api/v2/inventory/purchases/
+    GET/PUT/PATCH/DELETE /api/v2/inventory/purchases/{id}/
+    POST                 /api/v2/inventory/purchases/{id}/confirm/
 
     confirm/ — transitions status to CONFIRMED and creates IN StockMovements
     for every PurchaseItem.  The operation is idempotent: confirming an
@@ -1048,8 +1048,8 @@ class PurchaseViewSet(ExcelExportMixin, viewsets.ModelViewSet):
 class PurchaseItemViewSet(viewsets.ModelViewSet):
     """CRUD viewset for purchase line items.
 
-    GET/POST             /api/v1/inventory/purchase-items/
-    GET/PUT/PATCH/DELETE /api/v1/inventory/purchase-items/{id}/
+    GET/POST             /api/v2/inventory/purchase-items/
+    GET/PUT/PATCH/DELETE /api/v2/inventory/purchase-items/{id}/
 
     Items can only be created/modified while the parent Purchase is PENDING.
     The serializer enforces this rule via validate().
@@ -1103,7 +1103,7 @@ class PurchaseItemViewSet(viewsets.ModelViewSet):
 class InventoryStockReportView(APIView):
     """Inventory stock-level report for all products.
 
-    GET /api/v1/inventory/reports/stock/
+    GET /api/v2/inventory/reports/stock/
 
     Query parameters:
       product_type  — 'medicine' or 'equipment'
@@ -1197,7 +1197,7 @@ class InventoryStockReportView(APIView):
 class ProductCostReportView(APIView):
     """Purchase cost report — aggregates confirmed PurchaseItem totals.
 
-    GET /api/v1/inventory/reports/cost/
+    GET /api/v2/inventory/reports/cost/
 
     Query parameters:
         start_date   — YYYY-MM-DD (optional)

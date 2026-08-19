@@ -21,7 +21,7 @@ from rest_framework.test import APITestCase
 from inventory.models import Product, ProductType, ProductVendor, Vendor
 
 User = get_user_model()
-PRODUCTS_URL = '/api/v1/inventory/products/'
+PRODUCTS_URL = '/api/v2/inventory/products/'
 
 # Path to the product list template — used for static content assertions
 _TEMPLATE_PATH = (

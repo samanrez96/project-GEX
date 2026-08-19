@@ -27,8 +27,8 @@ from surgeries.models import Gender, Patient, SurgeryHistory, SurgeryType
 
 User = get_user_model()
 
-PATIENTS_URL = '/api/v1/surgeries/patients/'
-HISTORY_URL  = '/api/v1/surgeries/history/'
+PATIENTS_URL = '/api/v2/surgeries/patients/'
+HISTORY_URL  = '/api/v2/surgeries/history/'
 
 
 def _patient(case_code='PAT001', full_name='بیمار تست', age=30, gender=Gender.MALE, hidden=False):

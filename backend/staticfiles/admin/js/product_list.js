@@ -10,7 +10,7 @@
 const ProductListApp = (function () {
     'use strict';
 
-    var API_URL = '/api/v1/inventory/products/';
+    var API_URL = '/api/v2/inventory/products/';
     var COLS    = 6; // کد داخلی، نام، نوع، تعداد، قیمت، وضعیت موجودی
 
     // ── Shared filter / page state ────────────────────────────────

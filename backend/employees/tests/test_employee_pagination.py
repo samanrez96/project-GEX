@@ -1,6 +1,6 @@
 """Pagination tests for EmployeeViewSet (CLI-57).
 
-Verifies that GET /api/v1/employees/ returns the StandardPagination
+Verifies that GET /api/v2/employees/ returns the StandardPagination
 envelope (count, total_pages, page_size, results) so the JS frontend can
 render page-number buttons correctly.
 """
@@ -16,7 +16,7 @@ from rest_framework.test import APITestCase
 from employees.models import Employee, JobPosition
 
 User = get_user_model()
-URL  = '/api/v1/employees/'
+URL  = '/api/v2/employees/'
 
 
 def _position():

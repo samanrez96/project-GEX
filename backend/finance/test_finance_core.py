@@ -10,8 +10,8 @@ from rest_framework.test import APITestCase
 from finance.models import CategoryType, FinanceCategory, Transaction, TransactionPaymentStatus, TransactionType
 
 User = get_user_model()
-CATEGORIES_URL = '/api/v1/finance/categories/'
-TRANSACTIONS_URL = '/api/v1/finance/transactions/'
+CATEGORIES_URL = '/api/v2/finance/categories/'
+TRANSACTIONS_URL = '/api/v2/finance/transactions/'
 
 
 def make_category(**kwargs):
@@ -177,8 +177,8 @@ class IncomeCategoryTest(TestCase):
         )
 
 
-BALANCE_URL = '/api/v1/finance/reports/balance/'
-TREND_URL   = '/api/v1/finance/reports/trend/'
+BALANCE_URL = '/api/v2/finance/reports/balance/'
+TREND_URL   = '/api/v2/finance/reports/trend/'
 
 
 class BalanceReportAPITest(APITestCase):

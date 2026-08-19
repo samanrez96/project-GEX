@@ -20,7 +20,7 @@ const ProductAddFormApp = (function () {
         return {};
     }
 
-    var API_URL     = '/api/v1/inventory/products/';
+    var API_URL     = '/api/v2/inventory/products/';
     var DEBOUNCE_MS = 400;
     var MIN_CHARS   = 2;
 

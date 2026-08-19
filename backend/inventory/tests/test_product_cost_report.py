@@ -28,7 +28,7 @@ from inventory.models import Product, Purchase, PurchaseItem, PurchaseStatus, Ve
 
 User = get_user_model()
 
-REPORT_URL = '/api/v1/inventory/reports/cost/'
+REPORT_URL = '/api/v2/inventory/reports/cost/'
 
 _seq = [0]
 

@@ -8,8 +8,8 @@
  *
  * Globals injected by the template:
  *   window.FD_INITIAL_TREND  — Array<{month,income,expense}> for first render
- *   window.FD_API_BALANCE    — URL for /api/v1/finance/reports/balance/
- *   window.FD_API_TREND      — URL for /api/v1/finance/reports/trend/
+ *   window.FD_API_BALANCE    — URL for /api/v2/finance/reports/balance/
+ *   window.FD_API_TREND      — URL for /api/v2/finance/reports/trend/
  *   window.FD_CHARTJS_FAILED — true if Chart.js CDN failed to load
  */
 

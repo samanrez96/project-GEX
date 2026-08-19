@@ -24,8 +24,8 @@ from surgeries.models import Patient, SurgeryHistory, SurgeryType, SurgeryUsedIt
 
 User = get_user_model()
 
-PRODUCTS_URL   = '/api/v1/inventory/products/'
-USED_ITEMS_URL = '/api/v1/surgeries/used-items/'
+PRODUCTS_URL   = '/api/v2/inventory/products/'
+USED_ITEMS_URL = '/api/v2/surgeries/used-items/'
 
 _ctr = [0]
 

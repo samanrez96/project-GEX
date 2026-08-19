@@ -23,7 +23,7 @@
 (function () {
     'use strict';
 
-    var PATIENT_API_URL = '/api/v1/surgeries/patients/';
+    var PATIENT_API_URL = '/api/v2/surgeries/patients/';
 
     var metaRow = null;
     var activeController = null;

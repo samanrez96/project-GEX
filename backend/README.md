@@ -55,7 +55,7 @@ surgery-clinic/
 │   │   ├── base.py          # Shared settings
 │   │   ├── development.py   # Development overrides
 │   │   └── production.py    # Production hardening
-│   ├── urls.py              # Root URL router (/api/v1/)
+│   ├── urls.py              # Root URL router (/api/v2/)
 │   ├── wsgi.py
 │   └── asgi.py
 ├── employees/               # Staff & personnel management
@@ -72,14 +72,14 @@ surgery-clinic/
 
 ## API Overview
 
-All endpoints are versioned under `/api/v1/`.
+All endpoints are versioned under `/api/v2/`.
 
 | Prefix | App |
 |---|---|
-| `/api/v1/employees/` | Employees |
-| `/api/v1/finance/` | Finance |
-| `/api/v1/inventory/` | Inventory |
-| `/api/v1/surgeries/` | Surgeries |
+| `/api/v2/employees/` | Employees |
+| `/api/v2/finance/` | Finance |
+| `/api/v2/inventory/` | Inventory |
+| `/api/v2/surgeries/` | Surgeries |
 
 The Django admin panel is available at `/admin/`.
 

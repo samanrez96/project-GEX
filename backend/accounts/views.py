@@ -10,7 +10,7 @@ from accounts.serializers import UserSerializer
 
 class MeView(APIView):
     """
-    GET /api/v1/auth/me/
+    GET /api/v2/auth/me/
 
     Returns the profile of the currently authenticated user,
     including their assigned roles (Django groups).
@@ -25,7 +25,7 @@ class MeView(APIView):
 
 class LogoutView(APIView):
     """
-    POST /api/v1/auth/logout/
+    POST /api/v2/auth/logout/
 
     Blacklists the supplied refresh token, effectively logging the user out.
     Expected request body:

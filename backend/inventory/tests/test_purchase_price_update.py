@@ -1003,7 +1003,7 @@ class PriceSyncApiTest(TestCase):
         self.client.force_login(u)
 
     def test_product_list_api_returns_synced_purchase_price(self):
-        """After confirm, /api/v1/inventory/products/ must return the updated purchase_price."""
+        """After confirm, /api/v2/inventory/products/ must return the updated purchase_price."""
         import json
         vendor  = _vendor()
         product = _product(purchase_price=Decimal("1"))
@@ -1011,7 +1011,7 @@ class PriceSyncApiTest(TestCase):
         _item(purchase, product, unit_price=Decimal("55000"))
         purchase.confirm()
 
-        r = self.client.get(f'/api/v1/inventory/products/{product.pk}/')
+        r = self.client.get(f'/api/v2/inventory/products/{product.pk}/')
         self.assertEqual(r.status_code, 200)
         data = json.loads(r.content)
         from decimal import Decimal as D
@@ -1031,7 +1031,7 @@ class PriceSyncApiTest(TestCase):
         _item(p2, product, unit_price=Decimal("55000"))
         p2.confirm()
 
-        r = self.client.get(f'/api/v1/inventory/products/{product.pk}/')
+        r = self.client.get(f'/api/v2/inventory/products/{product.pk}/')
         data = json.loads(r.content)
         self.assertEqual(data['purchase_price'], '55000.00')
 
@@ -1064,7 +1064,7 @@ class PriceSyncApiTest(TestCase):
         )
         purchase.confirm()
 
-        r = self.client.get(f'/api/v1/inventory/products/{product.pk}/')
+        r = self.client.get(f'/api/v2/inventory/products/{product.pk}/')
         data = json.loads(r.content)
         from decimal import Decimal as D
         self.assertEqual(D(data['purchase_price']), D("8000"))

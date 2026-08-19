@@ -30,7 +30,7 @@ from surgeries.models import Patient, SurgeryHistory, SurgeryType
 
 User = get_user_model()
 
-REPORT_URL = '/api/v1/payroll/reports/employee-cost/'
+REPORT_URL = '/api/v2/payroll/reports/employee-cost/'
 
 _seq = [0]
 

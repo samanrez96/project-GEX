@@ -131,8 +131,8 @@ class JobPositionAPITest(APITestCase):
 
     def _url(self, pk=None):
         if pk:
-            return f"/api/v1/employees/positions/{pk}/"
-        return "/api/v1/employees/positions/"
+            return f"/api/v2/employees/positions/{pk}/"
+        return "/api/v2/employees/positions/"
 
     def _results(self, res):
         """Extract list items from a potentially-paginated response."""

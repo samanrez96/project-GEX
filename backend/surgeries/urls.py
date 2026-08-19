@@ -22,17 +22,17 @@ router.register("consumption-items", SurgeryConsumptionItemViewSet, basename="co
 router.register("types",             SurgeryTypeViewSet,            basename="surgery-type")
 
 # Registered routes:
-#   GET/POST             /api/v1/surgeries/surgeries/              — list / create
-#   GET/PUT/PATCH/DELETE /api/v1/surgeries/surgeries/{id}/
-#   POST                 /api/v1/surgeries/surgeries/{id}/complete/ — apply stock OUT
+#   GET/POST             /api/v2/surgeries/surgeries/              — list / create
+#   GET/PUT/PATCH/DELETE /api/v2/surgeries/surgeries/{id}/
+#   POST                 /api/v2/surgeries/surgeries/{id}/complete/ — apply stock OUT
 #
-#   GET/POST             /api/v1/surgeries/consumption-items/      — list / add item
-#   GET/PUT/PATCH/DELETE /api/v1/surgeries/consumption-items/{id}/
+#   GET/POST             /api/v2/surgeries/consumption-items/      — list / add item
+#   GET/PUT/PATCH/DELETE /api/v2/surgeries/consumption-items/{id}/
 #
-#   GET/POST             /api/v1/surgeries/types/                  — list / create surgery types
-#   GET/PUT/PATCH/DELETE /api/v1/surgeries/types/{id}/
+#   GET/POST             /api/v2/surgeries/types/                  — list / create surgery types
+#   GET/PUT/PATCH/DELETE /api/v2/surgeries/types/{id}/
 #
-#   GET  /api/v1/surgeries/reports/profit/ — surgery profit report
+#   GET  /api/v2/surgeries/reports/profit/ — surgery profit report
 
 urlpatterns = router.urls + [
     path('reports/profit/', SurgeryProfitReportView.as_view(), name='surgery-profit-report'),

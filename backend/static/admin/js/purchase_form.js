@@ -23,7 +23,7 @@ const PurchaseFormApp = (function () {
     'use strict';
 
     var PREFIX       = window.PF_FORMSET_PREFIX || 'items';
-    var API_PRODUCTS = window.PF_PRODUCTS_API   || '/api/v1/inventory/products/';
+    var API_PRODUCTS = window.PF_PRODUCTS_API   || '/api/v2/inventory/products/';
 
     // ── Utilities ────────────────────────────────────────────────
 

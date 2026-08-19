@@ -18,8 +18,8 @@ from inventory.models import (
     Vendor,
 )
 
-LIST_URL          = "/api/v1/inventory/purchases/"
-ITEMS_URL         = "/api/v1/inventory/purchase-items/"
+LIST_URL          = "/api/v2/inventory/purchases/"
+ITEMS_URL         = "/api/v2/inventory/purchase-items/"
 
 
 # ---------------------------------------------------------------------------

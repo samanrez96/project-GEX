@@ -29,7 +29,7 @@ from surgeries.models import Patient, SurgeryHistory, SurgeryType
 
 User = get_user_model()
 
-HISTORY_URL = '/api/v1/surgeries/history/'
+HISTORY_URL = '/api/v2/surgeries/history/'
 
 
 # ---------------------------------------------------------------------------

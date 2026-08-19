@@ -96,7 +96,7 @@ class EmployeeFormSavesCanonicalHourlyRateTest(TestCase):
 
         api_client = APIClient()
         api_client.force_authenticate(user=self.user)
-        resp = api_client.get(f'/api/v1/employees/{emp.pk}/')
+        resp = api_client.get(f'/api/v2/employees/{emp.pk}/')
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(Decimal(resp.data['current_hourly_rate']), Decimal('33'))
         self.assertEqual(str(resp.data['current_hourly_rate_start_date']), '2024-01-01')
@@ -109,7 +109,7 @@ class EmployeeFormSavesCanonicalHourlyRateTest(TestCase):
 
         api_client = APIClient()
         api_client.force_authenticate(user=self.user)
-        resp = api_client.get(f'/api/v1/employees/{emp.pk}/')
+        resp = api_client.get(f'/api/v2/employees/{emp.pk}/')
         self.assertIsNone(resp.data['current_hourly_rate'])
         self.assertEqual(Decimal(resp.data['future_hourly_rate']), Decimal('33'))
         self.assertEqual(str(resp.data['future_hourly_rate_start_date']), '2027-01-12')
@@ -142,7 +142,7 @@ class LegacyHourlyRateNotCanonicalTest(TestCase):
 
         api_client = APIClient()
         api_client.force_authenticate(user=self.user)
-        resp = api_client.get(f'/api/v1/employees/{emp.pk}/')
+        resp = api_client.get(f'/api/v2/employees/{emp.pk}/')
         self.assertEqual(Decimal(resp.data['legacy_hourly_rate']), Decimal('999999'))
         self.assertIsNone(resp.data['current_hourly_rate'])
         self.assertIsNone(resp.data['future_hourly_rate'])

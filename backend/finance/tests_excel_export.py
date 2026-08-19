@@ -1,6 +1,6 @@
 """Excel export tests for finance endpoints (CLI-54).
 
-Covers: /api/v1/finance/reports/balance/?export=excel
+Covers: /api/v2/finance/reports/balance/?export=excel
 """
 
 import io
@@ -12,7 +12,7 @@ from rest_framework.test import APITestCase
 
 from finance.models import FinanceCategory, Transaction, TransactionPaymentStatus, TransactionType
 
-URL     = '/api/v1/finance/reports/balance/'
+URL     = '/api/v2/finance/reports/balance/'
 XLSX_CT = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
 

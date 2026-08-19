@@ -1,7 +1,7 @@
 /**
  * VendorListApp — API-driven vendor list for Django Admin.
  *
- * Fetches from /api/v1/inventory/vendors/ with search and is_active filter.
+ * Fetches from /api/v2/inventory/vendors/ with search and is_active filter.
  * Columns: نام فروشنده، شماره تماس، ایمیل، آدرس، توضیحات
  *
  * Auth: SessionAuthentication via Django admin session cookie.
@@ -10,7 +10,7 @@
 const VendorListApp = (function () {
     'use strict';
 
-    var API_URL = '/api/v1/inventory/vendors/';
+    var API_URL = '/api/v2/inventory/vendors/';
     var COLS    = 5;
 
     var state = {

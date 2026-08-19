@@ -1,6 +1,6 @@
 ### 📘 API Documentation – Contacts App
 
-**Base URL**: `http://localhost:8000/api/v1/contacts/`  
+**Base URL**: `http://localhost:8000/api/v2/contacts/`  
 **Authentication**: Token or Session (JWT)  
 **Permissions**:
 - `GET /doctors/` & `/doctors/{id}/` – authenticated users only  
@@ -16,7 +16,7 @@
 - **Query Params**: `is_active`, `cooperation_status`, `specialty`, `search`, `ordering`, `page`, `page_size`
 - **cURL**:
 ```bash
-curl -X GET "http://localhost:8000/api/v1/contacts/doctors/?is_active=true&search=احمد" \
+curl -X GET "http://localhost:8000/api/v2/contacts/doctors/?is_active=true&search=احمد" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 - **Sample Response** (200 OK):
@@ -58,7 +58,7 @@ curl -X GET "http://localhost:8000/api/v1/contacts/doctors/?is_active=true&searc
 - **URL**: `/doctors/{id}/`  
 - **cURL**:
 ```bash
-curl -X GET "http://localhost:8000/api/v1/contacts/doctors/1/" \
+curl -X GET "http://localhost:8000/api/v2/contacts/doctors/1/" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 - **Response** similar to above, but with more fields (address, notes, created_at, updated_at).
@@ -88,7 +88,7 @@ curl -X GET "http://localhost:8000/api/v1/contacts/doctors/1/" \
 ```
 - **cURL**:
 ```bash
-curl -X POST "http://localhost:8000/api/v1/contacts/doctors/" \
+curl -X POST "http://localhost:8000/api/v2/contacts/doctors/" \
   -H "Authorization: Token YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"full_name":"دکتر علی محمدی","specialty":3,"phone_number":"09123456789","email":"ali@clinic.com","national_id":"1234567890","medical_system_number":"67890","clinic_phone":"021-12345678","collaboration_start_date":"2026-08-01","center_commission_percent":15,"rate_per_surgery":"600000.00","cooperation_status":"active","is_active":true}'
@@ -103,7 +103,7 @@ curl -X POST "http://localhost:8000/api/v1/contacts/doctors/" \
 - **URL**: `/doctors/{id}/`  
 - **cURL for PATCH**:
 ```bash
-curl -X PATCH "http://localhost:8000/api/v1/contacts/doctors/1/" \
+curl -X PATCH "http://localhost:8000/api/v2/contacts/doctors/1/" \
   -H "Authorization: Token YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"is_active": false}'
@@ -118,7 +118,7 @@ curl -X PATCH "http://localhost:8000/api/v1/contacts/doctors/1/" \
 - **URL**: `/doctors/{id}/`  
 - **cURL**:
 ```bash
-curl -X DELETE "http://localhost:8000/api/v1/contacts/doctors/1/" \
+curl -X DELETE "http://localhost:8000/api/v2/contacts/doctors/1/" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 - **Response**: 204 No Content.
@@ -132,7 +132,7 @@ curl -X DELETE "http://localhost:8000/api/v1/contacts/doctors/1/" \
 - **Query Params**: `is_active`, `job_position`, `search`, `ordering`
 - **cURL**:
 ```bash
-curl -X GET "http://localhost:8000/api/v1/contacts/employees/?search=کارمند" \
+curl -X GET "http://localhost:8000/api/v2/contacts/employees/?search=کارمند" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 - **Sample Response** (200 OK):
@@ -164,7 +164,7 @@ curl -X GET "http://localhost:8000/api/v1/contacts/employees/?search=کارمن�
 - **URL**: `/employees/{id}/`  
 - **cURL**:
 ```bash
-curl -X GET "http://localhost:8000/api/v1/contacts/employees/5/" \
+curl -X GET "http://localhost:8000/api/v2/contacts/employees/5/" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 - **Response** same as above.
@@ -177,7 +177,7 @@ curl -X GET "http://localhost:8000/api/v1/contacts/employees/5/" \
 - **URL**: `/doctors/?export=excel`  
 - **cURL**:
 ```bash
-curl -X GET "http://localhost:8000/api/v1/contacts/doctors/?export=excel" \
+curl -X GET "http://localhost:8000/api/v2/contacts/doctors/?export=excel" \
   -H "Authorization: Token YOUR_TOKEN" \
   --output doctor_list.xlsx
 ```

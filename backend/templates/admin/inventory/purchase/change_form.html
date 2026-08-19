@@ -468,7 +468,7 @@
 {% block extrascript %}
 <script>
   window.PF_FORMSET_PREFIX = "{{ inline_admin_formsets.0.formset.prefix|default:'items' }}";
-  window.PF_PRODUCTS_API   = "/api/v1/inventory/products/";
+  window.PF_PRODUCTS_API   = "/api/v2/inventory/products/";
 </script>
 <script src="{% static 'admin/js/purchase_form.js' %}?v=2"></script>
 {% if show_confirm_btn or show_cancel_btn or show_restore_btn %}

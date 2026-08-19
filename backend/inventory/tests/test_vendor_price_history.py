@@ -1,6 +1,6 @@
 """Tests for the per-product vendor price history API endpoint.
 
-Endpoint: GET /api/v1/inventory/products/{id}/vendor-price-history/
+Endpoint: GET /api/v2/inventory/products/{id}/vendor-price-history/
 
 Optional filters:
   vendor_id, date_from, date_to, currency
@@ -24,7 +24,7 @@ from inventory.models import (
     Vendor,
 )
 
-PRODUCTS_URL = "/api/v1/inventory/products/"
+PRODUCTS_URL = "/api/v2/inventory/products/"
 
 
 def _price_history_url(product_id):

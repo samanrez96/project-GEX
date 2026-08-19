@@ -168,7 +168,7 @@ class PurchaseConfirmAPIZeroItemsTest(TestCase):
         vendor   = _vendor()
         purchase = _purchase(vendor)
 
-        r = self.client.post(f'/api/v1/inventory/purchases/{purchase.pk}/confirm/')
+        r = self.client.post(f'/api/v2/inventory/purchases/{purchase.pk}/confirm/')
         self.assertEqual(r.status_code, 400)
         self.assertIn("حداقل یک قلم", str(r.json()))
 
@@ -178,7 +178,7 @@ class PurchaseConfirmAPIZeroItemsTest(TestCase):
         purchase = _purchase(vendor)
         _item(purchase, product)
 
-        r = self.client.post(f'/api/v1/inventory/purchases/{purchase.pk}/confirm/')
+        r = self.client.post(f'/api/v2/inventory/purchases/{purchase.pk}/confirm/')
         self.assertEqual(r.status_code, 200)
 
 
@@ -201,7 +201,7 @@ class PurchaseItemDeleteAPITest(TestCase):
         item     = _item(purchase, product)
         purchase.confirm()  # status → CONFIRMED
 
-        r = self.client.delete(f'/api/v1/inventory/purchase-items/{item.pk}/')
+        r = self.client.delete(f'/api/v2/inventory/purchase-items/{item.pk}/')
         self.assertIn(r.status_code, [400, 403],
                       f"Delete from CONFIRMED must be rejected, got {r.status_code}")
         self.assertTrue(PurchaseItem.objects.filter(pk=item.pk).exists(),
@@ -213,7 +213,7 @@ class PurchaseItemDeleteAPITest(TestCase):
         purchase = _purchase(vendor)
         item     = _item(purchase, product)
 
-        r = self.client.delete(f'/api/v1/inventory/purchase-items/{item.pk}/')
+        r = self.client.delete(f'/api/v2/inventory/purchase-items/{item.pk}/')
         self.assertIn(r.status_code, [204, 200],
                       "Delete from PENDING must succeed")
         self.assertFalse(PurchaseItem.objects.filter(pk=item.pk).exists())

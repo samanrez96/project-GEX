@@ -7,7 +7,7 @@ from rest_framework.test import APITestCase
 from contacts.models import DoctorSpecialty
 
 User = get_user_model()
-URL  = '/api/v1/contacts/doctors/'
+URL  = '/api/v2/contacts/doctors/'
 
 
 def _user():

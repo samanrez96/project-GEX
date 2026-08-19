@@ -59,8 +59,8 @@ from surgeries.serializers import (
 
 class PatientViewSet(viewsets.ModelViewSet):
     """
-    GET/POST             /api/v1/surgeries/patients/
-    GET/PUT/PATCH/DELETE /api/v1/surgeries/patients/{id}/
+    GET/POST             /api/v2/surgeries/patients/
+    GET/PUT/PATCH/DELETE /api/v2/surgeries/patients/{id}/
 
     Search: full_name, case_code, internal_code, national_id, phone_number
     Ordering: full_name, created_at
@@ -109,9 +109,9 @@ class PatientViewSet(viewsets.ModelViewSet):
 class SurgeryViewSet(viewsets.ModelViewSet):
     """CRUD viewset for surgical procedures with a complete action.
 
-    GET/POST             /api/v1/surgeries/surgeries/
-    GET/PUT/PATCH/DELETE /api/v1/surgeries/surgeries/{id}/
-    POST                 /api/v1/surgeries/surgeries/{id}/complete/
+    GET/POST             /api/v2/surgeries/surgeries/
+    GET/PUT/PATCH/DELETE /api/v2/surgeries/surgeries/{id}/
+    POST                 /api/v2/surgeries/surgeries/{id}/complete/
 
     complete/ — transitions status to COMPLETED and creates OUT StockMovements
     for every SurgeryConsumptionItem.  The operation is idempotent: completing
@@ -165,8 +165,8 @@ class SurgeryViewSet(viewsets.ModelViewSet):
 
 class SurgeryTypeViewSet(viewsets.ModelViewSet):
     """
-    GET/POST             /api/v1/surgeries/types/
-    GET/PUT/PATCH/DELETE /api/v1/surgeries/types/{id}/
+    GET/POST             /api/v2/surgeries/types/
+    GET/PUT/PATCH/DELETE /api/v2/surgeries/types/{id}/
 
     Filter: ?is_active=true|false  (manual — avoids DjangoFilterBackend dependency)
     Search: ?search=  (name, code, description)
@@ -213,8 +213,8 @@ class SurgeryTypeViewSet(viewsets.ModelViewSet):
 class SurgeryConsumptionItemViewSet(viewsets.ModelViewSet):
     """CRUD viewset for surgery consumption line items.
 
-    GET/POST             /api/v1/surgeries/consumption-items/
-    GET/PUT/PATCH/DELETE /api/v1/surgeries/consumption-items/{id}/
+    GET/POST             /api/v2/surgeries/consumption-items/
+    GET/PUT/PATCH/DELETE /api/v2/surgeries/consumption-items/{id}/
 
     Items can only be created/modified while the parent Surgery is PLANNED or
     IN_PROGRESS.  The serializer enforces this rule via validate().
@@ -269,8 +269,8 @@ class SurgeryHistoryOrderingFilter(OrderingFilter):
 
 class SurgeryHistoryViewSet(ExcelExportMixin, viewsets.ModelViewSet):
     """
-    GET/POST             /api/v1/surgeries/history/
-    GET/PUT/PATCH/DELETE /api/v1/surgeries/history/{id}/
+    GET/POST             /api/v2/surgeries/history/
+    GET/PUT/PATCH/DELETE /api/v2/surgeries/history/{id}/
 
     Filter: patient, surgery_type, status, payment_status, doctor_or_therapist
     Search: patient name, case_code, phone_number, description
@@ -581,8 +581,8 @@ class SurgeryHistoryViewSet(ExcelExportMixin, viewsets.ModelViewSet):
 
 class SurgeryUsedItemViewSet(viewsets.ModelViewSet):
     """
-    GET/POST             /api/v1/surgeries/used-items/
-    GET/PUT/PATCH/DELETE /api/v1/surgeries/used-items/{id}/
+    GET/POST             /api/v2/surgeries/used-items/
+    GET/PUT/PATCH/DELETE /api/v2/surgeries/used-items/{id}/
 
     Filter: surgery, product
     Ordering: created_at
@@ -673,7 +673,7 @@ class SurgeryUsedItemViewSet(viewsets.ModelViewSet):
 class SurgeryProfitReportView(APIView):
     """Per-surgery (or grouped) profitability report.
 
-    GET /api/v1/surgeries/reports/profit/
+    GET /api/v2/surgeries/reports/profit/
 
     Query parameters (all optional):
         start_date         YYYY-MM-DD

@@ -9,20 +9,20 @@ Permission system overview:
   - IsAdminOrEmployeeManager: superuser | admin group | employee_manager group
 
 Permission_classes by endpoint:
-  GET /api/v1/inventory/products/           → IsAuthenticated
-  GET /api/v1/inventory/purchases/          → IsAuthenticated
-  GET /api/v1/inventory/reports/stock/      → IsAuthenticated
-  GET /api/v1/inventory/reports/cost/       → IsAdminOrFinanceUser  ← role-restricted
-  GET /api/v1/employees/                    → IsAuthenticated
-  GET /api/v1/payroll/wages/                → IsAuthenticated
-  GET /api/v1/payroll/report/               → IsAdminOrFinanceUser  ← role-restricted (fix(api))
-  GET /api/v1/payroll/reports/employee-cost/ → IsAdminOrFinanceUser ← role-restricted
-  GET /api/v1/finance/categories/           → IsAuthenticated
-  GET /api/v1/finance/transactions/         → IsAuthenticated
-  GET /api/v1/finance/reports/balance/      → IsAdminOrFinanceUser  ← role-restricted (fix(api))
-  GET /api/v1/surgeries/history/            → IsAuthenticated
-  GET /api/v1/surgeries/reports/profit/     → IsAdminOrFinanceUser  ← role-restricted
-  GET /api/v1/contacts/doctors/             → IsAuthenticated
+  GET /api/v2/inventory/products/           → IsAuthenticated
+  GET /api/v2/inventory/purchases/          → IsAuthenticated
+  GET /api/v2/inventory/reports/stock/      → IsAuthenticated
+  GET /api/v2/inventory/reports/cost/       → IsAdminOrFinanceUser  ← role-restricted
+  GET /api/v2/employees/                    → IsAuthenticated
+  GET /api/v2/payroll/wages/                → IsAuthenticated
+  GET /api/v2/payroll/report/               → IsAdminOrFinanceUser  ← role-restricted (fix(api))
+  GET /api/v2/payroll/reports/employee-cost/ → IsAdminOrFinanceUser ← role-restricted
+  GET /api/v2/finance/categories/           → IsAuthenticated
+  GET /api/v2/finance/transactions/         → IsAuthenticated
+  GET /api/v2/finance/reports/balance/      → IsAdminOrFinanceUser  ← role-restricted (fix(api))
+  GET /api/v2/surgeries/history/            → IsAuthenticated
+  GET /api/v2/surgeries/reports/profit/     → IsAdminOrFinanceUser  ← role-restricted
+  GET /api/v2/contacts/doctors/             → IsAuthenticated
 
 NOT duplicated (already comprehensively covered in existing tests):
   - ProductCostReportView permissions  → inventory/tests/test_product_cost_report.py  (6 scenarios)
@@ -47,20 +47,20 @@ User = get_user_model()
 # URL constants
 # ---------------------------------------------------------------------------
 
-PRODUCTS_URL          = '/api/v1/inventory/products/'
-PURCHASES_URL         = '/api/v1/inventory/purchases/'
-STOCK_REPORT_URL      = '/api/v1/inventory/reports/stock/'
-COST_REPORT_URL       = '/api/v1/inventory/reports/cost/'
-EMPLOYEES_URL         = '/api/v1/employees/'
-WAGES_URL             = '/api/v1/payroll/wages/'
-PAYROLL_REPORT_URL    = '/api/v1/payroll/report/'
-EMP_COST_URL          = '/api/v1/payroll/reports/employee-cost/'
-FINANCE_CAT_URL       = '/api/v1/finance/categories/'
-FINANCE_TX_URL        = '/api/v1/finance/transactions/'
-BALANCE_REPORT_URL    = '/api/v1/finance/reports/balance/'
-SURGERY_HISTORY_URL   = '/api/v1/surgeries/history/'
-SURGERY_PROFIT_URL    = '/api/v1/surgeries/reports/profit/'
-CONTACTS_URL          = '/api/v1/contacts/doctors/'
+PRODUCTS_URL          = '/api/v2/inventory/products/'
+PURCHASES_URL         = '/api/v2/inventory/purchases/'
+STOCK_REPORT_URL      = '/api/v2/inventory/reports/stock/'
+COST_REPORT_URL       = '/api/v2/inventory/reports/cost/'
+EMPLOYEES_URL         = '/api/v2/employees/'
+WAGES_URL             = '/api/v2/payroll/wages/'
+PAYROLL_REPORT_URL    = '/api/v2/payroll/report/'
+EMP_COST_URL          = '/api/v2/payroll/reports/employee-cost/'
+FINANCE_CAT_URL       = '/api/v2/finance/categories/'
+FINANCE_TX_URL        = '/api/v2/finance/transactions/'
+BALANCE_REPORT_URL    = '/api/v2/finance/reports/balance/'
+SURGERY_HISTORY_URL   = '/api/v2/surgeries/history/'
+SURGERY_PROFIT_URL    = '/api/v2/surgeries/reports/profit/'
+CONTACTS_URL          = '/api/v2/contacts/doctors/'
 
 XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 

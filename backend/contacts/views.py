@@ -122,8 +122,8 @@ class DoctorViewSet(ExcelExportMixin, viewsets.ModelViewSet):
 
 class EmployeeContactViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
     """Read-only contact view for employees.
-    GET /api/v1/contacts/employees/
-    GET /api/v1/contacts/employees/{id}/
+    GET /api/v2/contacts/employees/
+    GET /api/v2/contacts/employees/{id}/
     """
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]

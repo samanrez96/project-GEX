@@ -16,9 +16,9 @@ from rest_framework.test import APITestCase
 from inventory.models import Product, ProductType, Purchase, PurchaseStatus, Vendor
 
 User = get_user_model()
-PRODUCTS_URL  = '/api/v1/inventory/products/'
-PURCHASES_URL = '/api/v1/inventory/purchases/'
-ITEMS_URL     = '/api/v1/inventory/purchase-items/'
+PRODUCTS_URL  = '/api/v2/inventory/products/'
+PURCHASES_URL = '/api/v2/inventory/purchases/'
+ITEMS_URL     = '/api/v2/inventory/purchase-items/'
 
 
 def _user():

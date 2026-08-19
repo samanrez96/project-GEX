@@ -13,7 +13,7 @@ from payroll.models import MonthlyWage, PayrollTypeConfig
 
 User = get_user_model()
 
-WAGES_URL = '/api/v1/payroll/wages/'
+WAGES_URL = '/api/v2/payroll/wages/'
 
 
 # ---------------------------------------------------------------------------

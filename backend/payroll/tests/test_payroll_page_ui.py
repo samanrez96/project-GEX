@@ -39,7 +39,7 @@ from payroll.services import finalize_hourly_payroll
 from surgeries.models import Patient, SurgeryHistory, SurgeryType
 
 User = get_user_model()
-REPORT_URL = '/api/v1/payroll/report/'
+REPORT_URL = '/api/v2/payroll/report/'
 PAGE_URL = '/admin/payroll/payroll-page/'
 
 EXPECTED_ROW_FIELDS = {

@@ -25,7 +25,7 @@ from surgeries.models import Patient
 
 User = get_user_model()
 
-PATIENTS_URL = '/api/v1/surgeries/patients/'
+PATIENTS_URL = '/api/v2/surgeries/patients/'
 
 _ctr = [0]
 

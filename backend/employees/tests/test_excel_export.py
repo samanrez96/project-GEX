@@ -10,7 +10,7 @@ from rest_framework.test import APITestCase
 
 from employees.models import Employee, JobPosition
 
-URL   = '/api/v1/employees/'
+URL   = '/api/v2/employees/'
 XLSX_CT = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
 

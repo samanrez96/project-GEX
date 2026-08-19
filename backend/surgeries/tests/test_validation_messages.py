@@ -25,9 +25,9 @@ from surgeries.models import (
 )
 
 User = get_user_model()
-PATIENTS_URL    = '/api/v1/surgeries/patients/'
-HISTORY_URL     = '/api/v1/surgeries/history/'
-USED_ITEMS_URL  = '/api/v1/surgeries/used-items/'
+PATIENTS_URL    = '/api/v2/surgeries/patients/'
+HISTORY_URL     = '/api/v2/surgeries/history/'
+USED_ITEMS_URL  = '/api/v2/surgeries/used-items/'
 
 
 def _user():

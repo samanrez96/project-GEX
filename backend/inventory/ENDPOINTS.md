@@ -1,6 +1,6 @@
 # Inventory App – Complete cURL Documentation
 
-**Base URL**: `http://localhost:8000/api/v1/inventory/`  
+**Base URL**: `http://localhost:8000/api/v2/inventory/`  
 **Authentication**: JWT Token (Bearer) or Session  
 **Permissions**:
 - **Read** (GET): `IsAuthenticated` (any logged-in user)
@@ -18,7 +18,7 @@
 **Query Params**: `is_active`, `parent`
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/inventory/categories/?is_active=true" \
+curl -X GET "http://localhost:8000/api/v2/inventory/categories/?is_active=true" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -51,7 +51,7 @@ curl -X GET "http://localhost:8000/api/v1/inventory/categories/?is_active=true" 
 **GET** `/categories/{id}/`
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/inventory/categories/1/" \
+curl -X GET "http://localhost:8000/api/v2/inventory/categories/1/" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -79,7 +79,7 @@ curl -X GET "http://localhost:8000/api/v1/inventory/categories/1/" \
 **GET** `/categories/tree/`
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/inventory/categories/tree/" \
+curl -X GET "http://localhost:8000/api/v2/inventory/categories/tree/" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -116,7 +116,7 @@ curl -X GET "http://localhost:8000/api/v1/inventory/categories/tree/" \
 **Query Params**: `product_type`, `category`, `category_tree`, `is_active`, `low_stock`, `out_of_stock`, `price_min`, `price_max`, `has_barcode`, `vendor`, `stock_min`, `stock_max`, `search`, `ordering`, `page`, `page_size`
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/inventory/products/?is_active=true&product_type=medicine&search=آسپیرین" \
+curl -X GET "http://localhost:8000/api/v2/inventory/products/?is_active=true&product_type=medicine&search=آسپیرین" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -156,7 +156,7 @@ curl -X GET "http://localhost:8000/api/v1/inventory/products/?is_active=true&pro
 **GET** `/products/{id}/`
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/inventory/products/10/" \
+curl -X GET "http://localhost:8000/api/v2/inventory/products/10/" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -196,7 +196,7 @@ curl -X GET "http://localhost:8000/api/v1/inventory/products/10/" \
 **POST** `/products/`
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/inventory/products/" \
+curl -X POST "http://localhost:8000/api/v2/inventory/products/" \
   -H "Authorization: Token YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -247,7 +247,7 @@ curl -X POST "http://localhost:8000/api/v1/inventory/products/" \
 **PATCH** `/products/{id}/`
 
 ```bash
-curl -X PATCH "http://localhost:8000/api/v1/inventory/products/10/" \
+curl -X PATCH "http://localhost:8000/api/v2/inventory/products/10/" \
   -H "Authorization: Token YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"minimum_stock": "30.000"}'
@@ -259,7 +259,7 @@ curl -X PATCH "http://localhost:8000/api/v1/inventory/products/10/" \
 **DELETE** `/products/{id}/` – always blocked with error message.
 
 ```bash
-curl -X DELETE "http://localhost:8000/api/v1/inventory/products/10/" \
+curl -X DELETE "http://localhost:8000/api/v2/inventory/products/10/" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -274,7 +274,7 @@ curl -X DELETE "http://localhost:8000/api/v1/inventory/products/10/" \
 **GET** `/products/low_stock/`
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/inventory/products/low_stock/" \
+curl -X GET "http://localhost:8000/api/v2/inventory/products/low_stock/" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -284,7 +284,7 @@ curl -X GET "http://localhost:8000/api/v1/inventory/products/low_stock/" \
 **GET** `/products/export_ids/`
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/inventory/products/export_ids/" \
+curl -X GET "http://localhost:8000/api/v2/inventory/products/export_ids/" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -300,7 +300,7 @@ curl -X GET "http://localhost:8000/api/v1/inventory/products/export_ids/" \
 **GET** `/products/{id}/purge-preview/`
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/inventory/products/10/purge-preview/" \
+curl -X GET "http://localhost:8000/api/v2/inventory/products/10/purge-preview/" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -338,7 +338,7 @@ curl -X GET "http://localhost:8000/api/v1/inventory/products/10/purge-preview/" 
 **POST** `/products/{id}/purge/`
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/inventory/products/10/purge/" \
+curl -X POST "http://localhost:8000/api/v2/inventory/products/10/purge/" \
   -H "Authorization: Token YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"confirmation_code": "MED-001"}'
@@ -368,7 +368,7 @@ curl -X POST "http://localhost:8000/api/v1/inventory/products/10/purge/" \
 **Query Params**: `vendor_id`, `date_from`, `date_to`, `currency`
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/inventory/products/10/vendor-price-history/?vendor_id=2" \
+curl -X GET "http://localhost:8000/api/v2/inventory/products/10/vendor-price-history/?vendor_id=2" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -396,7 +396,7 @@ curl -X GET "http://localhost:8000/api/v1/inventory/products/10/vendor-price-his
 **GET** `/products/?export=excel`
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/inventory/products/?export=excel" \
+curl -X GET "http://localhost:8000/api/v2/inventory/products/?export=excel" \
   -H "Authorization: Token YOUR_TOKEN" \
   --output products.xlsx
 ```
@@ -411,7 +411,7 @@ curl -X GET "http://localhost:8000/api/v1/inventory/products/?export=excel" \
 **Query Params**: `is_active`, `search`, `ordering`
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/inventory/vendors/?is_active=true&search=تهران" \
+curl -X GET "http://localhost:8000/api/v2/inventory/vendors/?is_active=true&search=تهران" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -439,7 +439,7 @@ curl -X GET "http://localhost:8000/api/v1/inventory/vendors/?is_active=true&sear
 **GET** `/vendors/{id}/`
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/inventory/vendors/1/" \
+curl -X GET "http://localhost:8000/api/v2/inventory/vendors/1/" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -470,7 +470,7 @@ curl -X GET "http://localhost:8000/api/v1/inventory/vendors/1/" \
 **POST** `/vendors/`
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/inventory/vendors/" \
+curl -X POST "http://localhost:8000/api/v2/inventory/vendors/" \
   -H "Authorization: Token YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -488,7 +488,7 @@ curl -X POST "http://localhost:8000/api/v1/inventory/vendors/" \
 **PATCH** `/vendors/{id}/`
 
 ```bash
-curl -X PATCH "http://localhost:8000/api/v1/inventory/vendors/1/" \
+curl -X PATCH "http://localhost:8000/api/v2/inventory/vendors/1/" \
   -H "Authorization: Token YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"is_active": false}'
@@ -498,7 +498,7 @@ curl -X PATCH "http://localhost:8000/api/v1/inventory/vendors/1/" \
 **DELETE** `/vendors/{id}/` – only if no related purchases exist.
 
 ```bash
-curl -X DELETE "http://localhost:8000/api/v1/inventory/vendors/1/" \
+curl -X DELETE "http://localhost:8000/api/v2/inventory/vendors/1/" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -510,7 +510,7 @@ curl -X DELETE "http://localhost:8000/api/v1/inventory/vendors/1/" \
 **Query Params**: `search`, `page`, `page_size`
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/inventory/vendors/1/purchased-products/?search=آسپیرین" \
+curl -X GET "http://localhost:8000/api/v2/inventory/vendors/1/purchased-products/?search=آسپیرین" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -550,7 +550,7 @@ curl -X GET "http://localhost:8000/api/v1/inventory/vendors/1/purchased-products
 **Query Params**: `product`, `vendor`, `is_active`, `is_primary`, `search`, `ordering`
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/inventory/product-vendors/?product=10" \
+curl -X GET "http://localhost:8000/api/v2/inventory/product-vendors/?product=10" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -586,7 +586,7 @@ curl -X GET "http://localhost:8000/api/v1/inventory/product-vendors/?product=10"
 **POST** `/product-vendors/`
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/inventory/product-vendors/" \
+curl -X POST "http://localhost:8000/api/v2/inventory/product-vendors/" \
   -H "Authorization: Token YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -614,7 +614,7 @@ curl -X POST "http://localhost:8000/api/v1/inventory/product-vendors/" \
 **Query Params**: `product`, `movement_type`, `source_type`, `search`, `ordering`
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/inventory/stock-movements/?product=10" \
+curl -X GET "http://localhost:8000/api/v2/inventory/stock-movements/?product=10" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -649,7 +649,7 @@ curl -X GET "http://localhost:8000/api/v1/inventory/stock-movements/?product=10"
 **POST** `/stock-movements/`
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/inventory/stock-movements/" \
+curl -X POST "http://localhost:8000/api/v2/inventory/stock-movements/" \
   -H "Authorization: Token YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -687,7 +687,7 @@ curl -X POST "http://localhost:8000/api/v1/inventory/stock-movements/" \
 **GET** `/stock-movements/{id}/`
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/inventory/stock-movements/6/" \
+curl -X GET "http://localhost:8000/api/v2/inventory/stock-movements/6/" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -703,7 +703,7 @@ curl -X GET "http://localhost:8000/api/v1/inventory/stock-movements/6/" \
 **Query Params**: `vendor`, `status`, `stock_applied`, `date_from`, `date_to`, `search`, `ordering`
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/inventory/purchases/?vendor=1&status=CONFIRMED" \
+curl -X GET "http://localhost:8000/api/v2/inventory/purchases/?vendor=1&status=CONFIRMED" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -737,7 +737,7 @@ curl -X GET "http://localhost:8000/api/v1/inventory/purchases/?vendor=1&status=C
 **GET** `/purchases/{id}/`
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/inventory/purchases/5/" \
+curl -X GET "http://localhost:8000/api/v2/inventory/purchases/5/" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -777,7 +777,7 @@ curl -X GET "http://localhost:8000/api/v1/inventory/purchases/5/" \
 **POST** `/purchases/`
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/inventory/purchases/" \
+curl -X POST "http://localhost:8000/api/v2/inventory/purchases/" \
   -H "Authorization: Token YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -810,7 +810,7 @@ curl -X POST "http://localhost:8000/api/v1/inventory/purchases/" \
 **PATCH** `/purchases/{id}/`
 
 ```bash
-curl -X PATCH "http://localhost:8000/api/v1/inventory/purchases/6/" \
+curl -X PATCH "http://localhost:8000/api/v2/inventory/purchases/6/" \
   -H "Authorization: Token YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"notes": "خرید جدید - اصلاح شده"}'
@@ -820,7 +820,7 @@ curl -X PATCH "http://localhost:8000/api/v1/inventory/purchases/6/" \
 **POST** `/purchases/{id}/confirm/`
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/inventory/purchases/6/confirm/" \
+curl -X POST "http://localhost:8000/api/v2/inventory/purchases/6/confirm/" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -846,7 +846,7 @@ curl -X POST "http://localhost:8000/api/v1/inventory/purchases/6/confirm/" \
 **POST** `/purchases/{id}/cancel/`
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/inventory/purchases/6/cancel/" \
+curl -X POST "http://localhost:8000/api/v2/inventory/purchases/6/cancel/" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -856,7 +856,7 @@ curl -X POST "http://localhost:8000/api/v1/inventory/purchases/6/cancel/" \
 **GET** `/purchases/price_history/?product=10`
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/inventory/purchases/price_history/?product=10" \
+curl -X GET "http://localhost:8000/api/v2/inventory/purchases/price_history/?product=10" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -884,7 +884,7 @@ curl -X GET "http://localhost:8000/api/v1/inventory/purchases/price_history/?pro
 **GET** `/purchases/?export=excel`
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/inventory/purchases/?export=excel" \
+curl -X GET "http://localhost:8000/api/v2/inventory/purchases/?export=excel" \
   -H "Authorization: Token YOUR_TOKEN" \
   --output purchases.xlsx
 ```
@@ -897,7 +897,7 @@ curl -X GET "http://localhost:8000/api/v1/inventory/purchases/?export=excel" \
 **GET** `/purchase-items/?purchase=6`
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/inventory/purchase-items/?purchase=6" \
+curl -X GET "http://localhost:8000/api/v2/inventory/purchase-items/?purchase=6" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -905,7 +905,7 @@ curl -X GET "http://localhost:8000/api/v1/inventory/purchase-items/?purchase=6" 
 **POST** `/purchase-items/`
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/inventory/purchase-items/" \
+curl -X POST "http://localhost:8000/api/v2/inventory/purchase-items/" \
   -H "Authorization: Token YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -948,7 +948,7 @@ curl -X POST "http://localhost:8000/api/v1/inventory/purchase-items/" \
 **Query Params**: `product_type`, `category`, `low_stock`, `out_of_stock`, `page`, `page_size`
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/inventory/reports/stock/?product_type=medicine&low_stock=true" \
+curl -X GET "http://localhost:8000/api/v2/inventory/reports/stock/?product_type=medicine&low_stock=true" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -993,7 +993,7 @@ curl -X GET "http://localhost:8000/api/v1/inventory/reports/stock/?product_type=
 **Query Params**: `start_date`, `end_date`, `product_type`, `group_by`, `vendor_id`, `page`, `page_size`, `export=excel`
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/inventory/reports/cost/?start_date=2026-01-01&end_date=2026-08-19&group_by=vendor" \
+curl -X GET "http://localhost:8000/api/v2/inventory/reports/cost/?start_date=2026-01-01&end_date=2026-08-19&group_by=vendor" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -1030,7 +1030,7 @@ curl -X GET "http://localhost:8000/api/v1/inventory/reports/cost/?start_date=202
 **GET** `/reports/cost/?export=excel`
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/inventory/reports/cost/?start_date=2026-01-01&end_date=2026-08-19&export=excel" \
+curl -X GET "http://localhost:8000/api/v2/inventory/reports/cost/?start_date=2026-01-01&end_date=2026-08-19&export=excel" \
   -H "Authorization: Token YOUR_TOKEN" \
   --output cost_report.xlsx
 ```

@@ -7,8 +7,8 @@
 const PurchaseListApp = (function () {
     'use strict';
 
-    var API_URL     = '/api/v1/inventory/purchases/';
-    var VENDORS_URL = '/api/v1/inventory/vendors/';
+    var API_URL     = '/api/v2/inventory/purchases/';
+    var VENDORS_URL = '/api/v2/inventory/vendors/';
 
     // ── State ────────────────────────────────────────────────────
     var state = {

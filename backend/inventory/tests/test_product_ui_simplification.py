@@ -21,7 +21,7 @@ from inventory.models import Product, ProductCategory, ProductType, ProductVendo
 
 User = get_user_model()
 PRODUCT_LIST_URL = '/admin/inventory/product/'
-PRODUCTS_API_URL = '/api/v1/inventory/products/'
+PRODUCTS_API_URL = '/api/v2/inventory/products/'
 
 
 def _make_admin(username='ui_simp_admin'):

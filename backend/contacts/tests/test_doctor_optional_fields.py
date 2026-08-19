@@ -11,7 +11,7 @@ from rest_framework.test import APITestCase
 from contacts.models import Doctor, DoctorSpecialty
 
 ADD_URL = '/admin/contacts/doctor/add/'
-API_URL = '/api/v1/contacts/doctors/'
+API_URL = '/api/v2/contacts/doctors/'
 User = get_user_model()
 
 

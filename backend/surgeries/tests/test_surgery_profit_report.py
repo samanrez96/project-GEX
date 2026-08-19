@@ -1,6 +1,6 @@
 """Tests for the Surgery Profit Report API (CLI-53).
 
-GET /api/v1/surgeries/reports/profit/
+GET /api/v2/surgeries/reports/profit/
 """
 
 import datetime
@@ -21,7 +21,7 @@ from surgeries.models import (
     SurgeryUsedItem,
 )
 
-URL = '/api/v1/surgeries/reports/profit/'
+URL = '/api/v2/surgeries/reports/profit/'
 
 # ---------------------------------------------------------------------------
 # Setup helpers

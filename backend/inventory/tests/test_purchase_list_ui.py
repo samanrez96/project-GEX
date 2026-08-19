@@ -227,7 +227,7 @@ class APIStatusFieldTest(ListUIBase):
 
     def _api(self, **params):
         qs = "&".join(f"{k}={v}" for k, v in params.items())
-        url = f'/api/v1/inventory/purchases/?{qs}' if qs else '/api/v1/inventory/purchases/'
+        url = f'/api/v2/inventory/purchases/?{qs}' if qs else '/api/v2/inventory/purchases/'
         return self.client.get(url, HTTP_ACCEPT='application/json')
 
     def test_api_returns_status_raw_value(self):

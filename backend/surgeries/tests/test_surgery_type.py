@@ -12,7 +12,7 @@ from surgeries.models import SurgeryType
 
 User = get_user_model()
 
-TYPES_URL = '/api/v1/surgeries/types/'
+TYPES_URL = '/api/v2/surgeries/types/'
 
 SEED_CODES = {'nose', 'stomach', 'lift', 'beauty', 'other'}
 

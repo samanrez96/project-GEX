@@ -306,7 +306,7 @@ class ProductPurgeSingleItemPurchaseTest(TestCase):
 # ---------------------------------------------------------------------------
 
 class ProductPurgeSurgeryCostTest(APITestCase):
-    PROFIT_URL = '/api/v1/surgeries/reports/profit/'
+    PROFIT_URL = '/api/v2/surgeries/reports/profit/'
 
     def test_consumed_item_cost_and_center_income_after_purge(self):
         from finance.models import CenterCommissionIncome
@@ -353,10 +353,10 @@ class ProductPurgeApiPermissionTest(APITestCase):
         self.product = _product()
 
     def _preview_url(self, pk):
-        return f'/api/v1/inventory/products/{pk}/purge-preview/'
+        return f'/api/v2/inventory/products/{pk}/purge-preview/'
 
     def _purge_url(self, pk):
-        return f'/api/v1/inventory/products/{pk}/purge/'
+        return f'/api/v2/inventory/products/{pk}/purge/'
 
     def test_superuser_can_preview_and_purge(self):
         self.client.force_authenticate(_superuser())
@@ -398,7 +398,7 @@ class ProductPurgeApiPermissionTest(APITestCase):
 
     def test_ordinary_destroy_is_always_blocked(self):
         self.client.force_authenticate(_superuser())
-        resp = self.client.delete(f'/api/v1/inventory/products/{self.product.pk}/')
+        resp = self.client.delete(f'/api/v2/inventory/products/{self.product.pk}/')
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertTrue(Product.objects.filter(pk=self.product.pk).exists())
 
@@ -497,7 +497,7 @@ class ProductPurgeIdempotencyTest(APITestCase):
         superuser = _superuser()
         self.client.force_authenticate(superuser)
 
-        url = f'/api/v1/inventory/products/{product.pk}/purge/'
+        url = f'/api/v2/inventory/products/{product.pk}/purge/'
         resp = self.client.post(url, {'confirmation_code': product.internal_code})
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
@@ -530,35 +530,35 @@ class ProductPurgePanelStabilityTest(APITestCase):
         ProductPurgeService.purge(self.product, self.superuser)
 
     def test_product_list_loads_without_deleted_product(self):
-        resp = self.client.get('/api/v1/inventory/products/')
+        resp = self.client.get('/api/v2/inventory/products/')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         ids = [row['id'] for row in resp.data['results']]
         self.assertNotIn(self.product.pk, ids)
         self.assertIn(self.other_product.pk, ids)
 
     def test_product_detail_404s_cleanly(self):
-        resp = self.client.get(f'/api/v1/inventory/products/{self.product.pk}/')
+        resp = self.client.get(f'/api/v2/inventory/products/{self.product.pk}/')
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_purchase_detail_loads_with_remaining_item_only(self):
-        resp = self.client.get(f'/api/v1/inventory/purchases/{self.purchase.pk}/')
+        resp = self.client.get(f'/api/v2/inventory/purchases/{self.purchase.pk}/')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         product_ids = [i['product'] for i in resp.data['items']]
         self.assertNotIn(self.product.pk, product_ids)
         self.assertIn(self.other_product.pk, product_ids)
 
     def test_surgery_history_detail_loads(self):
-        resp = self.client.get(f'/api/v1/surgeries/history/{self.surgery.pk}/')
+        resp = self.client.get(f'/api/v2/surgeries/history/{self.surgery.pk}/')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
     def test_stock_movement_list_loads(self):
-        resp = self.client.get('/api/v1/inventory/stock-movements/')
+        resp = self.client.get('/api/v2/inventory/stock-movements/')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
     def test_product_excel_export_still_works(self):
-        resp = self.client.get('/api/v1/inventory/products/', {'export': 'excel'})
+        resp = self.client.get('/api/v2/inventory/products/', {'export': 'excel'})
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
     def test_purchase_excel_export_still_works(self):
-        resp = self.client.get('/api/v1/inventory/purchases/', {'export': 'excel'})
+        resp = self.client.get('/api/v2/inventory/purchases/', {'export': 'excel'})
         self.assertEqual(resp.status_code, status.HTTP_200_OK)

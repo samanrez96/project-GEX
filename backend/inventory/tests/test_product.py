@@ -178,20 +178,20 @@ class ProductAPITest(TestCase):
         self.p1._apply_stock_delta(Decimal("5"))
 
     def test_list_returns_only_active_by_default(self):
-        resp = self.client.get("/api/v1/inventory/products/")
+        resp = self.client.get("/api/v2/inventory/products/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         codes = [item["internal_code"] for item in resp.data["results"]]
         self.assertNotIn("MED-999", codes)
         self.assertIn("MED-001", codes)
 
     def test_list_filter_by_product_type(self):
-        resp = self.client.get("/api/v1/inventory/products/?product_type=medicine")
+        resp = self.client.get("/api/v2/inventory/products/?product_type=medicine")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         types = {item["product_type"] for item in resp.data["results"]}
         self.assertEqual(types, {"medicine"})
 
     def test_list_filter_low_stock(self):
-        resp = self.client.get("/api/v1/inventory/products/?low_stock=true")
+        resp = self.client.get("/api/v2/inventory/products/?low_stock=true")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         codes = [item["internal_code"] for item in resp.data["results"]]
         self.assertIn("MED-001", codes)
@@ -202,14 +202,14 @@ class ProductAPITest(TestCase):
                           minimum_stock=Decimal("20"))
         p3._apply_stock_delta(Decimal("3"))  # stock=3, lower than p1's 5
 
-        resp = self.client.get("/api/v1/inventory/products/low_stock/")
+        resp = self.client.get("/api/v2/inventory/products/low_stock/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         stocks = [Decimal(str(item["current_stock"])) for item in resp.data]
         self.assertEqual(stocks, sorted(stocks))  # ascending
 
     def test_post_with_current_stock_in_payload_is_ignored(self):
         """current_stock in POST payload must be silently dropped — stays 0."""
-        resp = self.client.post("/api/v1/inventory/products/", {
+        resp = self.client.post("/api/v2/inventory/products/", {
             "name":          "پروپوفول",
             "internal_code": "MED-010",
             "product_type":  "medicine",
@@ -221,5 +221,5 @@ class ProductAPITest(TestCase):
 
     def test_unauthenticated_request_rejected(self):
         self.client.force_authenticate(user=None)
-        resp = self.client.get("/api/v1/inventory/products/")
+        resp = self.client.get("/api/v2/inventory/products/")
         self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)

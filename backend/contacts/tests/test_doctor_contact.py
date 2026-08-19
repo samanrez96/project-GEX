@@ -8,7 +8,7 @@ from rest_framework.test import APITestCase
 
 from contacts.models import CooperationStatus, Doctor, DoctorSpecialty
 
-DOCTORS_URL = '/api/v1/contacts/doctors/'
+DOCTORS_URL = '/api/v2/contacts/doctors/'
 User = get_user_model()
 
 

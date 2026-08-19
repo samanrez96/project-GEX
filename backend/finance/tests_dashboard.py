@@ -8,8 +8,8 @@ from rest_framework.test import APITestCase
 
 User = get_user_model()
 
-BALANCE_URL = '/api/v1/finance/reports/balance/'
-TREND_URL   = '/api/v1/finance/reports/trend/'
+BALANCE_URL = '/api/v2/finance/reports/balance/'
+TREND_URL   = '/api/v2/finance/reports/trend/'
 
 
 class FinanceDashboardPageTest(TestCase):

@@ -23,8 +23,8 @@ _EMPLOYEE_LIST_ACTIONS = frozenset({"list"})
 class JobPositionViewSet(viewsets.ModelViewSet):
     """CRUD viewset for job positions.
 
-    GET/POST             /api/v1/employees/positions/
-    GET/PUT/PATCH/DELETE /api/v1/employees/positions/{id}/
+    GET/POST             /api/v2/employees/positions/
+    GET/PUT/PATCH/DELETE /api/v2/employees/positions/{id}/
 
     Search (?search=): name, description
     Ordering (?ordering=): name, created_at  (default: name)
@@ -73,8 +73,8 @@ class JobPositionViewSet(viewsets.ModelViewSet):
 class EmployeeViewSet(ExcelExportMixin, viewsets.ModelViewSet):
     """CRUD viewset for clinic employees.
 
-    GET/POST             /api/v1/employees/
-    GET/PUT/PATCH/DELETE /api/v1/employees/{id}/
+    GET/POST             /api/v2/employees/
+    GET/PUT/PATCH/DELETE /api/v2/employees/{id}/
 
     Search (?search=):
       full_name, email, personal_phone, national_id, job_position__name
@@ -203,8 +203,8 @@ class EmployeeViewSet(ExcelExportMixin, viewsets.ModelViewSet):
 class EmployeePurchaseCommissionViewSet(viewsets.ModelViewSet):
     """CRUD for employee purchase commissions.
 
-    GET/POST             /api/v1/employees/purchase-commissions/
-    GET/PUT/PATCH/DELETE /api/v1/employees/purchase-commissions/{id}/
+    GET/POST             /api/v2/employees/purchase-commissions/
+    GET/PUT/PATCH/DELETE /api/v2/employees/purchase-commissions/{id}/
 
     Filter: ?employee={id}
     Ordering: commission_date (default: -commission_date)

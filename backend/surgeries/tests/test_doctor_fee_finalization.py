@@ -19,7 +19,7 @@ from surgeries.models import Patient, SurgeryHistory, SurgeryStatus, SurgeryType
 from surgeries.services import SurgeryFinanceService
 
 User = get_user_model()
-HISTORY_URL = '/api/v1/surgeries/history/'
+HISTORY_URL = '/api/v2/surgeries/history/'
 
 _counter = [0]
 

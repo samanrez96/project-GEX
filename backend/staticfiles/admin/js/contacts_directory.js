@@ -5,8 +5,8 @@
 var ContactsDirectoryApp = (function () {
     'use strict';
 
-    var DOCTORS_URL   = '/api/v1/contacts/doctors/';
-    var EMPLOYEES_URL = '/api/v1/contacts/employees/';
+    var DOCTORS_URL   = '/api/v2/contacts/doctors/';
+    var EMPLOYEES_URL = '/api/v2/contacts/employees/';
 
     var state = {
         activeTab: 'doctors',

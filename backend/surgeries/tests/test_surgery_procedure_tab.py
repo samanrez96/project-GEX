@@ -24,7 +24,7 @@ from surgeries.models import AnesthesiaType, Patient, SurgeryHistory, SurgeryTyp
 
 User = get_user_model()
 
-API_URL = '/api/v1/surgeries/history/'
+API_URL = '/api/v2/surgeries/history/'
 
 _ctr = [0]
 

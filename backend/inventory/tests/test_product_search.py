@@ -10,9 +10,9 @@ from rest_framework.test import APIClient
 
 from inventory.models import Product, ProductCategory, ProductType
 
-LIST_URL       = "/api/v1/inventory/products/"
-LOW_STOCK_URL  = "/api/v1/inventory/products/low_stock/"
-EXPORT_IDS_URL = "/api/v1/inventory/products/export_ids/"
+LIST_URL       = "/api/v2/inventory/products/"
+LOW_STOCK_URL  = "/api/v2/inventory/products/low_stock/"
+EXPORT_IDS_URL = "/api/v2/inventory/products/export_ids/"
 
 
 def _cat(name, parent=None):

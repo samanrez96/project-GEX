@@ -1,6 +1,6 @@
 ### 📘 API Documentation – Employees App
 
-**Base URL**: `http://localhost:8000/api/v1/employees/`  
+**Base URL**: `http://localhost:8000/api/v2/employees/`  
 **Authentication**: JWT Token (Bearer) or Session  
 **Permissions**:
 - **Read** (GET): `IsAuthenticated` (any logged-in user).
@@ -15,7 +15,7 @@
 - Query: `search`, `ordering`, `is_active`
 - **cURL**:
 ```bash
-curl -X GET "http://localhost:8000/api/v1/employees/positions/?is_active=true" \
+curl -X GET "http://localhost:8000/api/v2/employees/positions/?is_active=true" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 - **Sample Response**:
@@ -36,7 +36,7 @@ curl -X GET "http://localhost:8000/api/v1/employees/positions/?is_active=true" \
 - Body: `{"name":"تکنسین", "description":"", "is_active":true}`
 - **cURL**:
 ```bash
-curl -X POST "http://localhost:8000/api/v1/employees/positions/" \
+curl -X POST "http://localhost:8000/api/v2/employees/positions/" \
   -H "Authorization: Token YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"name":"تکنسین","is_active":true}'
@@ -55,7 +55,7 @@ curl -X POST "http://localhost:8000/api/v1/employees/positions/" \
 - Filters: `is_active`, `gender`, `job_position`, `start_date_from`, `start_date_to`, `search`, `ordering`
 - **cURL**:
 ```bash
-curl -X GET "http://localhost:8000/api/v1/employees/?is_active=true&search=علی" \
+curl -X GET "http://localhost:8000/api/v2/employees/?is_active=true&search=علی" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 - **Sample Response** (lightweight list):
@@ -86,7 +86,7 @@ curl -X GET "http://localhost:8000/api/v1/employees/?is_active=true&search=عل�
 - **GET** `/{id}/`  
 - **cURL**:
 ```bash
-curl -X GET "http://localhost:8000/api/v1/employees/3/" \
+curl -X GET "http://localhost:8000/api/v2/employees/3/" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 - **Sample Response** (detail, includes wage info):
@@ -136,7 +136,7 @@ curl -X GET "http://localhost:8000/api/v1/employees/3/" \
 ```
 - **cURL**:
 ```bash
-curl -X POST "http://localhost:8000/api/v1/employees/" \
+curl -X POST "http://localhost:8000/api/v2/employees/" \
   -H "Authorization: Token YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"full_name":"مریم کریمی","national_id":"0012345679","gender":"female","job_position":2,"start_date":"2026-08-01","is_active":true,"email":"maryam@clinic.com","personal_phone":"09123456780","emergency_contact_phone":"021-12345679","address":"اصفهان"}'
@@ -153,7 +153,7 @@ curl -X POST "http://localhost:8000/api/v1/employees/" \
 - **GET** `/purchase-commissions/?employee=3`
 - **cURL**:
 ```bash
-curl -X GET "http://localhost:8000/api/v1/employees/purchase-commissions/?employee=3" \
+curl -X GET "http://localhost:8000/api/v2/employees/purchase-commissions/?employee=3" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 - **Sample Response**:
@@ -189,7 +189,7 @@ curl -X GET "http://localhost:8000/api/v1/employees/purchase-commissions/?employ
 - Body: `{"employee":3, "amount":"50000", "commission_date":"2026-08-16", "description":"کمیسیون خرید"}`
 - **cURL**:
 ```bash
-curl -X POST "http://localhost:8000/api/v1/employees/purchase-commissions/" \
+curl -X POST "http://localhost:8000/api/v2/employees/purchase-commissions/" \
   -H "Authorization: Token YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"employee":3,"amount":"50000","commission_date":"2026-08-16","description":"کمیسیون خرید"}'
@@ -205,7 +205,7 @@ curl -X POST "http://localhost:8000/api/v1/employees/purchase-commissions/" \
 - **GET** `/?export=excel`  
 - **cURL**:
 ```bash
-curl -X GET "http://localhost:8000/api/v1/employees/?export=excel" \
+curl -X GET "http://localhost:8000/api/v2/employees/?export=excel" \
   -H "Authorization: Token YOUR_TOKEN" \
   --output employees.xlsx
 ```

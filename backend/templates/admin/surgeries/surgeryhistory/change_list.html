@@ -29,7 +29,7 @@
       <h1 class="adm-page-title">تاریخچه عمل های جراحی</h1>
     </div>
     <div class="adm-page-actions">
-      <a id="sh-export-btn" class="sh-export-btn adm-btn" href="/api/v1/surgeries/history/?export=excel">⬇ خروجی اکسل</a>
+      <a id="sh-export-btn" class="sh-export-btn adm-btn" href="/api/v2/surgeries/history/?export=excel">⬇ خروجی اکسل</a>
       {% if has_add_permission %}
       <a class="sh-add-btn adm-btn adm-btn--primary" href="{% url 'admin:surgeries_surgeryhistory_add' %}">+ ثبت عمل جدید</a>
       {% endif %}

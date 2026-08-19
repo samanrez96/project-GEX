@@ -1,6 +1,6 @@
 ## 📘 API Documentation – Accounts App
 
-**Base URL**: `http://localhost:8000/api/v1/auth/`  
+**Base URL**: `http://localhost:8000/api/v2/auth/`  
 **Authentication**: JWT (Bearer Token) – except for `login/` which accepts credentials.  
 **Endpoints**: 4 endpoints for full authentication flow.
 
@@ -19,7 +19,7 @@
   ```
 - **cURL**:
   ```bash
-  curl -X POST "http://localhost:8000/api/v1/auth/login/" \
+  curl -X POST "http://localhost:8000/api/v2/auth/login/" \
     -H "Content-Type: application/json" \
     -d '{"username":"admin","password":"secret123"}'
   ```
@@ -47,7 +47,7 @@
   ```
 - **cURL**:
   ```bash
-  curl -X POST "http://localhost:8000/api/v1/auth/refresh/" \
+  curl -X POST "http://localhost:8000/api/v2/auth/refresh/" \
     -H "Content-Type: application/json" \
     -d '{"refresh":"eyJhbGciOiJIUzI1NiIs..."}'
   ```
@@ -69,7 +69,7 @@
   ```
 - **cURL**:
   ```bash
-  curl -X POST "http://localhost:8000/api/v1/auth/logout/" \
+  curl -X POST "http://localhost:8000/api/v2/auth/logout/" \
     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIs..." \
     -H "Content-Type: application/json" \
     -d '{"refresh":"eyJhbGciOiJIUzI1NiIs..."}'
@@ -96,7 +96,7 @@
 - **Headers**: `Authorization: Bearer <access_token>`  
 - **cURL**:
   ```bash
-  curl -X GET "http://localhost:8000/api/v1/auth/me/" \
+  curl -X GET "http://localhost:8000/api/v2/auth/me/" \
     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIs..."
   ```
 - **Sample Response** (200 OK):

@@ -1,7 +1,7 @@
 """Excel export tests for surgery endpoints (CLI-54).
 
-Covers: /api/v1/surgeries/history/?export=excel
-        /api/v1/surgeries/reports/profit/?export=excel
+Covers: /api/v2/surgeries/history/?export=excel
+        /api/v2/surgeries/reports/profit/?export=excel
 """
 
 import io
@@ -23,8 +23,8 @@ from surgeries.models import (
     SurgeryUsedItem,
 )
 
-HISTORY_URL = '/api/v1/surgeries/history/'
-PROFIT_URL  = '/api/v1/surgeries/reports/profit/'
+HISTORY_URL = '/api/v2/surgeries/history/'
+PROFIT_URL  = '/api/v2/surgeries/reports/profit/'
 XLSX_CT     = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
 

@@ -331,7 +331,7 @@ class SeedDemoDataCommandTest(TestCase):
 
         client = APIClient()
         client.force_authenticate(user=u)
-        resp = client.get("/api/v1/finance/reports/balance/")
+        resp = client.get("/api/v2/finance/reports/balance/")
         self.assertEqual(resp.status_code, 200)
 
         data = resp.data

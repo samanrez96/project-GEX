@@ -24,7 +24,7 @@ from common.uploads import MAX_IMAGE_UPLOAD_SIZE, validate_image_upload
 from contacts.models import Doctor, DoctorSpecialty
 
 User = get_user_model()
-DOCTORS_URL = '/api/v1/contacts/doctors/'
+DOCTORS_URL = '/api/v2/contacts/doctors/'
 
 _TEST_MEDIA_ROOT = tempfile.mkdtemp(prefix='doctor_docs_test_')
 

@@ -103,7 +103,7 @@ Start with the app I will provide now. If you need any clarification about exist
 
 #### API Documentation
 
-**Base URL**: `http://localhost:8000/api/v1/<app_name>`
+**Base URL**: `http://localhost:8000/api/v2/<app_name>`
 **Authentication**: Token / Session
 
 ##### 1. Endpoint Name

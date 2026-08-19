@@ -160,7 +160,7 @@ class ProductCategoryAPITest(TestCase):
         self.child         = make_category("داروی بیهوشی", parent=self.root_daro)
 
     def test_list_returns_all_categories(self):
-        resp = self.client.get("/api/v1/inventory/categories/")
+        resp = self.client.get("/api/v2/inventory/categories/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         names = [item["name"] for item in resp.data["results"]]
         self.assertIn("دارو", names)
@@ -169,32 +169,32 @@ class ProductCategoryAPITest(TestCase):
 
     def test_list_filter_by_is_active(self):
         inactive = make_category("منسوخ", is_active=False)
-        resp = self.client.get("/api/v1/inventory/categories/?is_active=true")
+        resp = self.client.get("/api/v2/inventory/categories/?is_active=true")
         names = [item["name"] for item in resp.data["results"]]
         self.assertNotIn("منسوخ", names)
         _ = inactive  # silence unused-var warning
 
     def test_list_filter_by_parent_null(self):
-        resp = self.client.get("/api/v1/inventory/categories/?parent=null")
+        resp = self.client.get("/api/v2/inventory/categories/?parent=null")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         for item in resp.data["results"]:
             self.assertIsNone(item["parent"])
 
     def test_retrieve_includes_direct_children(self):
-        resp = self.client.get(f"/api/v1/inventory/categories/{self.root_daro.pk}/")
+        resp = self.client.get(f"/api/v2/inventory/categories/{self.root_daro.pk}/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         child_names = [c["name"] for c in resp.data["children"]]
         self.assertIn("داروی بیهوشی", child_names)
 
     def test_tree_endpoint_returns_roots_only(self):
-        resp = self.client.get("/api/v1/inventory/categories/tree/")
+        resp = self.client.get("/api/v2/inventory/categories/tree/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         # All top-level items should be root categories
         for item in resp.data:
             self.assertEqual(item["depth"], 0)
 
     def test_tree_endpoint_nests_children(self):
-        resp = self.client.get("/api/v1/inventory/categories/tree/")
+        resp = self.client.get("/api/v2/inventory/categories/tree/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         daro_node = next(
             (item for item in resp.data if item["name"] == "دارو"), None
@@ -205,5 +205,5 @@ class ProductCategoryAPITest(TestCase):
 
     def test_unauthenticated_request_is_rejected(self):
         self.client.force_authenticate(user=None)
-        resp = self.client.get("/api/v1/inventory/categories/")
+        resp = self.client.get("/api/v2/inventory/categories/")
         self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)

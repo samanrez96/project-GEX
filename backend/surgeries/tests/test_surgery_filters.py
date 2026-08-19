@@ -18,7 +18,7 @@ from surgeries.models import (
 )
 
 User = get_user_model()
-URL  = '/api/v1/surgeries/history/'
+URL  = '/api/v2/surgeries/history/'
 
 _ctr = [0]
 

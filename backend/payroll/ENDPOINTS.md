@@ -1,6 +1,6 @@
 ### 📘 API Documentation
 
-**Base URL**: `http://localhost:8000/api/v1/payroll/`  
+**Base URL**: `http://localhost:8000/api/v2/payroll/`  
 **Authentication**: JWT Token (Bearer) or Session  
 **Permissions**:
 - **Read** (GET): `IsAuthenticated` (any logged-in user)
@@ -17,7 +17,7 @@
 **POST** `/periods/{id}/close/` – close a period (admin/finance)  
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/payroll/periods/?status=OPEN" \
+curl -X GET "http://localhost:8000/api/v2/payroll/periods/?status=OPEN" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -28,7 +28,7 @@ curl -X GET "http://localhost:8000/api/v1/payroll/periods/?status=OPEN" \
 **GET** `/configs/by_employee/?employee={id}` – retrieve by employee  
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/payroll/configs/by_employee/?employee=5" \
+curl -X GET "http://localhost:8000/api/v2/payroll/configs/by_employee/?employee=5" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -40,7 +40,7 @@ curl -X GET "http://localhost:8000/api/v1/payroll/configs/by_employee/?employee=
 **GET** `/wages/period_summary/?year=&month=` – summary for a Jalali month  
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/payroll/wages/" \
+curl -X POST "http://localhost:8000/api/v2/payroll/wages/" \
   -H "Authorization: Token YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"employee":5,"amount":"5000000","start_date":"2026-08-01","is_active":true}'
@@ -53,7 +53,7 @@ curl -X POST "http://localhost:8000/api/v1/payroll/wages/" \
 **GET/PATCH** `/hourly-rates/{id}/` – retrieve/update (write restricted)  
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/payroll/hourly-rates/" \
+curl -X POST "http://localhost:8000/api/v2/payroll/hourly-rates/" \
   -H "Authorization: Token YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"employee":5,"rate":"150000","start_date":"2026-08-01","is_active":true}'
@@ -68,7 +68,7 @@ curl -X POST "http://localhost:8000/api/v1/payroll/hourly-rates/" \
 **POST** `/hourly-work-entries/calculate/` – preview calculation (admin/finance)  
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/payroll/hourly-work-entries/calculate/" \
+curl -X POST "http://localhost:8000/api/v2/payroll/hourly-work-entries/calculate/" \
   -H "Authorization: Token YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"employee":5,"year":1404,"month":6}'
@@ -84,7 +84,7 @@ curl -X POST "http://localhost:8000/api/v1/payroll/hourly-work-entries/calculate
 **GET** `/commission-rules/by_position/?job_position={id}` – rules for a position  
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/payroll/commission-rules/matrix/" \
+curl -X GET "http://localhost:8000/api/v2/payroll/commission-rules/matrix/" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -94,7 +94,7 @@ curl -X GET "http://localhost:8000/api/v1/payroll/commission-rules/matrix/" \
 **GET** `/commission-transactions/{id}/` – retrieve  
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/payroll/commission-transactions/?employee=5" \
+curl -X GET "http://localhost:8000/api/v2/payroll/commission-transactions/?employee=5" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -105,7 +105,7 @@ curl -X GET "http://localhost:8000/api/v1/payroll/commission-transactions/?emplo
 Query: `start_date`, `end_date`, `employee`, `position`, `month`, `year`, `wage_type`  
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/payroll/report/?year=1404&month=6&wage_type=both" \
+curl -X GET "http://localhost:8000/api/v2/payroll/report/?year=1404&month=6&wage_type=both" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -116,6 +116,6 @@ curl -X GET "http://localhost:8000/api/v1/payroll/report/?year=1404&month=6&wage
 Query: `start_date`, `end_date`, `employee_id`, `position_id`, `wage_type`, `page`, `page_size`, `export=excel`  
 
 ```bash
-curl -X GET "http://localhost:8000/api/v1/payroll/reports/employee-cost/?start_date=2026-08-01&end_date=2026-08-31" \
+curl -X GET "http://localhost:8000/api/v2/payroll/reports/employee-cost/?start_date=2026-08-01&end_date=2026-08-31" \
   -H "Authorization: Token YOUR_TOKEN"
 ```

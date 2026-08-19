@@ -1,13 +1,13 @@
 /**
  * PayrollPageApp — API-driven payroll report page for Django Admin.
  *
- * Fetches from /api/v1/payroll/report/ with date and wage_type filters.
+ * Fetches from /api/v2/payroll/report/ with date and wage_type filters.
  * Shows summary cards and a paginated employee table.
  */
 const PayrollPageApp = (function () {
     'use strict';
 
-    var REPORT_URL = '/api/v1/payroll/report/';
+    var REPORT_URL = '/api/v2/payroll/report/';
     var COLS       = 6;
 
     var currentPage = 1;

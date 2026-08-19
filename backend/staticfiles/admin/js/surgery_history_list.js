@@ -7,9 +7,9 @@
 const SurgeryHistoryListApp = (function () {
     'use strict';
 
-    var API_URL      = '/api/v1/surgeries/history/';
-    var TYPES_URL    = '/api/v1/surgeries/types/';
-    var DOCTORS_URL  = '/api/v1/contacts/doctors/';
+    var API_URL      = '/api/v2/surgeries/history/';
+    var TYPES_URL    = '/api/v2/surgeries/types/';
+    var DOCTORS_URL  = '/api/v2/contacts/doctors/';
 
     // ── State ────────────────────────────────────────────────────
     var state = {

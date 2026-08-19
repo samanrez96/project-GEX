@@ -289,7 +289,7 @@ class EmployeePurchaseCommissionAPITest(APITestCase):
         self.emp = _make_employee()
 
     def test_create_commission_via_api(self):
-        resp = self.client.post('/api/v1/employees/purchase-commissions/', {
+        resp = self.client.post('/api/v2/employees/purchase-commissions/', {
             'employee': self.emp.pk,
             'amount': '750000',
             'commission_date': '2025-06-01',
@@ -304,7 +304,7 @@ class EmployeePurchaseCommissionAPITest(APITestCase):
             amount=Decimal('300000'),
             commission_date=datetime.date(2025, 5, 1),
         )
-        resp = self.client.get(f'/api/v1/employees/purchase-commissions/?employee={self.emp.pk}')
+        resp = self.client.get(f'/api/v2/employees/purchase-commissions/?employee={self.emp.pk}')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         results = resp.data.get('results', resp.data)
         self.assertEqual(len(results), 1)
@@ -321,7 +321,7 @@ class EmployeePurchaseCommissionAPITest(APITestCase):
             amount=Decimal('50000'),
             commission_date=datetime.date(2025, 6, 1),
         )
-        resp = self.client.get(f'/api/v1/employees/purchase-commissions/?employee={self.emp.pk}')
+        resp = self.client.get(f'/api/v2/employees/purchase-commissions/?employee={self.emp.pk}')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         results = resp.data.get('results', resp.data)
         row = results[0]
@@ -335,13 +335,13 @@ class EmployeePurchaseCommissionAPITest(APITestCase):
 
     def test_employee_without_commission_returns_empty_list(self):
         emp2 = _make_employee(national_id='1111111111')
-        resp = self.client.get(f'/api/v1/employees/purchase-commissions/?employee={emp2.pk}')
+        resp = self.client.get(f'/api/v2/employees/purchase-commissions/?employee={emp2.pk}')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         results = resp.data.get('results', resp.data)
         self.assertEqual(len(results), 0)
 
     def test_invalid_amount_rejected(self):
-        resp = self.client.post('/api/v1/employees/purchase-commissions/', {
+        resp = self.client.post('/api/v2/employees/purchase-commissions/', {
             'employee': self.emp.pk,
             'amount': '-100',
             'commission_date': '2025-06-01',
@@ -372,7 +372,7 @@ class EmployeePurchaseCommissionAPITest(APITestCase):
             commission_rule=rule, amount=Decimal('100000'),
         )
         # Purchase commissions endpoint must return zero records for this employee
-        resp = self.client.get(f'/api/v1/employees/purchase-commissions/?employee={self.emp.pk}')
+        resp = self.client.get(f'/api/v2/employees/purchase-commissions/?employee={self.emp.pk}')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         results = resp.data.get('results', resp.data)
         self.assertEqual(len(results), 0,
@@ -436,7 +436,7 @@ class PayrollReportHasCommissionTest(APITestCase):
 
     def test_employee_with_purchase_commission_shows_darad(self):
         """Employee with EmployeePurchaseCommission → has_commission = True (دارد)."""
-        resp = self.client.get('/api/v1/payroll/report/')
+        resp = self.client.get('/api/v2/payroll/report/')
         self.assertEqual(resp.status_code, 200)
         emps = {r['employee_id']: r for r in resp.data.get('employees', [])}
         row = emps.get(self.emp_with.pk)
@@ -445,7 +445,7 @@ class PayrollReportHasCommissionTest(APITestCase):
 
     def test_employee_without_any_commission_shows_nadarad(self):
         """Employee without any commission → has_commission = False (ندارد)."""
-        resp = self.client.get('/api/v1/payroll/report/')
+        resp = self.client.get('/api/v2/payroll/report/')
         self.assertEqual(resp.status_code, 200)
         emps = {r['employee_id']: r for r in resp.data.get('employees', [])}
         row = emps.get(self.emp_without.pk)
@@ -483,7 +483,7 @@ class PayrollReportHasCommissionTest(APITestCase):
             surgery=surgery, employee=emp_surgery_only,
             commission_rule=rule, amount=Decimal('100000'),
         )
-        resp = self.client.get('/api/v1/payroll/report/')
+        resp = self.client.get('/api/v2/payroll/report/')
         self.assertEqual(resp.status_code, 200)
         emps = {r['employee_id']: r for r in resp.data.get('employees', [])}
         row = emps.get(emp_surgery_only.pk)
@@ -507,7 +507,7 @@ class PayrollReportHasCommissionTest(APITestCase):
             amount=Decimal('200000'),
             commission_date=datetime.date(2024, 3, 1),
         )
-        resp = self.client.get('/api/v1/payroll/report/?year=1404&month=3')
+        resp = self.client.get('/api/v2/payroll/report/?year=1404&month=3')
         self.assertEqual(resp.status_code, 200)
         emps = {r['employee_id']: r for r in resp.data.get('employees', [])}
         row = emps.get(emp_old.pk)
@@ -562,7 +562,7 @@ class PayrollReportCombinedCommissionTest(APITestCase):
         )
 
     def _get_row(self):
-        resp = self.client.get('/api/v1/payroll/report/')
+        resp = self.client.get('/api/v2/payroll/report/')
         self.assertEqual(resp.status_code, 200)
         emps = {r['employee_id']: r for r in resp.data.get('employees', [])}
         return emps.get(self.emp.pk)
@@ -605,7 +605,7 @@ class PayrollReportCombinedCommissionTest(APITestCase):
             employee=emp2, amount=Decimal('150000'),
             commission_date=datetime.date(2025, 6, 1),
         )
-        resp = self.client.get('/api/v1/payroll/report/')
+        resp = self.client.get('/api/v2/payroll/report/')
         emps = {r['employee_id']: r for r in resp.data.get('employees', [])}
         row = emps.get(emp2.pk)
         self.assertIsNotNone(row)
@@ -638,7 +638,7 @@ class PayrollReportCombinedCommissionTest(APITestCase):
             surgery=surgery, employee=emp3,
             commission_rule=rule, amount=Decimal('80000'),
         )
-        resp = self.client.get('/api/v1/payroll/report/')
+        resp = self.client.get('/api/v2/payroll/report/')
         emps = {r['employee_id']: r for r in resp.data.get('employees', [])}
         row = emps.get(emp3.pk)
         self.assertIsNotNone(row)
@@ -679,7 +679,7 @@ class CommissionTransactionSerializerFieldsTest(APITestCase):
         )
 
     def test_surgery_date_in_response(self):
-        resp = self.client.get(f'/api/v1/payroll/commission-transactions/?employee={self.emp.pk}')
+        resp = self.client.get(f'/api/v2/payroll/commission-transactions/?employee={self.emp.pk}')
         self.assertEqual(resp.status_code, 200)
         results = resp.data.get('results', resp.data)
         row = results[0] if results else None
@@ -690,7 +690,7 @@ class CommissionTransactionSerializerFieldsTest(APITestCase):
                          'surgery_date must be ISO date string YYYY-MM-DD')
 
     def test_surgery_amount_in_response(self):
-        resp = self.client.get(f'/api/v1/payroll/commission-transactions/?employee={self.emp.pk}')
+        resp = self.client.get(f'/api/v2/payroll/commission-transactions/?employee={self.emp.pk}')
         self.assertEqual(resp.status_code, 200)
         results = resp.data.get('results', resp.data)
         row = results[0] if results else None
@@ -699,7 +699,7 @@ class CommissionTransactionSerializerFieldsTest(APITestCase):
         self.assertEqual(Decimal(str(row['surgery_amount'])), Decimal('5000000'))
 
     def test_surgery_amount_has_no_decimal_point(self):
-        resp = self.client.get(f'/api/v1/payroll/commission-transactions/?employee={self.emp.pk}')
+        resp = self.client.get(f'/api/v2/payroll/commission-transactions/?employee={self.emp.pk}')
         self.assertEqual(resp.status_code, 200)
         results = resp.data.get('results', resp.data)
         row = results[0] if results else None
@@ -728,8 +728,8 @@ class PayrollEmployeeDetailLinkTest(APITestCase):
         )
 
     def test_payroll_report_includes_employee_id(self):
-        """Each row in /api/v1/payroll/report/ must include employee_id for link building."""
-        resp = self.client.get('/api/v1/payroll/report/')
+        """Each row in /api/v2/payroll/report/ must include employee_id for link building."""
+        resp = self.client.get('/api/v2/payroll/report/')
         self.assertEqual(resp.status_code, 200)
         rows = resp.data.get('employees', [])
         self.assertTrue(len(rows) >= 1)
@@ -746,7 +746,7 @@ class PayrollEmployeeDetailLinkTest(APITestCase):
 
     def test_payroll_report_includes_employee_name(self):
         """employee_name must be present so it can be used as the link label."""
-        resp = self.client.get('/api/v1/payroll/report/')
+        resp = self.client.get('/api/v2/payroll/report/')
         self.assertEqual(resp.status_code, 200)
         rows = resp.data.get('employees', [])
         row = next((r for r in rows if r['employee_id'] == self.emp.pk), None)
@@ -778,7 +778,7 @@ class PurchaseCommissionRowFieldsTest(APITestCase):
         )
 
     def test_all_expected_fields_present(self):
-        resp = self.client.get(f'/api/v1/employees/purchase-commissions/?employee={self.emp.pk}')
+        resp = self.client.get(f'/api/v2/employees/purchase-commissions/?employee={self.emp.pk}')
         self.assertEqual(resp.status_code, 200)
         results = resp.data.get('results', resp.data)
         row = results[0]
@@ -789,7 +789,7 @@ class PurchaseCommissionRowFieldsTest(APITestCase):
 
     def test_commission_amount_no_decimal(self):
         """The commission amount field must not contain .00 when whole."""
-        resp = self.client.get(f'/api/v1/employees/purchase-commissions/?employee={self.emp.pk}')
+        resp = self.client.get(f'/api/v2/employees/purchase-commissions/?employee={self.emp.pk}')
         results = resp.data.get('results', resp.data)
         row = results[0]
         # amount is Decimal field; serializer returns string representation
@@ -818,14 +818,14 @@ class PurchaseCommissionRowFieldsTest(APITestCase):
             commission_rule=rule, amount=Decimal('200000'),
         )
         # purchase commission endpoint: only 1 row (the EmployeePurchaseCommission)
-        resp = self.client.get(f'/api/v1/employees/purchase-commissions/?employee={self.emp.pk}')
+        resp = self.client.get(f'/api/v2/employees/purchase-commissions/?employee={self.emp.pk}')
         self.assertEqual(resp.status_code, 200)
         results = resp.data.get('results', resp.data)
         self.assertEqual(len(results), 1,
                          'Surgery CommissionTransaction must not appear in purchase commission list')
 
         # surgery commission endpoint: only 1 row (the CommissionTransaction)
-        resp2 = self.client.get(f'/api/v1/payroll/commission-transactions/?employee={self.emp.pk}')
+        resp2 = self.client.get(f'/api/v2/payroll/commission-transactions/?employee={self.emp.pk}')
         self.assertEqual(resp2.status_code, 200)
         results2 = resp2.data.get('results', resp2.data)
         self.assertEqual(len(results2), 1,

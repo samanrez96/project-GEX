@@ -557,14 +557,14 @@ class PreviewFinalizeSeparationTest(TestCase):
 
     def test_report_api_read_does_not_process_entries(self):
         """Opening/refreshing the payroll report page must never finalize."""
-        resp = self.client.get('/api/v1/payroll/report/', {
+        resp = self.client.get('/api/v2/payroll/report/', {
             'year': self.jy, 'month': self.jm,
         })
         self.assertEqual(resp.status_code, 200)
         self._assert_entry_untouched()
 
     def test_employee_cost_report_read_does_not_process_entries(self):
-        resp = self.client.get('/api/v1/payroll/reports/employee-cost/', {
+        resp = self.client.get('/api/v2/payroll/reports/employee-cost/', {
             'wage_type': 'hourly',
         })
         self.assertEqual(resp.status_code, 200)
@@ -575,7 +575,7 @@ class PreviewFinalizeSeparationTest(TestCase):
         must not process entries or create a PayrollPeriod row."""
         period_count_before = PayrollPeriod.objects.count()
 
-        resp = self.client.post('/api/v1/payroll/hourly-work-entries/calculate/', {
+        resp = self.client.post('/api/v2/payroll/hourly-work-entries/calculate/', {
             'employee': self.emp.pk, 'year': self.jy, 'month': self.jm,
         })
         self.assertEqual(resp.status_code, 200)
@@ -586,7 +586,7 @@ class PreviewFinalizeSeparationTest(TestCase):
 
     def test_calculate_api_action_creates_no_finance_transaction(self):
         from finance.models import Transaction
-        self.client.post('/api/v1/payroll/hourly-work-entries/calculate/', {
+        self.client.post('/api/v2/payroll/hourly-work-entries/calculate/', {
             'employee': self.emp.pk, 'year': self.jy, 'month': self.jm,
         })
         self.assertEqual(Transaction.objects.count(), 0)
@@ -644,7 +644,7 @@ class HourlyPayrollReportTest(TestCase):
         finalize_hourly_payroll(self.emp, period)
 
     def test_report_includes_total_hourly_salary(self):
-        resp = self.client.get('/api/v1/payroll/report/', {
+        resp = self.client.get('/api/v2/payroll/report/', {
             'year': self.jy, 'month': self.jm,
         })
         self.assertEqual(resp.status_code, 200)
@@ -652,7 +652,7 @@ class HourlyPayrollReportTest(TestCase):
         self.assertEqual(Decimal(resp.data['total_hours_worked']), Decimal('10'))
 
     def test_report_employee_row_includes_hourly_fields(self):
-        resp = self.client.get('/api/v1/payroll/report/', {
+        resp = self.client.get('/api/v2/payroll/report/', {
             'year': self.jy, 'month': self.jm, 'employee': self.emp.pk,
         })
         row = resp.data['employees'][0]
@@ -661,13 +661,13 @@ class HourlyPayrollReportTest(TestCase):
         self.assertEqual(Decimal(row['total_payment']), Decimal('5000000'))
 
     def test_report_wage_type_hourly_filter(self):
-        resp = self.client.get('/api/v1/payroll/report/', {'wage_type': 'hourly'})
+        resp = self.client.get('/api/v2/payroll/report/', {'wage_type': 'hourly'})
         self.assertEqual(resp.status_code, 200)
         emp_ids = [row['employee_id'] for row in resp.data['employees']]
         self.assertIn(self.emp.pk, emp_ids)
 
     def test_employee_cost_report_includes_hourly(self):
-        resp = self.client.get('/api/v1/payroll/reports/employee-cost/', {
+        resp = self.client.get('/api/v2/payroll/reports/employee-cost/', {
             'wage_type': 'hourly',
         })
         self.assertEqual(resp.status_code, 200)
@@ -747,13 +747,13 @@ class HourlyWorkEntryImmutabilityTest(TestCase):
         self.entry.refresh_from_db()
 
     def test_api_delete_of_processed_entry_is_rejected(self):
-        resp = self.client.delete(f'/api/v1/payroll/hourly-work-entries/{self.entry.pk}/')
+        resp = self.client.delete(f'/api/v2/payroll/hourly-work-entries/{self.entry.pk}/')
         self.assertEqual(resp.status_code, 400)
         self.assertTrue(HourlyWorkEntry.objects.filter(pk=self.entry.pk).exists())
 
     def test_api_patch_of_processed_entry_hours_is_rejected(self):
         resp = self.client.patch(
-            f'/api/v1/payroll/hourly-work-entries/{self.entry.pk}/',
+            f'/api/v2/payroll/hourly-work-entries/{self.entry.pk}/',
             {'hours_worked': '99'},
             content_type='application/json',
         )

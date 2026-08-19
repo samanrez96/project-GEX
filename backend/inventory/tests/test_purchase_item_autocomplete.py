@@ -141,7 +141,7 @@ class PurchaseItemProductSelectTemplateTest(TestCase):
 # ---------------------------------------------------------------------------
 
 class ProductsApiForAutocompleteTest(TestCase):
-    """The /api/v1/inventory/products/ endpoint must return the fields and
+    """The /api/v2/inventory/products/ endpoint must return the fields and
     ordering that the search dropdown relies on."""
 
     def setUp(self):
@@ -168,7 +168,7 @@ class ProductsApiForAutocompleteTest(TestCase):
 
     def _get(self, **params):
         qs = "&".join(f"{k}={v}" for k, v in params.items())
-        url = "/api/v1/inventory/products/" + (f"?{qs}" if qs else "")
+        url = "/api/v2/inventory/products/" + (f"?{qs}" if qs else "")
         return self.client.get(url)
 
     def test_api_result_includes_internal_code(self):

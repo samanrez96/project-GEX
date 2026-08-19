@@ -7,8 +7,8 @@
 const EmployeeListApp = (function () {
     'use strict';
 
-    var API_URL       = '/api/v1/employees/';
-    var POSITIONS_URL = '/api/v1/employees/positions/';
+    var API_URL       = '/api/v2/employees/';
+    var POSITIONS_URL = '/api/v2/employees/positions/';
 
     // ── State ────────────────────────────────────────────────────
     var state = {

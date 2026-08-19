@@ -19,8 +19,8 @@ from payroll.models import (
 
 User = get_user_model()
 
-PERIODS_URL = '/api/v1/payroll/periods/'
-CONFIGS_URL = '/api/v1/payroll/configs/'
+PERIODS_URL = '/api/v2/payroll/periods/'
+CONFIGS_URL = '/api/v2/payroll/configs/'
 
 
 # ---------------------------------------------------------------------------

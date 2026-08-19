@@ -178,7 +178,7 @@ class ReloadedFormAndDetailShowPersistedValuesTest(TestCase):
 
         api_client = APIClient()
         api_client.force_authenticate(user=self.admin)
-        resp = api_client.get(f'/api/v1/employees/{emp.pk}/')
+        resp = api_client.get(f'/api/v2/employees/{emp.pk}/')
         self.assertEqual(resp.status_code, 200)
         self.assertIsNotNone(resp.data['current_hourly_rate'])
         self.assertEqual(Decimal(resp.data['current_hourly_rate']), Decimal('33'))
@@ -201,7 +201,7 @@ class ReloadedFormAndDetailShowPersistedValuesTest(TestCase):
 
         api_client = APIClient()
         api_client.force_authenticate(user=self.admin)
-        resp = api_client.get(f'/api/v1/employees/{emp.pk}/')
+        resp = api_client.get(f'/api/v2/employees/{emp.pk}/')
         self.assertEqual(Decimal(resp.data['current_hourly_rate']), Decimal('33'))
         self.assertEqual(Decimal(resp.data['legacy_hourly_rate']), Decimal('999999'))
 

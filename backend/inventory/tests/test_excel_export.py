@@ -1,8 +1,8 @@
 """Excel export tests for inventory endpoints (CLI-54).
 
-Covers: /api/v1/inventory/products/?export=excel
-        /api/v1/inventory/purchases/?export=excel
-        /api/v1/inventory/reports/cost/?export=excel
+Covers: /api/v2/inventory/products/?export=excel
+        /api/v2/inventory/purchases/?export=excel
+        /api/v2/inventory/reports/cost/?export=excel
 """
 
 import io
@@ -22,9 +22,9 @@ from inventory.models import (
     Vendor,
 )
 
-PRODUCTS_URL  = '/api/v1/inventory/products/'
-PURCHASES_URL = '/api/v1/inventory/purchases/'
-COST_REPORT_URL = '/api/v1/inventory/reports/cost/'
+PRODUCTS_URL  = '/api/v2/inventory/products/'
+PURCHASES_URL = '/api/v2/inventory/purchases/'
+COST_REPORT_URL = '/api/v2/inventory/reports/cost/'
 
 XLSX_CT = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 

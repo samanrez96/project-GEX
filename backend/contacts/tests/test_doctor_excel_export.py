@@ -1,6 +1,6 @@
 """Excel export tests for the Doctor endpoint.
 
-Covers: /api/v1/contacts/doctors/?export=excel — the export the دفترچه تماس
+Covers: /api/v2/contacts/doctors/?export=excel — the export the دفترچه تماس
 (contacts directory) page's "خروجی اکسل" button links to, since that page
 is entirely JS/API-driven (contacts_directory.js) rather than a Django
 admin ChangeList.
@@ -14,7 +14,7 @@ from rest_framework.test import APITestCase
 
 from contacts.models import CooperationStatus, Doctor, DoctorSpecialty
 
-URL     = '/api/v1/contacts/doctors/'
+URL     = '/api/v2/contacts/doctors/'
 XLSX_CT = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
 

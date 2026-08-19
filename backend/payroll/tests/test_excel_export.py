@@ -1,6 +1,6 @@
 """Excel export tests for payroll endpoints (CLI-54).
 
-Covers: /api/v1/payroll/reports/employee-cost/?export=excel
+Covers: /api/v2/payroll/reports/employee-cost/?export=excel
 """
 
 import io
@@ -14,7 +14,7 @@ from rest_framework.test import APITestCase
 from employees.models import Employee, JobPosition
 from payroll.models import MonthlyWage
 
-URL     = '/api/v1/payroll/reports/employee-cost/'
+URL     = '/api/v2/payroll/reports/employee-cost/'
 XLSX_CT = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
 

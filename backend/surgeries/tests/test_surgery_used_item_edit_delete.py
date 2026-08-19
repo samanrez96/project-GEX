@@ -33,8 +33,8 @@ from surgeries.models import Patient, SurgeryHistory, SurgeryStatus, SurgeryType
 
 User = get_user_model()
 
-USED_ITEMS_URL = '/api/v1/surgeries/used-items/'
-HISTORY_URL    = '/api/v1/surgeries/history/'
+USED_ITEMS_URL = '/api/v2/surgeries/used-items/'
+HISTORY_URL    = '/api/v2/surgeries/history/'
 
 _ctr = [0]
 

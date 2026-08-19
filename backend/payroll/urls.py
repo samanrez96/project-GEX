@@ -25,13 +25,13 @@ router.register('commission-rules',        CommissionRuleViewSet,         basena
 router.register('commission-transactions', CommissionTransactionViewSet,  basename='commission-transaction')
 
 # Registered routes:
-#   GET/POST   /api/v1/payroll/periods/            — list / create periods
-#   GET/PATCH  /api/v1/payroll/periods/{id}/       — retrieve / update period
-#   POST       /api/v1/payroll/periods/{id}/close/ — close a period
+#   GET/POST   /api/v2/payroll/periods/            — list / create periods
+#   GET/PATCH  /api/v2/payroll/periods/{id}/       — retrieve / update period
+#   POST       /api/v2/payroll/periods/{id}/close/ — close a period
 #
-#   GET        /api/v1/payroll/configs/                         — list configs
-#   GET/PATCH  /api/v1/payroll/configs/{id}/                   — retrieve / update config
-#   GET        /api/v1/payroll/configs/by_employee/?employee={id}
+#   GET        /api/v2/payroll/configs/                         — list configs
+#   GET/PATCH  /api/v2/payroll/configs/{id}/                   — retrieve / update config
+#   GET        /api/v2/payroll/configs/by_employee/?employee={id}
 
 urlpatterns = router.urls + [
     path('report/',                    PayrollReportView.as_view(),         name='payroll-report'),

@@ -214,7 +214,7 @@ class SurgeryUsedItemAPIMultipleTest(APITestCase):
         self.p2 = _product(stock=Decimal("200"))
 
     def test_two_api_posts_decrease_two_products(self):
-        url = "/api/v1/surgeries/used-items/"
+        url = "/api/v2/surgeries/used-items/"
         resp1 = self.client.post(url, {
             "surgery": self.surgery.id,
             "product": self.p1.id,
@@ -236,7 +236,7 @@ class SurgeryUsedItemAPIMultipleTest(APITestCase):
     def test_insufficient_stock_on_second_item_leaves_first_intact(self):
         """If the second POST fails with insufficient stock, the first POST
         must already have been committed (each is its own transaction)."""
-        url = "/api/v1/surgeries/used-items/"
+        url = "/api/v2/surgeries/used-items/"
         # First item: valid
         self.client.post(url, {
             "surgery": self.surgery.id,

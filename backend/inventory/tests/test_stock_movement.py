@@ -18,7 +18,7 @@ from inventory.models import (
     StockMovement,
 )
 
-LIST_URL = "/api/v1/inventory/stock-movements/"
+LIST_URL = "/api/v2/inventory/stock-movements/"
 
 
 # ---------------------------------------------------------------------------

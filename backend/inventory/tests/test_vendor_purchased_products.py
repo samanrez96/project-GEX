@@ -97,7 +97,7 @@ def _change_url(vendor_id):
 
 
 def _api_url(vendor_id):
-    return f"/api/v1/inventory/vendors/{vendor_id}/purchased-products/"
+    return f"/api/v2/inventory/vendors/{vendor_id}/purchased-products/"
 
 
 # ---------------------------------------------------------------------------

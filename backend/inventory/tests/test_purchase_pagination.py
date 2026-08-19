@@ -1,6 +1,6 @@
 """Pagination tests for PurchaseViewSet (CLI-57).
 
-Verifies that GET /api/v1/inventory/purchases/ returns the StandardPagination
+Verifies that GET /api/v2/inventory/purchases/ returns the StandardPagination
 envelope (count, total_pages, page_size, results) so the JS frontend can
 render page-number buttons correctly.
 """
@@ -14,7 +14,7 @@ from rest_framework.test import APITestCase
 from inventory.models import Purchase, PurchaseStatus, Vendor
 
 User = get_user_model()
-URL  = '/api/v1/inventory/purchases/'
+URL  = '/api/v2/inventory/purchases/'
 
 
 def _vendor(name='TestVendor'):

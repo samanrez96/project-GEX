@@ -1,15 +1,15 @@
 /**
  * FinanceTransactionsApp — API-driven transactions list for Django Admin.
  *
- * Fetches from /api/v1/finance/transactions/ with filters for type, status,
+ * Fetches from /api/v2/finance/transactions/ with filters for type, status,
  * category, and date range. Shows summary cards and a paginated table.
  */
 const FinanceTransactionsApp = (function () {
     'use strict';
 
-    var API_URL         = '/api/v1/finance/transactions/';
-    var CATEGORIES_URL  = '/api/v1/finance/categories/';
-    var BALANCE_URL     = '/api/v1/finance/reports/balance/';
+    var API_URL         = '/api/v2/finance/transactions/';
+    var CATEGORIES_URL  = '/api/v2/finance/categories/';
+    var BALANCE_URL     = '/api/v2/finance/reports/balance/';
     var COLS            = 6;
 
     var currentPage     = 1;

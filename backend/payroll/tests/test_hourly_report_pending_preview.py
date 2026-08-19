@@ -42,7 +42,7 @@ from employees.models import Employee, JobPosition
 from payroll.models import HourlyRate, HourlyWorkEntry, PayrollPeriod, PayrollStatus
 from payroll.services import finalize_hourly_payroll
 
-REPORT_URL = '/api/v1/payroll/report/'
+REPORT_URL = '/api/v2/payroll/report/'
 
 _counter = [0]
 

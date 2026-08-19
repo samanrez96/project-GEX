@@ -31,7 +31,7 @@ from inventory.models import (
 
 User = get_user_model()
 
-STOCK_REPORT_URL = '/api/v1/inventory/reports/stock/'
+STOCK_REPORT_URL = '/api/v2/inventory/reports/stock/'
 
 
 # ---------------------------------------------------------------------------

@@ -511,13 +511,13 @@ class StockAdjustmentRegressionTest(APITestCase):
     def test_product_excel_export_reflects_new_stock(self):
         product = _product(stock=Decimal('100'), name='محصول اکسل اصلاح')
         StockService.adjust_to_quantity(product=product, desired_quantity=Decimal('130'), reason='x')
-        resp = self.client.get('/api/v1/inventory/products/', {'export': 'excel', 'search': product.internal_code})
+        resp = self.client.get('/api/v2/inventory/products/', {'export': 'excel', 'search': product.internal_code})
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
     def test_product_serializer_current_stock_remains_read_only(self):
         """Ordinary Product PATCH must never bypass the ledger."""
         product = _product(stock=Decimal('100'))
-        resp = self.client.patch(f'/api/v1/inventory/products/{product.pk}/', {'current_stock': '999'})
+        resp = self.client.patch(f'/api/v2/inventory/products/{product.pk}/', {'current_stock': '999'})
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         product.refresh_from_db()
         self.assertEqual(product.current_stock, Decimal('100'))

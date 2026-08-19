@@ -23,7 +23,7 @@ from surgeries.serializers import SurgeryHistoryListSerializer
 User = get_user_model()
 
 LIST_URL   = '/admin/surgeries/surgeryhistory/'
-API_URL    = '/api/v1/surgeries/history/'
+API_URL    = '/api/v2/surgeries/history/'
 
 
 # ---------------------------------------------------------------------------

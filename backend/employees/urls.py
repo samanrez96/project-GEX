@@ -10,8 +10,8 @@ router.register("purchase-commissions", EmployeePurchaseCommissionViewSet, basen
 router.register("",                     EmployeeViewSet,                  basename="employee")
 
 # Registered routes:
-#   /api/v1/employees/positions/                — job positions CRUD
-#   /api/v1/employees/purchase-commissions/     — employee purchase commissions CRUD
-#   /api/v1/employees/{id}/                     — employees CRUD
+#   /api/v2/employees/positions/                — job positions CRUD
+#   /api/v2/employees/purchase-commissions/     — employee purchase commissions CRUD
+#   /api/v2/employees/{id}/                     — employees CRUD
 
 urlpatterns = router.urls

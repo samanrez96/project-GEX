@@ -8,7 +8,7 @@ from rest_framework.test import APITestCase
 
 from employees.models import Employee, GenderChoice, JobPosition
 
-LIST_URL = "/api/v1/employees/"
+LIST_URL = "/api/v2/employees/"
 
 User = get_user_model()
 

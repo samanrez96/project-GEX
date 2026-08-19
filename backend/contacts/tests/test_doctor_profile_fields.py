@@ -18,7 +18,7 @@ from contacts.models import Doctor, DoctorSpecialty
 from common.text import normalize_identifier
 
 User = get_user_model()
-DOCTORS_URL = '/api/v1/contacts/doctors/'
+DOCTORS_URL = '/api/v2/contacts/doctors/'
 
 
 def make_specialty(name='جراحی عمومی'):

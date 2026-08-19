@@ -30,7 +30,7 @@ from finance.models import (
     TransactionType,
 )
 
-BALANCE_URL = '/api/v1/finance/reports/balance/'
+BALANCE_URL = '/api/v2/finance/reports/balance/'
 
 
 # ---------------------------------------------------------------------------

@@ -389,7 +389,7 @@ class VendorAPIPhoneTest(TestCase):
 
     def test_api_phone_field_present(self):
         vendor = _vendor(phone="02111112222")
-        resp = self.client.get(f"/api/v1/inventory/vendors/{vendor.pk}/")
+        resp = self.client.get(f"/api/v2/inventory/vendors/{vendor.pk}/")
         self.assertEqual(resp.status_code, 200)
         data = resp.json()
         self.assertIn("phone_number", data)
@@ -397,7 +397,7 @@ class VendorAPIPhoneTest(TestCase):
 
     def test_api_phones_list_primary_only(self):
         vendor = _vendor(phone="02111112222")
-        resp = self.client.get(f"/api/v1/inventory/vendors/{vendor.pk}/")
+        resp = self.client.get(f"/api/v2/inventory/vendors/{vendor.pk}/")
         data = resp.json()
         self.assertIn("phones", data)
         self.assertIn("02111112222", data["phones"])
@@ -406,7 +406,7 @@ class VendorAPIPhoneTest(TestCase):
     def test_api_phones_list_includes_additional(self):
         vendor = _vendor(phone="02111112222")
         VendorPhone.objects.create(vendor=vendor, phone="09129990000")
-        resp = self.client.get(f"/api/v1/inventory/vendors/{vendor.pk}/")
+        resp = self.client.get(f"/api/v2/inventory/vendors/{vendor.pk}/")
         data = resp.json()
         self.assertIn("09129990000", data["phones"])
         self.assertEqual(len(data["phones"]), 2)
@@ -414,7 +414,7 @@ class VendorAPIPhoneTest(TestCase):
     def test_api_additional_phones_field(self):
         vendor = _vendor(phone="02111112222")
         VendorPhone.objects.create(vendor=vendor, phone="09129990000")
-        resp = self.client.get(f"/api/v1/inventory/vendors/{vendor.pk}/")
+        resp = self.client.get(f"/api/v2/inventory/vendors/{vendor.pk}/")
         data = resp.json()
         self.assertIn("additional_phones", data)
         self.assertEqual(len(data["additional_phones"]), 1)
@@ -423,7 +423,7 @@ class VendorAPIPhoneTest(TestCase):
     def test_api_list_includes_phones(self):
         vendor = _vendor(phone="02111112222")
         VendorPhone.objects.create(vendor=vendor, phone="09129990000")
-        resp = self.client.get("/api/v1/inventory/vendors/")
+        resp = self.client.get("/api/v2/inventory/vendors/")
         data = resp.json()
         results = data.get("results", data)
         entry = next((v for v in results if v["id"] == vendor.pk), None)
@@ -480,7 +480,7 @@ class VendorSearchPhoneTest(TestCase):
         self.assertEqual(pks.count(self.vendor.pk), 1)
 
     def test_api_search_by_additional_phone(self):
-        resp = self.client.get("/api/v1/inventory/vendors/?search=09161234567")
+        resp = self.client.get("/api/v2/inventory/vendors/?search=09161234567")
         data = resp.json()
         results = data.get("results", data)
         pks = [v["id"] for v in results]
@@ -488,7 +488,7 @@ class VendorSearchPhoneTest(TestCase):
 
     def test_api_search_no_duplicate_rows(self):
         """API search must not return duplicate vendor entries."""
-        resp = self.client.get("/api/v1/inventory/vendors/?search=09161234567")
+        resp = self.client.get("/api/v2/inventory/vendors/?search=09161234567")
         data = resp.json()
         results = data.get("results", data)
         pks = [v["id"] for v in results]

@@ -11,9 +11,9 @@
 const EmployeeDetailApp = (function () {
     'use strict';
 
-    var API_URL                  = '/api/v1/employees/';
-    var COMMISSIONS_URL          = '/api/v1/employees/purchase-commissions/';
-    var SURGERY_COMMISSIONS_URL  = '/api/v1/payroll/commission-transactions/';
+    var API_URL                  = '/api/v2/employees/';
+    var COMMISSIONS_URL          = '/api/v2/employees/purchase-commissions/';
+    var SURGERY_COMMISSIONS_URL  = '/api/v2/payroll/commission-transactions/';
 
     var employeeId   = null;
     var employeeData = null;

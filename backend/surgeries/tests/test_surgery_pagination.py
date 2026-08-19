@@ -1,6 +1,6 @@
 """Pagination tests for SurgeryHistoryViewSet (CLI-57).
 
-Verifies that GET /api/v1/surgeries/history/ returns the StandardPagination
+Verifies that GET /api/v2/surgeries/history/ returns the StandardPagination
 envelope (count, total_pages, page_size, results) so the JS frontend can
 render page-number buttons correctly.
 """
@@ -16,7 +16,7 @@ from rest_framework.test import APITestCase
 from surgeries.models import Patient, SurgeryHistory, SurgeryStatus, SurgeryType
 
 User = get_user_model()
-URL  = '/api/v1/surgeries/history/'
+URL  = '/api/v2/surgeries/history/'
 
 _ctr = [0]
 

@@ -3,7 +3,7 @@
  * add/edit page (/admin/inventory/vendor/{id}/change/).
  *
  * Products section: list, add, edit unit_price + is_primary, remove.
- * Uses the same /api/v1/inventory/product-vendors/ endpoint as product_detail.js.
+ * Uses the same /api/v2/inventory/product-vendors/ endpoint as product_detail.js.
  *
  * Auth: SessionAuthentication via Django admin session cookie.
  * 401 → redirect to login.
@@ -11,8 +11,8 @@
 const VendorFormApp = (function () {
     'use strict';
 
-    var PRODUCT_VENDOR_API = '/api/v1/inventory/product-vendors/';
-    var PRODUCTS_API       = '/api/v1/inventory/products/';
+    var PRODUCT_VENDOR_API = '/api/v2/inventory/product-vendors/';
+    var PRODUCTS_API       = '/api/v2/inventory/products/';
 
     var vendorId  = window.VF_VENDOR_ID || null;
     var _pvList   = [];    // current ProductVendor links for this vendor

@@ -31,8 +31,8 @@ from inventory.models import (
 
 User = get_user_model()
 
-CONFIRM_URL = '/api/v1/inventory/purchases/{pk}/confirm/'
-CANCEL_URL  = '/api/v1/inventory/purchases/{pk}/cancel/'
+CONFIRM_URL = '/api/v2/inventory/purchases/{pk}/confirm/'
+CANCEL_URL  = '/api/v2/inventory/purchases/{pk}/cancel/'
 
 
 # ---------------------------------------------------------------------------

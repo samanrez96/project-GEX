@@ -53,7 +53,7 @@ from payroll.models import PayrollPeriod, PayrollStatus, _gregorian_to_jalali, _
 from surgeries.models import Patient, SurgeryHistory, SurgeryType
 
 User = get_user_model()
-REPORT_URL = '/api/v1/payroll/report/'
+REPORT_URL = '/api/v2/payroll/report/'
 
 _counter = [0]
 

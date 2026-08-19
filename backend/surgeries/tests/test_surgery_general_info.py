@@ -456,7 +456,7 @@ class SecondAssistantSurgeonEmployeeTest(TestCase):
         self.client.logout()
         api_user = User.objects.create_user(username='api_2a', password='pass123')
         self.client.force_login(api_user)
-        response = self.client.get(f'/api/v1/surgeries/history/{surgery.pk}/')
+        response = self.client.get(f'/api/v2/surgeries/history/{surgery.pk}/')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['second_assistant_surgeon_name'], 'کارمند نمایش‌داده‌شده')
 

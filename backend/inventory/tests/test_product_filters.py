@@ -20,8 +20,8 @@ from inventory.models import (
 )
 
 User = get_user_model()
-PRODUCTS_URL  = '/api/v1/inventory/products/'
-PURCHASES_URL = '/api/v1/inventory/purchases/'
+PRODUCTS_URL  = '/api/v2/inventory/products/'
+PURCHASES_URL = '/api/v2/inventory/purchases/'
 
 
 def _user():

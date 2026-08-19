@@ -78,7 +78,7 @@ def _superuser():
 
 
 # ---------------------------------------------------------------------------
-# API endpoint tests (hits /api/v1/inventory/product-vendors/)
+# API endpoint tests (hits /api/v2/inventory/product-vendors/)
 # ---------------------------------------------------------------------------
 
 class ProductVendorAPIAllowsDifferentConditionsTest(TestCase):
@@ -92,7 +92,7 @@ class ProductVendorAPIAllowsDifferentConditionsTest(TestCase):
 
     def _post(self, data):
         return self.client.post(
-            '/api/v1/inventory/product-vendors/',
+            '/api/v2/inventory/product-vendors/',
             data,
             content_type='application/json',
         )
@@ -198,7 +198,7 @@ class ProductVendorAPIAllowsDifferentConditionsTest(TestCase):
         ProductVendor.objects.create(vendor=vendor, product=product, unit_price=Decimal("100"))
         ProductVendor.objects.create(vendor=vendor, product=product, unit_price=Decimal("200"))
 
-        r = self.client.get(f'/api/v1/inventory/product-vendors/?vendor={vendor.pk}&page_size=200')
+        r = self.client.get(f'/api/v2/inventory/product-vendors/?vendor={vendor.pk}&page_size=200')
         self.assertEqual(r.status_code, 200)
         data = r.json()
         results = data.get("results", data)
@@ -211,7 +211,7 @@ class ProductVendorAPIAllowsDifferentConditionsTest(TestCase):
 
         ProductVendor.objects.create(vendor=vendor, product=product, unit_price=Decimal("500"))
 
-        r = self.client.get('/api/v1/inventory/products/?is_active=true&page_size=500')
+        r = self.client.get('/api/v2/inventory/products/?is_active=true&page_size=500')
         self.assertEqual(r.status_code, 200)
         ids = [p["id"] for p in r.json().get("results", [])]
         self.assertIn(product.pk, ids,
@@ -253,7 +253,7 @@ class VendorPageCsrfTest(TestCase):
         csrf_client = Client(enforce_csrf_checks=True)
         csrf_client.force_login(self.user)
         r = csrf_client.post(
-            '/api/v1/inventory/product-vendors/',
+            '/api/v2/inventory/product-vendors/',
             data={'vendor': vendor.pk, 'product': product.pk, 'unit_price': '500',
                   'is_primary': False, 'is_active': True},
             content_type='application/json',
@@ -282,7 +282,7 @@ class VendorPageCsrfTest(TestCase):
         self.assertGreater(len(token), 10, "CSRF token must not be empty or too short")
 
         r = csrf_client.post(
-            '/api/v1/inventory/product-vendors/',
+            '/api/v2/inventory/product-vendors/',
             data={'vendor': vendor.pk, 'product': product.pk, 'unit_price': '500',
                   'is_primary': False, 'is_active': True},
             content_type='application/json',
@@ -416,7 +416,7 @@ class PurchaseSyncVendorProductsTest(TestCase):
 
         PriceService.ensure_vendor_product_link(purchase)
 
-        r = client.get(f'/api/v1/inventory/product-vendors/?vendor={vendor.pk}')
+        r = client.get(f'/api/v2/inventory/product-vendors/?vendor={vendor.pk}')
         self.assertEqual(r.status_code, 200)
         results = r.json().get("results", [])
         product_ids = [row["product"] for row in results]
@@ -521,7 +521,7 @@ class ProductVendorDeleteAPITest(TestCase):
         pk = pv.pk
 
         r = self.client.delete(
-            f'/api/v1/inventory/product-vendors/{pk}/',
+            f'/api/v2/inventory/product-vendors/{pk}/',
             content_type='application/json',
         )
         self.assertIn(r.status_code, [204, 200], f"Delete must succeed, got {r.status_code}")
@@ -530,13 +530,13 @@ class ProductVendorDeleteAPITest(TestCase):
 
     def test_delete_does_not_delete_product(self):
         pv, vendor, product = self._create_pv()
-        self.client.delete(f'/api/v1/inventory/product-vendors/{pv.pk}/')
+        self.client.delete(f'/api/v2/inventory/product-vendors/{pv.pk}/')
         self.assertTrue(product.__class__.objects.filter(pk=product.pk).exists(),
                         "Product must survive ProductVendor deletion")
 
     def test_delete_does_not_delete_vendor(self):
         pv, vendor, product = self._create_pv()
-        self.client.delete(f'/api/v1/inventory/product-vendors/{pv.pk}/')
+        self.client.delete(f'/api/v2/inventory/product-vendors/{pv.pk}/')
         self.assertTrue(Vendor.objects.filter(pk=vendor.pk).exists(),
                         "Vendor must survive ProductVendor deletion")
 
@@ -545,7 +545,7 @@ class ProductVendorDeleteAPITest(TestCase):
         purchase = _purchase(vendor)
         _item(purchase, product)
 
-        self.client.delete(f'/api/v1/inventory/product-vendors/{pv.pk}/')
+        self.client.delete(f'/api/v2/inventory/product-vendors/{pv.pk}/')
 
         self.assertTrue(Purchase.objects.filter(pk=purchase.pk).exists(),
                         "Purchase must survive ProductVendor deletion")
@@ -555,29 +555,29 @@ class ProductVendorDeleteAPITest(TestCase):
     def test_delete_requires_authentication(self):
         pv, _, _ = self._create_pv()
         anon_client = Client()
-        r = anon_client.delete(f'/api/v1/inventory/product-vendors/{pv.pk}/')
+        r = anon_client.delete(f'/api/v2/inventory/product-vendors/{pv.pk}/')
         self.assertIn(r.status_code, [401, 403],
                       "Unauthenticated delete must be rejected")
         self.assertTrue(ProductVendor.objects.filter(pk=pv.pk).exists(),
                         "Row must not be deleted by unauthenticated request")
 
     def test_delete_non_existing_row_returns_404(self):
-        r = self.client.delete('/api/v1/inventory/product-vendors/99999999/')
+        r = self.client.delete('/api/v2/inventory/product-vendors/99999999/')
         self.assertEqual(r.status_code, 404)
 
     def test_vendor_product_list_excludes_deleted_row(self):
         pv, vendor, product = self._create_pv()
 
         # Verify it exists before
-        r_before = self.client.get(f'/api/v1/inventory/product-vendors/?vendor={vendor.pk}')
+        r_before = self.client.get(f'/api/v2/inventory/product-vendors/?vendor={vendor.pk}')
         ids_before = [x['id'] for x in r_before.json().get('results', [])]
         self.assertIn(pv.pk, ids_before)
 
         # Delete it
-        self.client.delete(f'/api/v1/inventory/product-vendors/{pv.pk}/')
+        self.client.delete(f'/api/v2/inventory/product-vendors/{pv.pk}/')
 
         # Verify it's gone
-        r_after = self.client.get(f'/api/v1/inventory/product-vendors/?vendor={vendor.pk}')
+        r_after = self.client.get(f'/api/v2/inventory/product-vendors/?vendor={vendor.pk}')
         ids_after = [x['id'] for x in r_after.json().get('results', [])]
         self.assertNotIn(pv.pk, ids_after, "Deleted row must not appear in API results")
 
@@ -590,11 +590,11 @@ class VendorTabPurchaseStatsTest(TestCase):
     """Tests for the two new columns (تعداد خریداری‌شده, تاریخ آخرین خرید)
     and the clickable supplier-name link in the product detail vendor tab.
 
-    All stats come from /api/v1/inventory/product-vendors/?product=<id>
+    All stats come from /api/v2/inventory/product-vendors/?product=<id>
     via ProductVendorListSerializer with purchase_stats injected by the viewset.
     """
 
-    URL = '/api/v1/inventory/product-vendors/'
+    URL = '/api/v2/inventory/product-vendors/'
 
     def setUp(self):
         self.client = Client()
@@ -899,7 +899,7 @@ class VendorTabPurchaseStatsTest(TestCase):
     def test_product_api_general_tab_unaffected(self):
         """ProductSerializer response must not include purchase_stats fields."""
         product = _product()
-        r = self.client.get(f'/api/v1/inventory/products/{product.pk}/')
+        r = self.client.get(f'/api/v2/inventory/products/{product.pk}/')
         self.assertEqual(r.status_code, 200)
         data = r.json()
         self.assertNotIn('total_purchased_quantity', data)
@@ -914,7 +914,7 @@ class VendorTabPurchaseStatsTest(TestCase):
 class VendorDetailUrlTest(TestCase):
     """Tests for vendor_detail_url field in the product-vendor API."""
 
-    URL = '/api/v1/inventory/product-vendors/'
+    URL = '/api/v2/inventory/product-vendors/'
 
     def setUp(self):
         self.client = Client()

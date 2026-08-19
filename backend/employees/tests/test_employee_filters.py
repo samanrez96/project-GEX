@@ -10,7 +10,7 @@ from rest_framework.test import APITestCase
 from employees.models import Employee, JobPosition
 
 User = get_user_model()
-URL  = '/api/v1/employees/'
+URL  = '/api/v2/employees/'
 
 
 def _user():

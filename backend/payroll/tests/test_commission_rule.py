@@ -13,9 +13,9 @@ from surgeries.models import SurgeryType
 
 User = get_user_model()
 
-RULES_URL      = '/api/v1/payroll/commission-rules/'
-MATRIX_URL     = '/api/v1/payroll/commission-rules/matrix/'
-BY_POSITION_URL = '/api/v1/payroll/commission-rules/by_position/'
+RULES_URL      = '/api/v2/payroll/commission-rules/'
+MATRIX_URL     = '/api/v2/payroll/commission-rules/matrix/'
+BY_POSITION_URL = '/api/v2/payroll/commission-rules/by_position/'
 
 _counter = [0]
 

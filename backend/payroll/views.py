@@ -45,11 +45,11 @@ from .serializers import (
 
 class CommissionRuleViewSet(viewsets.ModelViewSet):
     """
-    GET/POST   /api/v1/payroll/commission-rules/
-    GET/PATCH  /api/v1/payroll/commission-rules/{id}/
-    DELETE     /api/v1/payroll/commission-rules/{id}/ → 405
-    GET        /api/v1/payroll/commission-rules/matrix/
-    GET        /api/v1/payroll/commission-rules/by_position/?job_position={id}
+    GET/POST   /api/v2/payroll/commission-rules/
+    GET/PATCH  /api/v2/payroll/commission-rules/{id}/
+    DELETE     /api/v2/payroll/commission-rules/{id}/ → 405
+    GET        /api/v2/payroll/commission-rules/matrix/
+    GET        /api/v2/payroll/commission-rules/by_position/?job_position={id}
 
     Filter: ?job_position={id}  ?surgery_type={id}  ?is_active=true|false
     """
@@ -115,9 +115,9 @@ class CommissionRuleViewSet(viewsets.ModelViewSet):
 
 class PayrollPeriodViewSet(viewsets.ModelViewSet):
     """
-    GET/POST   /api/v1/payroll/periods/
-    GET/PATCH  /api/v1/payroll/periods/{id}/
-    POST       /api/v1/payroll/periods/{id}/close/
+    GET/POST   /api/v2/payroll/periods/
+    GET/PATCH  /api/v2/payroll/periods/{id}/
+    POST       /api/v2/payroll/periods/{id}/close/
 
     Filter: ?status=OPEN|CLOSED|PROCESSED  ?year={year}
     """
@@ -156,9 +156,9 @@ class PayrollTypeConfigViewSet(
     viewsets.GenericViewSet,
 ):
     """
-    GET        /api/v1/payroll/configs/
-    GET/PATCH  /api/v1/payroll/configs/{id}/
-    GET        /api/v1/payroll/configs/by_employee/?employee={id}
+    GET        /api/v2/payroll/configs/
+    GET/PATCH  /api/v2/payroll/configs/{id}/
+    GET        /api/v2/payroll/configs/by_employee/?employee={id}
 
     No create (signal handles it). No delete.
     Filter: ?has_monthly_wage=true|false  ?has_commission=true|false
@@ -199,10 +199,10 @@ class PayrollTypeConfigViewSet(
 
 class MonthlyWageViewSet(viewsets.ModelViewSet):
     """
-    GET/POST   /api/v1/payroll/wages/
-    GET/PATCH  /api/v1/payroll/wages/{id}/
-    DELETE     /api/v1/payroll/wages/{id}/ → 405
-    GET        /api/v1/payroll/wages/period_summary/?year=&month=
+    GET/POST   /api/v2/payroll/wages/
+    GET/PATCH  /api/v2/payroll/wages/{id}/
+    DELETE     /api/v2/payroll/wages/{id}/ → 405
+    GET        /api/v2/payroll/wages/period_summary/?year=&month=
 
     Filter: ?employee={id}  ?is_active=true|false
     """
@@ -278,9 +278,9 @@ class MonthlyWageViewSet(viewsets.ModelViewSet):
 
 class HourlyRateViewSet(viewsets.ModelViewSet):
     """
-    GET/POST   /api/v1/payroll/hourly-rates/
-    GET/PATCH  /api/v1/payroll/hourly-rates/{id}/
-    DELETE     /api/v1/payroll/hourly-rates/{id}/ → 405
+    GET/POST   /api/v2/payroll/hourly-rates/
+    GET/PATCH  /api/v2/payroll/hourly-rates/{id}/
+    DELETE     /api/v2/payroll/hourly-rates/{id}/ → 405
 
     Filter: ?employee={id}  ?is_active=true|false
     """
@@ -315,10 +315,10 @@ class HourlyRateViewSet(viewsets.ModelViewSet):
 
 class HourlyWorkEntryViewSet(viewsets.ModelViewSet):
     """
-    GET/POST   /api/v1/payroll/hourly-work-entries/
-    GET/PATCH  /api/v1/payroll/hourly-work-entries/{id}/
-    DELETE     /api/v1/payroll/hourly-work-entries/{id}/ (blocked once processed)
-    POST       /api/v1/payroll/hourly-work-entries/calculate/
+    GET/POST   /api/v2/payroll/hourly-work-entries/
+    GET/PATCH  /api/v2/payroll/hourly-work-entries/{id}/
+    DELETE     /api/v2/payroll/hourly-work-entries/{id}/ (blocked once processed)
+    POST       /api/v2/payroll/hourly-work-entries/calculate/
                body: {"employee": <id>, "year": <jalali>, "month": <jalali 1-12>}
                Read-only preview: prices unprocessed entries for that
                employee/period the same way finalization would, but writes
@@ -419,8 +419,8 @@ class CommissionTransactionViewSet(
     viewsets.GenericViewSet,
 ):
     """
-    GET  /api/v1/payroll/commission-transactions/
-    GET  /api/v1/payroll/commission-transactions/{id}/
+    GET  /api/v2/payroll/commission-transactions/
+    GET  /api/v2/payroll/commission-transactions/{id}/
 
     Read-only — created automatically by the commission service.
     Filter: employee, surgery, commission_rule
@@ -444,7 +444,7 @@ class CommissionTransactionViewSet(
 class PayrollReportView(views.APIView):
     """Aggregate payroll report API.
 
-    GET /api/v1/payroll/report/
+    GET /api/v2/payroll/report/
 
     Query parameters (all optional):
       start_date   YYYY-MM-DD
@@ -743,7 +743,7 @@ class PayrollReportView(views.APIView):
 class EmployeeCostReportView(views.APIView):
     """Per-employee payroll cost report.
 
-    GET /api/v1/payroll/reports/employee-cost/
+    GET /api/v2/payroll/reports/employee-cost/
 
     Query parameters (all optional):
         start_date    YYYY-MM-DD
