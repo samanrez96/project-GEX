@@ -31,6 +31,51 @@ from surgeries.models import (
 )
 
 
+# ---------------------------------------------------------------------------
+# Custom AdminSite – replaces the default to avoid monkey‑patching
+# ---------------------------------------------------------------------------
+
+class SurgeriesAdminSite(admin.AdminSite):
+    """Custom admin site for the surgeries app.
+
+    Adds custom URLs for detail views and AnesthesiaType management.
+    """
+    def get_urls(self):
+        urls = super().get_urls()
+        custom = [
+            path(
+                'surgeryhistory/<int:surgery_id>/detail/',
+                self.admin_view(surgery_history_detail_view),
+                name='surgeries_surgeryhistory_detail',
+            ),
+            path(
+                'anesthesia-type/create/',
+                self.admin_view(anesthesia_type_create_view),
+                name='surgeries_anesthesia_type_create',
+            ),
+            path(
+                'anesthesia-type/<int:pk>/delete/',
+                self.admin_view(anesthesia_type_delete_view),
+                name='surgeries_anesthesia_type_delete',
+            ),
+            path(
+                'anesthesia-type/<int:pk>/deactivate/',
+                self.admin_view(anesthesia_type_deactivate_view),
+                name='surgeries_anesthesia_type_deactivate',
+            ),
+            path(
+                'anesthesia-type/<int:pk>/activate/',
+                self.admin_view(anesthesia_type_activate_view),
+                name='surgeries_anesthesia_type_activate',
+            ),
+        ]
+        return custom + urls
+
+
+# Replace the default admin site with our custom one
+admin.site = SurgeriesAdminSite()
+
+
 _PERSIAN_DIGITS = '۰۱۲۳۴۵۶۷۸۹'
 
 
@@ -120,8 +165,6 @@ class PatientAdmin(AdminExcelExportMixin, JalaliAdminDatesMixin, admin.ModelAdmi
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
-        # Django's default TextField widget is 10 rows — oversized for a
-        # short patient note relative to the rest of this compact form.
         if formfield and db_field.name == 'description':
             formfield.widget.attrs.update({'rows': 4})
         if formfield and db_field.name == 'is_hidden':
@@ -180,9 +223,6 @@ class PatientAdmin(AdminExcelExportMixin, JalaliAdminDatesMixin, admin.ModelAdmi
     def get_fieldsets(self, request, obj=None):
         base = [
             ('اطلاعات بیمار', {
-                # CSS hook only — patient_form.css turns this fieldset into
-                # a real CSS grid (see that file's header comment). Field
-                # order/grouping below is unchanged; only the class is new.
                 'classes': ('patient-form-card',),
                 'fields': (
                     'full_name',
@@ -197,9 +237,6 @@ class PatientAdmin(AdminExcelExportMixin, JalaliAdminDatesMixin, admin.ModelAdmi
             }),
         ]
         if is_main_administrator(request.user):
-            # A single checkbox does not need its own oversized section —
-            # grouped with the (already collapsed) timestamps section under
-            # a shared "وضعیت و دسترسی" label instead.
             base.append(('وضعیت و دسترسی', {
                 'classes': ('patient-status-section',),
                 'fields': ('is_hidden', 'get_hidden_audit_display'),
@@ -213,8 +250,6 @@ class PatientAdmin(AdminExcelExportMixin, JalaliAdminDatesMixin, admin.ModelAdmi
     def get_readonly_fields(self, request, obj=None):
         readonly = ['created_at_jalali', 'updated_at_jalali', 'get_latest_surgery_date', 'get_latest_doctor']
         if is_main_administrator(request.user):
-            # is_hidden itself stays editable (that IS the hide/restore
-            # control) — only the audit trail (who/when) is read-only.
             readonly.append('get_hidden_audit_display')
         return readonly
 
@@ -227,13 +262,7 @@ class PatientAdmin(AdminExcelExportMixin, JalaliAdminDatesMixin, admin.ModelAdmi
         return f'{who} — {when}'
 
     def save_model(self, request, obj, form, change):
-        # Route any is_hidden transition through hide()/unhide() so the
-        # audit fields (hidden_at/hidden_by) stay correct even when the
-        # checkbox is toggled directly on the change form, not just via the
-        # bulk actions below.
         if is_main_administrator(request.user) and change and 'is_hidden' in form.changed_data:
-            # obj already has the new (submitted) value bound by form.save()
-            # at this point — True means the user just turned hiding ON.
             if obj.is_hidden:
                 obj.hide(request.user)
                 self.message_user(request, 'بیمار با موفقیت مخفی شد.')
@@ -256,10 +285,6 @@ class PatientAdmin(AdminExcelExportMixin, JalaliAdminDatesMixin, admin.ModelAdmi
     def hide_selected_patients(self, request, queryset):
         if not is_main_administrator(request.user):
             raise PermissionDenied
-        # Re-verify against the allowed queryset rather than trusting the
-        # submitted IDs directly — defends against bulk-action ID
-        # manipulation (e.g. a forged form re-adding IDs outside what was
-        # actually rendered to this user).
         count = 0
         for patient in Patient.objects.visible_to(request.user).filter(pk__in=queryset.values_list('pk', flat=True)):
             if not patient.is_hidden:
@@ -279,21 +304,6 @@ class PatientAdmin(AdminExcelExportMixin, JalaliAdminDatesMixin, admin.ModelAdmi
         self.message_user(request, 'بیمار با موفقیت از حالت مخفی خارج شد.' if count == 1 else f'{count} بیمار با موفقیت از حالت مخفی خارج شدند.')
 
     # ── Excel export ──────────────────────────────────────────────────────────
-    #
-    # PatientAdmin is a plain Django admin changelist (no DRF ViewSet), so the
-    # export reuses the admin's own ChangeList via AdminExcelExportMixin — the
-    # exact same object that already applies search (?q=) and ordering (?o=)
-    # for the normal paginated page — instead of re-implementing filtering.
-    # Columns mirror list_display exactly, so the export never surfaces more
-    # than what the list page already shows.
-    #
-    # Hidden Patients are EXCLUDED here unconditionally, even for the main
-    # administrator — cl.queryset may legitimately include hidden rows for a
-    # superuser's on-screen list, but the normal Excel export must never
-    # contain them (task requirement — a separate, explicit hidden-data
-    # export would be a distinct, superuser-only action, not implemented
-    # here since nothing currently requires it).
-
     excel_filename_prefix = 'patient-list'
     excel_sheet_title      = 'بیماران'
     excel_report_title     = 'گزارش فهرست بیماران'
@@ -443,11 +453,6 @@ class SurgeryTypeAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
 @admin.register(SurgeryHistory)
 class SurgeryHistoryAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
     change_list_template = 'admin/surgeries/surgeryhistory/change_list.html'
-    # The app-specific change_form.html (same directory) is the read-only
-    # detail tab view (surgery_history_detail_view) — edit_form.html is a
-    # separate template that extends Django's own admin/change_form.html
-    # for the real add/edit page, only adding the AnesthesiaType modal's
-    # CSS/JS on top of it.
     change_form_template = 'admin/surgeries/surgeryhistory/edit_form.html'
     form = SurgeryHistoryAdminForm
     formfield_overrides  = {**_JALALI_DATE_OVERRIDES, **_DECIMAL_OVERRIDES}
@@ -467,14 +472,6 @@ class SurgeryHistoryAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
     ordering        = ('-surgery_date', '-created_at')
     readonly_fields = ('case_code', 'phone_number', 'created_at_jalali', 'updated_at_jalali', 'get_university_share', 'get_doctor_share')
     formfield_overrides = _JALALI_DATE_OVERRIDES
-    # clinical_doctor autocomplete uses DoctorAdmin.search_fields (set).
-    # patient autocomplete uses PatientAdmin.search_fields (set).
-    # clinical_doctor/patient get their autocomplete widget automatically
-    # from here. The 7 Employee role fields + second_assistant_surgeon are
-    # explicitly declared ModelChoiceFields on SurgeryHistoryAdminForm (for
-    # the inactive-value labeling / forged-POST handling) and so bypass this
-    # mechanism entirely — they get their AutocompleteSelect widget wired
-    # directly in surgeries/forms.py instead.
     autocomplete_fields = ('patient', 'clinical_doctor')
     date_hierarchy  = 'surgery_date'
 
@@ -515,12 +512,6 @@ class SurgeryHistoryAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
     )
 
     def get_queryset(self, request):
-        # A hidden Patient's surgeries are excluded here for everyone except
-        # the main administrator — see SurgeryHistoryQuerySet.visible_to for
-        # why this is a whole-record exclusion rather than field masking.
-        # This is also what makes get_object() (used by the /change/ URL and
-        # by has_change_permission) 404 for a non-superuser guessing a
-        # hidden-patient surgery's ID directly.
         return super().get_queryset(request).visible_to(request.user)
 
     @admin.display(description='مبلغ', ordering='amount')
@@ -543,15 +534,11 @@ class SurgeryHistoryAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name == 'surgery_date':
-            # Date-only Jalali widget: surgery_date must show/accept only a
-            # calendar day, no hour/minute, even though the DB column is a
-            # DateTimeField — see common.admin.JalaliFormDateForDateTimeField.
             kwargs['form_class'] = JalaliFormDateForDateTimeField
             kwargs['widget'] = JalaliDateWidget
         formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
         if formfield and db_field.name in ('amount', 'center_commission_amount'):
             formfield.widget = MoneyInput()
-        # شرح عمل و مشاهدات is a larger textarea than تشخیص بعد از عمل.
         if formfield and db_field.name == 'postoperative_diagnosis':
             formfield.widget.attrs.update({'rows': 4})
         if formfield and db_field.name == 'operation_description':
@@ -575,36 +562,7 @@ class SurgeryHistoryAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
         })
         return super().render_change_form(request, context, add=add, change=change, form_url=form_url, obj=obj)
 
-    def get_urls(self):
-        urls = super().get_urls()
-        custom_urls = [
-            path(
-                '<int:surgery_id>/detail/',
-                self.admin_site.admin_view(surgery_history_detail_view),
-                name='surgeries_surgeryhistory_detail',
-            ),
-            path(
-                'anesthesia-type/create/',
-                self.admin_site.admin_view(anesthesia_type_create_view),
-                name='surgeries_anesthesia_type_create',
-            ),
-            path(
-                'anesthesia-type/<int:pk>/delete/',
-                self.admin_site.admin_view(anesthesia_type_delete_view),
-                name='surgeries_anesthesia_type_delete',
-            ),
-            path(
-                'anesthesia-type/<int:pk>/deactivate/',
-                self.admin_site.admin_view(anesthesia_type_deactivate_view),
-                name='surgeries_anesthesia_type_deactivate',
-            ),
-            path(
-                'anesthesia-type/<int:pk>/activate/',
-                self.admin_site.admin_view(anesthesia_type_activate_view),
-                name='surgeries_anesthesia_type_activate',
-            ),
-        ]
-        return custom_urls + urls
+    # get_urls is no longer needed; all custom URLs are now in SurgeriesAdminSite
 
 
 # ---------------------------------------------------------------------------
@@ -678,3 +636,7 @@ class SurgeryUsedItemAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+# The monkey‑patching section has been removed.
+# Custom URLs are now added via SurgeriesAdminSite.get_urls().

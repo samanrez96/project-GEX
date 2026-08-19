@@ -66,7 +66,7 @@ class PatientViewSet(viewsets.ModelViewSet):
     Ordering: full_name, created_at
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # base, overridden for write
     filter_backends    = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     search_fields      = ['full_name', 'case_code', 'internal_code', 'national_id', 'phone_number']
     ordering_fields    = ['full_name', 'created_at']
@@ -79,6 +79,11 @@ class PatientViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Patient.objects.visible_to(self.request.user)
+
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [IsAuthenticated(), IsAdminOrFinanceUser()]
+        return [IsAuthenticated()]
 
     def perform_update(self, serializer):
         # is_hidden only ever reaches validated_data for the main
@@ -124,7 +129,7 @@ class SurgeryViewSet(viewsets.ModelViewSet):
       surgery_date, created_at, status  (default: -surgery_date)
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # base, overridden for write
     filter_backends    = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields   = ["status", "stock_applied"]
     search_fields      = ["patient_name", "surgeon_name", "notes"]
@@ -140,6 +145,11 @@ class SurgeryViewSet(viewsets.ModelViewSet):
         if self.action == "list":
             return Surgery.objects.prefetch_related("consumption_items")
         return Surgery.objects.prefetch_related("consumption_items__product")
+
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy', 'complete']:
+            return [IsAuthenticated(), IsAdminOrFinanceUser()]
+        return [IsAuthenticated()]
 
     @action(detail=True, methods=["post"], url_path="complete")
     def complete(self, request, pk=None):
@@ -165,7 +175,7 @@ class SurgeryTypeViewSet(viewsets.ModelViewSet):
     DELETE is blocked when active CommissionRules exist (CLI-30 stub).
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # base, overridden for write
     filter_backends    = [SearchFilter, OrderingFilter]
     search_fields      = ['name', 'code', 'description']
     ordering_fields    = ['name', 'base_rate', 'created_at']
@@ -184,6 +194,11 @@ class SurgeryTypeViewSet(viewsets.ModelViewSet):
         if is_active == 'false':
             return qs.filter(is_active=False)
         return qs
+
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [IsAuthenticated(), IsAdminOrFinanceUser()]
+        return [IsAuthenticated()]
 
     def destroy(self, request, *args, **kwargs):
         surgery_type = self.get_object()
@@ -211,7 +226,7 @@ class SurgeryConsumptionItemViewSet(viewsets.ModelViewSet):
       created_at  (default: surgery, product name)
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # base, overridden for write
     filter_backends    = [DjangoFilterBackend, OrderingFilter]
     filterset_fields   = ["surgery", "product"]
     ordering_fields    = ["created_at"]
@@ -220,6 +235,11 @@ class SurgeryConsumptionItemViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return SurgeryConsumptionItem.objects.select_related("surgery", "product")
+
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [IsAuthenticated(), IsAdminOrFinanceUser()]
+        return [IsAuthenticated()]
 
 
 class SurgeryHistoryOrderingFilter(OrderingFilter):
@@ -260,7 +280,7 @@ class SurgeryHistoryViewSet(ExcelExportMixin, viewsets.ModelViewSet):
     record in finance via SurgeryFinanceService — both saves are atomic.
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # base, overridden for write
     pagination_class   = StandardPagination
     filterset_class    = SurgeryHistoryFilter
     filter_backends    = [DjangoFilterBackend, SearchFilter, SurgeryHistoryOrderingFilter]
@@ -285,6 +305,11 @@ class SurgeryHistoryViewSet(ExcelExportMixin, viewsets.ModelViewSet):
             'anesthesiologist', 'anesthesia_technician', 'anesthesia_type',
             'operating_room_manager', 'service_employee',
         )
+
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [IsAuthenticated(), IsAdminOrFinanceUser()]
+        return [IsAuthenticated()]
 
     @transaction.atomic
     def perform_create(self, serializer):
@@ -572,7 +597,7 @@ class SurgeryUsedItemViewSet(viewsets.ModelViewSet):
     ever mutated for this model.
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # base, overridden for write
     filter_backends    = [DjangoFilterBackend, OrderingFilter]
     filterset_fields   = ['surgery', 'product']
     ordering_fields    = ['created_at']
@@ -583,6 +608,11 @@ class SurgeryUsedItemViewSet(viewsets.ModelViewSet):
         return SurgeryUsedItem.objects.select_related(
             'surgery__patient', 'surgery__surgery_type', 'product',
         )
+
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [IsAuthenticated(), IsAdminOrFinanceUser()]
+        return [IsAuthenticated()]
 
     @transaction.atomic
     def perform_create(self, serializer):

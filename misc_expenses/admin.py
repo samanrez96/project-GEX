@@ -6,11 +6,31 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Avg, Count, Max, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import path, reverse
+from django.contrib.auth.decorators import user_passes_test
 
 from common.dates import parse_jalali_date, to_jalali_date
 
 from .forms import MiscellaneousExpenseForm
 from .models import MiscellaneousExpense
+
+
+# ---------------------------------------------------------------------------
+# Permission helpers
+# ---------------------------------------------------------------------------
+
+def _user_is_admin_or_finance(user):
+    """Return True if user is in admin or finance_user group (or superuser)."""
+    if not user.is_authenticated:
+        return False
+    if user.is_superuser:
+        return True
+    return user.groups.filter(name__in=['admin', 'finance_user']).exists()
+
+
+# Decorator that combines staff_member_required and the group check.
+def admin_or_finance_required(view_func):
+    decorated = staff_member_required(view_func)
+    return user_passes_test(_user_is_admin_or_finance, login_url='admin:login')(decorated)
 
 
 # ---------------------------------------------------------------------------
@@ -31,10 +51,10 @@ def _fmt_toman(value):
 
 
 # ---------------------------------------------------------------------------
-# Custom admin views
+# Custom admin views (restricted to admin/finance)
 # ---------------------------------------------------------------------------
 
-@staff_member_required
+@admin_or_finance_required
 def misc_expenses_list_view(request):
     qs = MiscellaneousExpense.objects.all()
 
@@ -89,12 +109,12 @@ def misc_expenses_list_view(request):
         "date_from":          date_from,
         "date_to":            date_to,
         "add_url":            reverse("admin:misc_expenses_add"),
-        "has_add_permission": request.user.is_staff,
+        "has_add_permission": request.user.has_perm("misc_expenses.add_miscellaneousexpense"),
     }
     return render(request, "admin/misc_expenses/change_list.html", context)
 
 
-@staff_member_required
+@admin_or_finance_required
 def misc_expenses_add_view(request):
     if request.method == "POST":
         form = MiscellaneousExpenseForm(request.POST)
@@ -115,7 +135,7 @@ def misc_expenses_add_view(request):
     return render(request, "admin/misc_expenses/change_form.html", context)
 
 
-@staff_member_required
+@admin_or_finance_required
 def misc_expenses_change_view(request, pk):
     expense = get_object_or_404(MiscellaneousExpense, pk=pk)
 
@@ -151,9 +171,8 @@ def misc_expenses_change_view(request, pk):
     return render(request, "admin/misc_expenses/change_form.html", context)
 
 
-@staff_member_required
+@admin_or_finance_required
 def misc_expenses_delete_view(request, pk):
-    """Dedicated delete-confirmation page (GET) and delete action (POST)."""
     expense = get_object_or_404(MiscellaneousExpense, pk=pk)
 
     if not request.user.has_perm("misc_expenses.delete_miscellaneousexpense"):
@@ -177,12 +196,10 @@ def misc_expenses_delete_view(request, pk):
 
 
 # ---------------------------------------------------------------------------
-# Monkey-patch admin site URLs
-# Chains correctly after finance/admin.py's patch.
+# Monkey-patch admin site URLs (chains with any existing patches)
 # ---------------------------------------------------------------------------
 
 _original_get_urls = admin.site.__class__.get_urls
-
 
 def _patched_get_urls(self):
     base = _original_get_urls(self)
@@ -209,6 +226,5 @@ def _patched_get_urls(self):
         ),
     ]
     return extra + base
-
 
 admin.site.__class__.get_urls = _patched_get_urls

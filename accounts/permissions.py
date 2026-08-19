@@ -17,8 +17,25 @@ Role hierarchy:
 
 from rest_framework.permissions import BasePermission
 
+__all__ = [
+    'ADMIN',
+    'FINANCE_USER',
+    'INVENTORY_USER',
+    'EMPLOYEE_MANAGER',
+    'IsAdminRole',
+    'IsFinanceUser',
+    'IsInventoryUser',
+    'IsEmployeeManager',
+    'IsAdminOrFinanceUser',
+    'IsAdminOrInventoryUser',
+    'IsAdminOrEmployeeManager',
+    'IsMainAdministrator',
+    'user_has_role',
+    'is_main_administrator',
+]
+
 # ---------------------------------------------------------------------------
-# Role name constants — use these everywhere to avoid string typos
+# Role name constants
 # ---------------------------------------------------------------------------
 ADMIN = "admin"
 FINANCE_USER = "finance_user"
@@ -27,7 +44,7 @@ EMPLOYEE_MANAGER = "employee_manager"
 
 
 # ---------------------------------------------------------------------------
-# Helper
+# Helpers
 # ---------------------------------------------------------------------------
 
 def user_has_role(user, role_name: str) -> bool:
@@ -36,26 +53,15 @@ def user_has_role(user, role_name: str) -> bool:
 
 
 def is_main_administrator(user) -> bool:
-    """The single source of truth for "main administrator" status.
-
-    Currently Django's own ``is_superuser`` flag — the project has no more
-    explicit root-admin role (the ``admin`` group above is a broad business
-    role for finance/inventory/employee data, not equivalent to "the main
-    system administrator" for sensitive privacy features like hidden
-    Patients). Centralized here so every sensitive-visibility check enforces
-    the same rule; do not duplicate a raw ``user.is_superuser`` check
-    elsewhere — import and call this instead.
-    """
+    """Centralised check for the main administrator (superuser)."""
     return bool(user and getattr(user, 'is_authenticated', False) and user.is_superuser)
 
 
 # ---------------------------------------------------------------------------
-# Single-role permission classes
+# Permission classes
 # ---------------------------------------------------------------------------
 
 class IsAdminRole(BasePermission):
-    """Grants access only to users in the 'admin' group (or superusers)."""
-
     message = "You must be an administrator to perform this action."
 
     def has_permission(self, request, view):
@@ -67,8 +73,6 @@ class IsAdminRole(BasePermission):
 
 
 class IsFinanceUser(BasePermission):
-    """Grants access only to users in the 'finance_user' group (or superusers)."""
-
     message = "You must be a finance user to perform this action."
 
     def has_permission(self, request, view):
@@ -80,8 +84,6 @@ class IsFinanceUser(BasePermission):
 
 
 class IsInventoryUser(BasePermission):
-    """Grants access only to users in the 'inventory_user' group (or superusers)."""
-
     message = "You must be an inventory user to perform this action."
 
     def has_permission(self, request, view):
@@ -93,8 +95,6 @@ class IsInventoryUser(BasePermission):
 
 
 class IsEmployeeManager(BasePermission):
-    """Grants access only to users in the 'employee_manager' group (or superusers)."""
-
     message = "You must be an employee manager to perform this action."
 
     def has_permission(self, request, view):
@@ -105,20 +105,7 @@ class IsEmployeeManager(BasePermission):
         return user_has_role(request.user, EMPLOYEE_MANAGER)
 
 
-# ---------------------------------------------------------------------------
-# Combined permission classes (admin always included)
-# ---------------------------------------------------------------------------
-
 class IsAdminOrFinanceUser(BasePermission):
-    """
-    Grants access to:
-        - Superusers
-        - Users in the 'admin' group
-        - Users in the 'finance_user' group
-
-    Use this on all finance/payroll-related views.
-    """
-
     message = "Access restricted to admin or finance users."
 
     def has_permission(self, request, view):
@@ -130,15 +117,6 @@ class IsAdminOrFinanceUser(BasePermission):
 
 
 class IsAdminOrInventoryUser(BasePermission):
-    """
-    Grants access to:
-        - Superusers
-        - Users in the 'admin' group
-        - Users in the 'inventory_user' group
-
-    Use this on all inventory-related views.
-    """
-
     message = "Access restricted to admin or inventory users."
 
     def has_permission(self, request, view):
@@ -149,33 +127,7 @@ class IsAdminOrInventoryUser(BasePermission):
         return user_has_role(request.user, ADMIN) or user_has_role(request.user, INVENTORY_USER)
 
 
-class IsMainAdministrator(BasePermission):
-    """Grants access only to the main administrator (is_superuser).
-
-    Stricter than every other class in this module — the broad 'admin'
-    business role does NOT bypass this the way it bypasses IsAdminRole and
-    friends. Reserved for irreversible, destructive operations (e.g. the
-    Product purge endpoints) where ordinary admin staff must not have
-    access. Backed by is_main_administrator() so the rule lives in one
-    place.
-    """
-
-    message = "فقط مدیر اصلی سامانه مجاز به انجام این عملیات است."
-
-    def has_permission(self, request, view):
-        return is_main_administrator(request.user)
-
-
 class IsAdminOrEmployeeManager(BasePermission):
-    """
-    Grants access to:
-        - Superusers
-        - Users in the 'admin' group
-        - Users in the 'employee_manager' group
-
-    Use this on all employee-related views.
-    """
-
     message = "Access restricted to admin or employee managers."
 
     def has_permission(self, request, view):
@@ -184,3 +136,10 @@ class IsAdminOrEmployeeManager(BasePermission):
         if request.user.is_superuser:
             return True
         return user_has_role(request.user, ADMIN) or user_has_role(request.user, EMPLOYEE_MANAGER)
+
+
+class IsMainAdministrator(BasePermission):
+    message = "فقط مدیر اصلی سامانه مجاز به انجام این عملیات است."
+
+    def has_permission(self, request, view):
+        return is_main_administrator(request.user)

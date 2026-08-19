@@ -54,7 +54,7 @@ class CommissionRuleViewSet(viewsets.ModelViewSet):
     Filter: ?job_position={id}  ?surgery_type={id}  ?is_active=true|false
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # base, overridden for write
     filterset_fields   = ['job_position', 'surgery_type', 'is_active']
 
     def get_serializer_class(self):
@@ -66,6 +66,11 @@ class CommissionRuleViewSet(viewsets.ModelViewSet):
         return CommissionRule.objects.select_related(
             'job_position', 'surgery_type', 'created_by',
         )
+
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [IsAuthenticated(), IsAdminOrFinanceUser()]
+        return [IsAuthenticated()]
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
@@ -117,12 +122,17 @@ class PayrollPeriodViewSet(viewsets.ModelViewSet):
     Filter: ?status=OPEN|CLOSED|PROCESSED  ?year={year}
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # base, overridden for write
     serializer_class   = PayrollPeriodSerializer
     filterset_fields   = ['status', 'year']
 
     def get_queryset(self):
         return PayrollPeriod.objects.all()
+
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy', 'close']:
+            return [IsAuthenticated(), IsAdminOrFinanceUser()]
+        return [IsAuthenticated()]
 
     @action(detail=True, methods=['post'], url_path='close')
     def close(self, request, pk=None):
@@ -154,13 +164,18 @@ class PayrollTypeConfigViewSet(
     Filter: ?has_monthly_wage=true|false  ?has_commission=true|false
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # base, overridden for write
     serializer_class   = PayrollTypeConfigSerializer
     filterset_fields   = ['has_monthly_wage', 'has_commission']
     http_method_names  = ['get', 'patch', 'head', 'options']
 
     def get_queryset(self):
         return PayrollTypeConfig.objects.select_related('employee')
+
+    def get_permissions(self):
+        if self.action in ['update', 'partial_update']:
+            return [IsAuthenticated(), IsAdminOrFinanceUser()]
+        return [IsAuthenticated()]
 
     @action(detail=False, methods=['get'], url_path='by_employee')
     def by_employee(self, request):
@@ -192,7 +207,7 @@ class MonthlyWageViewSet(viewsets.ModelViewSet):
     Filter: ?employee={id}  ?is_active=true|false
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # base, overridden for write
     filterset_fields   = ['employee', 'is_active']
 
     def get_queryset(self):
@@ -204,6 +219,11 @@ class MonthlyWageViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             return MonthlyWageListSerializer
         return MonthlyWageSerializer
+
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [IsAuthenticated(), IsAdminOrFinanceUser()]
+        return [IsAuthenticated()]
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
@@ -265,7 +285,7 @@ class HourlyRateViewSet(viewsets.ModelViewSet):
     Filter: ?employee={id}  ?is_active=true|false
     """
 
-    permission_classes = [IsAdminOrFinanceUser]
+    permission_classes = [IsAuthenticated]  # base, overridden for write
     filterset_fields   = ['employee', 'is_active']
 
     def get_queryset(self):
@@ -277,6 +297,11 @@ class HourlyRateViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             return HourlyRateListSerializer
         return HourlyRateSerializer
+
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [IsAuthenticated(), IsAdminOrFinanceUser()]
+        return [IsAuthenticated()]
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
@@ -307,7 +332,7 @@ class HourlyWorkEntryViewSet(viewsets.ModelViewSet):
     Filter: ?employee={id}  ?work_date_after=  ?work_date_before=  ?payroll_period={id}
     """
 
-    permission_classes = [IsAdminOrFinanceUser]
+    permission_classes = [IsAuthenticated]  # base, overridden for write
     filterset_fields   = {
         'employee':       ['exact'],
         'work_date':      ['gte', 'lte'],
@@ -321,6 +346,11 @@ class HourlyWorkEntryViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             return HourlyWorkEntryListSerializer
         return HourlyWorkEntrySerializer
+
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy', 'calculate']:
+            return [IsAuthenticated(), IsAdminOrFinanceUser()]
+        return [IsAuthenticated()]
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -365,11 +395,6 @@ class HourlyWorkEntryViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        # Unsaved instance — preview_hourly_payroll only reads year/month to
-        # derive the Jalali month's date range, so no PayrollPeriod row is
-        # created as a side effect of a preview request. The real
-        # PayrollPeriod (created/looked up via period.close()'s own flow)
-        # is what finalization uses later.
         period = PayrollPeriod(year=year, month=month)
 
         try:
@@ -606,14 +631,6 @@ class PayrollReportView(views.APIView):
             hourly_hours_totals[emp_id] = hourly_hours_totals.get(emp_id, Decimal('0')) + bucket['hours']
 
         # ── Configured-but-possibly-zero employees ─────────────────────────
-        # An employee can be correctly configured for a payroll type
-        # (PayrollTypeConfig flag set) and still have no actual transaction
-        # row yet for this specific period — e.g. an hourly employee with no
-        # HourlyWorkEntry rows this month. Deriving the employee list only
-        # from "has at least one row in one of the totals dicts above" (an
-        # inner join on activity) silently drops them. These three sets are
-        # a left-join in spirit: eligible by configuration + period overlap,
-        # regardless of whether any amount has actually accrued yet.
         def _config_eligible_ids(flag_name, related_name):
             qs = Employee.objects.filter(is_active=True, **{f'payroll_config__{flag_name}': True})
             if employee_id:
@@ -634,10 +651,6 @@ class PayrollReportView(views.APIView):
 
         monthly_config_eligible_ids = _config_eligible_ids('has_monthly_wage', 'monthly_wages')
         hourly_config_eligible_ids = _config_eligible_ids('has_hourly_wage', 'hourly_rates')
-        # Commission eligibility has no employee-specific dated rate record
-        # (CommissionRule is keyed by job position, not employee, and its
-        # own effective date already drives has_commission via the existing
-        # sync signal) — configuration alone is the eligibility signal.
         commission_qs = Employee.objects.filter(is_active=True, payroll_config__has_commission=True)
         if employee_id:
             commission_qs = commission_qs.filter(pk=employee_id)
@@ -645,9 +658,6 @@ class PayrollReportView(views.APIView):
             commission_qs = commission_qs.filter(job_position_id=position_id)
         commission_config_eligible_ids = set(commission_qs.values_list('pk', flat=True))
 
-        # Restrict to employees who either have actual activity in this
-        # period or are configured (and period-eligible) for a payroll type
-        # even with nothing accrued yet.
         relevant_ids = (
             set(wage_totals) | set(commission_totals)
             | set(hourly_totals) | set(purchase_commission_totals)
@@ -672,14 +682,6 @@ class PayrollReportView(views.APIView):
             surgery_comm  = commission_totals.get(emp.pk, Decimal('0'))
             purchase_comm = purchase_commission_totals.get(emp.pk, Decimal('0'))
 
-            # HourlyWorkEntry (new) is the canonical hourly source for an
-            # employee that has any priced entries in this date-filtered
-            # window; HourlyWorkRecord (legacy) is used ONLY as a fallback
-            # when the employee has no new-system data at all — the two are
-            # never summed together for the same employee, so this is never
-            # double-counted. The value exposed to the table/summary as
-            # hourly_salary / total_hours_worked is always this single,
-            # already-disambiguated figure — never a silent mix of both.
             if emp.pk in hourly_entry_totals:
                 hourly_salary = hourly_entry_totals[emp.pk]
                 total_hours   = hourly_hours_totals.get(emp.pk, Decimal('0'))
@@ -788,7 +790,6 @@ class EmployeeCostReportView(views.APIView):
         if wage_type not in self._VALID_WAGE_TYPES:
             wage_type = 'all'
 
-        # Parse dates
         date_start = None
         date_end   = None
         try:
@@ -802,7 +803,6 @@ class EmployeeCostReportView(views.APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Parse optional ID filters
         employee_id = None
         position_id = None
         try:
@@ -819,12 +819,10 @@ class EmployeeCostReportView(views.APIView):
         # ── Fixed wages ───────────────────────────────────────────────────
         wage_qs = MonthlyWage.objects.filter(is_active=True)
         if date_start:
-            # Wage must not have ended before the range starts
             wage_qs = wage_qs.filter(
                 Q(end_date__isnull=True) | Q(end_date__gte=date_start)
             )
         if date_end:
-            # Wage must have started by the time the range ends
             wage_qs = wage_qs.filter(start_date__lte=date_end)
         if employee_id:
             wage_qs = wage_qs.filter(employee_id=employee_id)
@@ -832,7 +830,6 @@ class EmployeeCostReportView(views.APIView):
             wage_qs = wage_qs.filter(employee__job_position_id=position_id)
 
         # ── Commission transactions ───────────────────────────────────────
-        # Date-filtered by surgery date (when the commission was earned).
         ct_qs = CommissionTransaction.objects.all()
         if date_start:
             ct_qs = ct_qs.filter(surgery__surgery_date__date__gte=date_start)
@@ -843,7 +840,7 @@ class EmployeeCostReportView(views.APIView):
         if position_id:
             ct_qs = ct_qs.filter(employee__job_position_id=position_id)
 
-        # ── Hourly work entries (already-priced only — no read-time recalc) ─
+        # ── Hourly work entries (already-priced only) ────────────────────
         hwe_qs = HourlyWorkEntry.objects.filter(amount__isnull=False)
         if date_start:
             hwe_qs = hwe_qs.filter(work_date__gte=date_start)
@@ -872,7 +869,6 @@ class EmployeeCostReportView(views.APIView):
             for row in hwe_qs.values('employee_id').annotate(total=Sum('hours_worked'))
         }
 
-        # Determine which employees appear in this report
         if wage_type == 'monthly':
             relevant_ids = set(wage_totals)
         elif wage_type == 'commission':
@@ -882,7 +878,6 @@ class EmployeeCostReportView(views.APIView):
         else:
             relevant_ids = set(wage_totals) | set(commission_totals) | set(hourly_totals)
 
-        # ── Grand totals (before pagination) ─────────────────────────────
         grand_fixed = sum(
             wage_totals.get(eid, Decimal('0')) for eid in relevant_ids
         )
@@ -907,7 +902,6 @@ class EmployeeCostReportView(views.APIView):
             grand_fixed       = Decimal('0')
             grand_commissions = Decimal('0')
 
-        # ── Build employee queryset for pagination ────────────────────────
         from employees.models import Employee
         emp_qs = (
             Employee.objects
@@ -932,7 +926,6 @@ class EmployeeCostReportView(views.APIView):
             'employee_count':     total_count,
         }
 
-        # ── Excel export (no pagination) ──────────────────────────────────
         if params.get('export') == 'excel':
             if total_count > EXCEL_MAX_ROWS:
                 return Response(
@@ -979,7 +972,6 @@ class EmployeeCostReportView(views.APIView):
                                    sheet_title='هزینه کارمندان', meta_rows=meta_rows)
             return excel_file_response(content, filename='employee_cost_report.xlsx')
 
-        # ── Pagination ────────────────────────────────────────────────────
         try:
             page      = max(1, int(params.get('page', 1)))
             page_size = min(max(1, int(params.get('page_size', 50))), 100)
@@ -989,7 +981,6 @@ class EmployeeCostReportView(views.APIView):
         offset     = (page - 1) * page_size
         page_emps  = list(emp_qs[offset:offset + page_size])
 
-        # ── Build result rows ─────────────────────────────────────────────
         results = []
         for emp in page_emps:
             fixed  = wage_totals.get(emp.pk, Decimal('0'))
@@ -1013,7 +1004,6 @@ class EmployeeCostReportView(views.APIView):
                 'total_payments':     fixed + comm + hourly,
             })
 
-        # ── Pagination URLs ───────────────────────────────────────────────
         def _page_url(p):
             p_copy = dict(params)
             p_copy['page']      = str(p)

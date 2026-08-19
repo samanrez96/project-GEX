@@ -23,6 +23,31 @@ from .models import (
 
 
 # ---------------------------------------------------------------------------
+# Custom AdminSite – replaces the default to avoid monkey‑patching
+# ---------------------------------------------------------------------------
+
+class PayrollAdminSite(admin.AdminSite):
+    """Custom admin site for the payroll app.
+
+    Adds the custom payroll page URL.
+    """
+    def get_urls(self):
+        urls = super().get_urls()
+        custom = [
+            path(
+                'payroll/payroll-page/',
+                self.admin_view(payroll_page_view),
+                name='payroll_page',
+            ),
+        ]
+        return custom + urls
+
+
+# Replace the default admin site with our custom one
+admin.site = PayrollAdminSite()
+
+
+# ---------------------------------------------------------------------------
 # Payroll page — custom admin view
 # ---------------------------------------------------------------------------
 
@@ -35,6 +60,10 @@ def payroll_page_view(request):
     }
     return render(request, 'admin/payroll/payroll_page.html', context)
 
+
+# ---------------------------------------------------------------------------
+# ModelAdmins (registered after assigning custom admin site)
+# ---------------------------------------------------------------------------
 
 @admin.register(PayrollPeriod)
 class PayrollPeriodAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
@@ -162,8 +191,6 @@ class HourlyWorkEntryAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         base = list(super().get_readonly_fields(request, obj))
-        # employee/work_date/hours_worked become readonly once processed —
-        # mirrors the model-level immutability guard in clean()/save().
         if obj and obj.is_processed:
             base.extend(['employee', 'work_date', 'hours_worked'])
         return base
@@ -174,15 +201,6 @@ class HourlyWorkEntryAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
         return super().has_delete_permission(request, obj)
 
     def get_actions(self, request):
-        # Django's "Delete selected" bulk action calls queryset.delete()
-        # directly — a bulk SQL delete that bypasses both this method's
-        # per-object obj.is_processed check (called here with obj=None,
-        # only gating whether the action is offered at all) and the
-        # model's own delete() override (HourlyWorkEntry.delete() is never
-        # invoked per row by a bulk queryset delete). Removing the action
-        # forces deletion through the single-object delete view, which
-        # does call has_delete_permission(request, obj) with the real
-        # object and does call obj.delete().
         actions = super().get_actions(request)
         actions.pop('delete_selected', None)
         return actions
@@ -306,9 +324,6 @@ class HourlyWorkRecordAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
         from finance.admin import _fmt_toman
         return f'{_fmt_toman(obj.calculated_salary)} تومان'
 
-    # ── Legacy: read-only. Existing rows stay visible/searchable for audit,
-    # but no new row can be created and no existing row can be edited —
-    # new hourly payroll must go through HourlyRate/HourlyWorkEntry instead.
     def has_add_permission(self, request):
         return False
 
@@ -316,23 +331,5 @@ class HourlyWorkRecordAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
         return False
 
 
-# ---------------------------------------------------------------------------
-# Register custom payroll page URL on the default admin site
-# ---------------------------------------------------------------------------
-
-_original_payroll_get_urls = admin.site.__class__.get_urls
-
-
-def _patched_payroll_get_urls(self):
-    base = _original_payroll_get_urls(self)
-    extra = [
-        path(
-            'payroll/payroll-page/',
-            self.admin_view(payroll_page_view),
-            name='payroll_page',
-        ),
-    ]
-    return extra + base
-
-
-admin.site.__class__.get_urls = _patched_payroll_get_urls
+# The monkey‑patching section has been removed.
+# Custom URLs are now added via PayrollAdminSite.get_urls().

@@ -4,6 +4,7 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from accounts.permissions import IsAdminOrEmployeeManager
 from common.excel import ExcelColumn, ExcelExportMixin, describe_ordering
 from common.pagination import StandardPagination
 from employees.filters import EmployeeFilter
@@ -30,7 +31,7 @@ class JobPositionViewSet(viewsets.ModelViewSet):
     Filter (?is_active=true/false)
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # base, overridden for write
     filter_backends    = [SearchFilter, OrderingFilter]
     search_fields      = ["name", "description"]
     ordering_fields    = ["name", "created_at"]
@@ -49,6 +50,15 @@ class JobPositionViewSet(viewsets.ModelViewSet):
         if is_active == "false":
             return qs.filter(is_active=False)
         return qs
+
+    def get_permissions(self):
+        """
+        Read-only (list, retrieve) allowed for any authenticated user.
+        Write operations require admin or employee manager role.
+        """
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [IsAdminOrEmployeeManager()]
+        return [IsAuthenticated()]
 
     def destroy(self, request, *args, **kwargs):
         position = self.get_object()
@@ -76,7 +86,7 @@ class EmployeeViewSet(ExcelExportMixin, viewsets.ModelViewSet):
       full_name, start_date, created_at  (default: full_name)
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # base, overridden for write
     pagination_class   = StandardPagination
     filterset_class    = EmployeeFilter
     filter_backends    = [DjangoFilterBackend, SearchFilter, OrderingFilter]
@@ -97,13 +107,16 @@ class EmployeeViewSet(ExcelExportMixin, viewsets.ModelViewSet):
     def get_queryset(self):
         return Employee.objects.select_related("job_position")
 
-    # ── Excel export ──────────────────────────────────────────────────────────
-    #
-    # No payroll/wage figures are exported here — this is the general
-    # Employee directory export, not a payroll report. Payroll amounts (fixed
-    # salary, hourly rate, commissions) require their own payroll-permission-
-    # gated export, not this general-purpose list.
+    def get_permissions(self):
+        """
+        Read-only (list, retrieve) allowed for any authenticated user.
+        Write operations require admin or employee manager role.
+        """
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [IsAdminOrEmployeeManager()]
+        return [IsAuthenticated()]
 
+    # ── Excel export ──────────────────────────────────────────────────────────
     excel_filename_prefix = 'employee-list'
     excel_sheet_title      = 'کارمندان'
     excel_report_title     = 'گزارش فهرست کارمندان'
@@ -187,10 +200,6 @@ class EmployeeViewSet(ExcelExportMixin, viewsets.ModelViewSet):
             }
 
 
-# ---------------------------------------------------------------------------
-# EmployeePurchaseCommission viewset
-# ---------------------------------------------------------------------------
-
 class EmployeePurchaseCommissionViewSet(viewsets.ModelViewSet):
     """CRUD for employee purchase commissions.
 
@@ -201,7 +210,7 @@ class EmployeePurchaseCommissionViewSet(viewsets.ModelViewSet):
     Ordering: commission_date (default: -commission_date)
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # base, overridden for write
     serializer_class   = EmployeePurchaseCommissionSerializer
     filter_backends    = [DjangoFilterBackend, OrderingFilter]
     filterset_fields   = ['employee']
@@ -212,3 +221,12 @@ class EmployeePurchaseCommissionViewSet(viewsets.ModelViewSet):
         return EmployeePurchaseCommission.objects.select_related(
             'employee', 'purchase', 'purchase__vendor',
         ).prefetch_related('purchase__items__product')
+
+    def get_permissions(self):
+        """
+        Read-only (list, retrieve) allowed for any authenticated user.
+        Write operations require admin or employee manager role.
+        """
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [IsAdminOrEmployeeManager()]
+        return [IsAuthenticated()]

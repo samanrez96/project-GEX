@@ -23,10 +23,6 @@ from contacts.forms import DoctorDocumentWidget, ValidatedImageFormField
 from employees.models import Employee, EmployeeDocument, EmployeePurchaseCommission, JobPosition
 
 
-# ---------------------------------------------------------------------------
-# Employee admin form — includes payroll setup fields
-# ---------------------------------------------------------------------------
-
 class EmployeeAdminForm(forms.ModelForm):
     """Standard employee ModelForm extended with optional wage configuration."""
 
@@ -70,9 +66,6 @@ class EmployeeAdminForm(forms.ModelForm):
     class Meta:
         model  = Employee
         fields = '__all__'
-        # first_name/last_name exist only for migration/DB consistency with
-        # the historically-applied schema (see migrations 0005-0009) — the
-        # visible identity field remains full_name alone, unchanged.
         exclude = ('first_name', 'last_name')
 
     def clean(self):
@@ -84,10 +77,6 @@ class EmployeeAdminForm(forms.ModelForm):
             self.add_error('hourly_rate_amount', 'نرخ هر ساعت برای نوع «حقوق ساعتی» الزامی است.')
         return cleaned
 
-
-# ---------------------------------------------------------------------------
-# JobPosition admin
-# ---------------------------------------------------------------------------
 
 @admin.register(JobPosition)
 class JobPositionAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
@@ -121,19 +110,6 @@ class JobPositionAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
         return obj.get_active_employee_count()
 
 
-# ---------------------------------------------------------------------------
-# EmployeeDocument inline — repeatable document uploads on the Employee form.
-#
-# Uses a dedicated template (mirrors contacts.DoctorSurgeryRateInline) rather
-# than Django's default admin/edit_inline/tabular.html, for the same reason:
-# the project-wide `#content-main .form-row { display: flex; ... }` rule in
-# rtl_responsive.css matches the `tr.form-row` rows the default tabular
-# -inline template emits and breaks row layout. "Add another" is handled by
-# static/admin/js/employee_documents.js cloning a <template>, not Django's
-# admin/js/inlines.js. No standalone EmployeeDocument admin page/menu entry
-# exists — this inline is the only way documents are ever managed.
-# ---------------------------------------------------------------------------
-
 class EmployeeDocumentInlineForm(forms.ModelForm):
     file = ValidatedImageFormField(
         required=False,
@@ -157,21 +133,12 @@ class EmployeeDocumentInline(admin.TabularInline):
     template            = 'admin/employees/employee/employee_document_inline.html'
 
 
-# ---------------------------------------------------------------------------
-# Employee admin
-# ---------------------------------------------------------------------------
-
 @admin.register(Employee)
 class EmployeeAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
     form    = EmployeeAdminForm
     inlines = [EmployeeDocumentInline]
 
     change_list_template = "admin/employees/employee/change_list.html"
-    # Use a custom change_form only to inject the document-inline CSS/JS —
-    # field rendering itself still comes entirely from Django's stock
-    # template (see templates/admin/employees/employee/employee_edit_form.html).
-    # (the app-specific admin/employees/employee/change_form.html is the
-    # separate read-only detail tab view, not this edit form).
     change_form_template = "admin/employees/employee/employee_edit_form.html"
     formfield_overrides  = {**JALALI_FORMFIELD_OVERRIDES, **MONEY_FORMFIELD_OVERRIDES}
 
@@ -188,10 +155,6 @@ class EmployeeAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
     readonly_fields = ("created_at_jalali", "updated_at_jalali")
     date_hierarchy  = "start_date"
 
-    # ------------------------------------------------------------------
-    # Payroll display (edit mode only)
-    # ------------------------------------------------------------------
-
     @admin.display(description="حقوق / دستمزد فعلی")
     def current_wage_display(self, obj):
         if not obj or not obj.pk:
@@ -205,9 +168,6 @@ class EmployeeAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
         if wage:
             parts.append(f"حقوق ثابت: {_fmt_toman(wage.amount)} تومان")
 
-        # Same canonical current/future rule as get_form()'s prefill and the
-        # Employee detail page — a future-dated row must never be shown as
-        # if it were already in effect.
         hourly_current, hourly_future = HourlyRate.get_current_and_future(obj.pk, datetime.date.today())
         if hourly_current:
             parts.append(
@@ -242,10 +202,6 @@ class EmployeeAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
         if obj:
             base.append("current_wage_display")
         return base
-
-    # ------------------------------------------------------------------
-    # Fieldsets — build dynamically to add current_wage_display on edit
-    # ------------------------------------------------------------------
 
     def get_fieldsets(self, request, obj=None):
         payroll_fields = []
@@ -293,21 +249,12 @@ class EmployeeAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
             }),
         ]
 
-    # ------------------------------------------------------------------
-    # Pre-fill wage fields when editing
-    # ------------------------------------------------------------------
-
     def get_form(self, request, obj=None, **kwargs):
         form_class = super().get_form(request, obj, **kwargs)
         if obj and request.method == 'GET':
             import datetime
             from payroll.models import HourlyRate, MonthlyWage
             wage = MonthlyWage.objects.filter(employee=obj, is_active=True).first()
-            # The canonical "currently relevant" rate: the one in effect
-            # today, or — if none has started yet — the next scheduled one.
-            # Never just "the latest-created active row", which can be a
-            # future-dated one even while an earlier, already-effective row
-            # is still active.
             hourly_current, hourly_future = HourlyRate.get_current_and_future(obj.pk, datetime.date.today())
             hourly = hourly_current or hourly_future
 
@@ -340,17 +287,7 @@ class EmployeeAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
 
         return form_class
 
-    # ------------------------------------------------------------------
-    # Save — persist wage after saving the employee
-    # ------------------------------------------------------------------
-
     def save_model(self, request, obj, form, change):
-        # Explicit — not just relying on the admin changeform view's own
-        # atomic wrapping — so the Employee row and its payroll
-        # configuration/HourlyRate/MonthlyWage rows can never be committed
-        # out of sync with each other: any exception in _save_payroll rolls
-        # back the Employee save too, instead of leaving a saved Employee
-        # whose payroll sync silently failed.
         with transaction.atomic():
             super().save_model(request, obj, form, change)
             self._save_payroll(request, obj, form)
@@ -371,19 +308,16 @@ class EmployeeAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
         if not monthly_amount or monthly_amount <= 0:
             return
 
-        # Skip if an identical active wage already exists (avoid duplicate)
         existing = MonthlyWage.objects.filter(employee=obj, is_active=True).first()
         if existing and existing.amount == Decimal(str(monthly_amount)):
             return
 
-        # Deactivate all existing active wages for this employee
         for old in MonthlyWage.objects.filter(employee=obj, is_active=True):
             old.is_active = False
             if not old.end_date:
                 old.end_date = wage_start
             old.save(update_fields=['is_active', 'end_date', 'updated_at'])
 
-        # Create the new wage record
         MonthlyWage.objects.create(
             employee=obj,
             amount=monthly_amount,
@@ -400,27 +334,16 @@ class EmployeeAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
             return
         new_rate = Decimal(str(hourly_rate_amount))
 
-        # Skip only if the active rate is genuinely unchanged. Comparing the
-        # rate alone let a start-date-only correction (same rate, new date)
-        # silently no-op — the date is just as much a part of "the rate" as
-        # the amount, so either one changing must version out a new row.
         existing = HourlyRate.objects.filter(employee=obj, is_active=True).first()
         if existing and existing.rate == new_rate and existing.start_date == wage_start:
             return
 
-        # Deactivate all existing active rates for this employee. A rate
-        # being corrected to an *earlier* start date (e.g. fixing a
-        # mistakenly future-dated row) must not receive an end_date before
-        # its own start_date — close it at its own start instead, which
-        # marks it as never having taken effect rather than corrupting the
-        # date range.
         for old in HourlyRate.objects.filter(employee=obj, is_active=True):
             old.is_active = False
             if not old.end_date:
                 old.end_date = wage_start if wage_start > old.start_date else old.start_date
             old.save(update_fields=['is_active', 'end_date', 'updated_at'])
 
-        # Create the new rate record
         HourlyRate.objects.create(
             employee=obj,
             rate=new_rate,
@@ -428,10 +351,6 @@ class EmployeeAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
             is_active=True,
             created_by=request.user,
         )
-
-    # ------------------------------------------------------------------
-    # Custom URL: read-only employee detail tab view
-    # ------------------------------------------------------------------
 
     def get_urls(self):
         urls = super().get_urls()
@@ -450,16 +369,6 @@ class EmployeeAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
         return custom_urls + urls
 
 
-# ---------------------------------------------------------------------------
-# Employee detail standalone view (read-only tab UI, registered via get_urls)
-# ---------------------------------------------------------------------------
-
-# ---------------------------------------------------------------------------
-# Document serving view — staff-only, permission-checked. No standalone
-# EmployeeDocument admin page/menu entry exists; this is the only way an
-# uploaded document is ever served (no public MEDIA_URL route is wired up).
-# ---------------------------------------------------------------------------
-
 def employee_document_view(request, pk):
     if not request.user.has_perm('employees.view_employee'):
         raise PermissionDenied
@@ -477,10 +386,6 @@ def employee_document_view(request, pk):
     response['Content-Disposition'] = 'inline'
     return response
 
-
-# ---------------------------------------------------------------------------
-# EmployeePurchaseCommission admin
-# ---------------------------------------------------------------------------
 
 @admin.register(EmployeePurchaseCommission)
 class EmployeePurchaseCommissionAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):

@@ -15,7 +15,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
-from accounts.permissions import IsAdminOrFinanceUser
+from accounts.permissions import IsAdminOrFinanceUser, IsAdminOrInventoryUser, IsMainAdministrator
 from common.excel import (
     EXCEL_MAX_ROWS,
     ExcelColumn,
@@ -69,7 +69,7 @@ _LIST_ACTIONS = frozenset({"list", "low_stock", "export_ids"})
 
 
 # ---------------------------------------------------------------------------
-# ProductCategory viewset
+# ProductCategory viewset (read-only)
 # ---------------------------------------------------------------------------
 
 class ProductCategoryViewSet(ReadOnlyModelViewSet):
@@ -126,19 +126,7 @@ class ProductCategoryViewSet(ReadOnlyModelViewSet):
 # ---------------------------------------------------------------------------
 
 class ProductOrderingFilter(OrderingFilter):
-    """OrderingFilter with NATURAL ordering for internal_code (CLI-68).
-
-    Product.internal_code is a free-form CharField that, in real data, holds a
-    mix of bare integers ('1', '2', '24') and prefixed codes ('DEMO-EQP-002').
-    A plain text sort interleaves the bare integers lexically → 1, 2, 24, 25, 3
-    (because the string "24" < "3").  Sorting by (LENGTH, value) restores
-    natural numeric order for the bare-integer codes (1, 2, 3, 24, 25) while
-    keeping the longer prefixed codes grouped together and stable.
-
-    Only internal_code is rewritten; every other ordering field (name, price,
-    stock, …) passes through unchanged.  LENGTH() works on both SQLite and
-    PostgreSQL, so behaviour is identical in dev and production.
-    """
+    """OrderingFilter with NATURAL ordering for internal_code (CLI-68)."""
 
     def get_ordering(self, request, queryset, view):
         ordering = super().get_ordering(request, queryset, view)
@@ -176,7 +164,7 @@ class ProductViewSet(ExcelExportMixin, viewsets.ModelViewSet):
       category__name, created_at  (default: internal_code ascending — CLI-68)
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # base, overridden for write
     pagination_class   = ProductListPagination
     filterset_class    = ProductFilter
     filter_backends    = [
@@ -198,9 +186,6 @@ class ProductViewSet(ExcelExportMixin, viewsets.ModelViewSet):
         "name", "internal_code", "purchase_price", "sale_price",
         "current_stock", "category__name", "created_at",
     ]
-    # CLI-68: default product listing is ascending by internal_code.
-    # internal_code is unique & non-null; "id" is a stable tie-breaker.
-    # Scoped to this viewset only — Product.Meta.ordering stays ["-created_at"].
     ordering        = ["internal_code", "id"]
 
     def get_serializer_class(self):
@@ -209,15 +194,7 @@ class ProductViewSet(ExcelExportMixin, viewsets.ModelViewSet):
         return ProductSerializer
 
     def get_queryset(self):
-        """Return an optimized queryset based on the current action.
-
-        List actions: select_related(category) + only() — one JOIN, minimal columns.
-        Detail/write actions: full select_related for nested serializer fields.
-
-        The select_related('category') + only('category__id') pattern is critical:
-        PrimaryKeyRelatedField calls instance.category (not instance.category_id),
-        so without select_related the field fires a per-row query.
-        """
+        """Return an optimized queryset based on the current action."""
         if self.action in _LIST_ACTIONS:
             qs = (
                 Product.objects
@@ -232,34 +209,27 @@ class ProductViewSet(ExcelExportMixin, viewsets.ModelViewSet):
         else:
             qs = Product.objects.select_related("category", "category__parent")
 
-        # Prefetch vendor links added in CLI-13 (ProductVendor through table)
         if hasattr(Product, "product_vendors"):
             qs = qs.prefetch_related("product_vendors__vendor")
 
         return qs
 
-    # ------------------------------------------------------------------
-    # Deletion — ordinary destroy is always blocked; permanent removal
-    # only exists through the superuser-only purge actions below.
-    # ------------------------------------------------------------------
+    # ── Permission overrides ───────────────────────────────────────────────────
 
     def get_permissions(self):
-        if self.action in ("purge_preview", "purge"):
-            from accounts.permissions import IsMainAdministrator
+        """
+        Read-only (list, retrieve) allowed for any authenticated user.
+        Write operations (create, update, delete) require admin or inventory user role.
+        Purge actions (purge_preview, purge) require superuser (main administrator).
+        """
+        if self.action in ['purge_preview', 'purge']:
             return [IsAuthenticated(), IsMainAdministrator()]
-        return super().get_permissions()
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [IsAuthenticated(), IsAdminOrInventoryUser()]
+        return [IsAuthenticated()]
 
     def destroy(self, request, *args, **kwargs):
-        """Ordinary DELETE is always blocked.
-
-        Product has PROTECT relations (StockMovement, PurchaseItem,
-        SurgeryUsedItem, SurgeryConsumptionItem) that make a plain delete
-        fail outright — and even for a superuser, silently cascading here
-        would be exactly the unreviewed global cascade the purge feature
-        exists to avoid. Use is_active=False to deactivate, or the
-        dedicated purge action (superuser-only, requires confirmation) to
-        permanently remove a Product and its dependent history.
-        """
+        """Ordinary DELETE is always blocked."""
         raise DRFValidationError(
             "حذف مستقیم محصول از این مسیر امکان‌پذیر نیست. "
             "برای غیرفعال‌سازی، فیلد is_active را خاموش کنید؛ "
@@ -289,8 +259,6 @@ class ProductViewSet(ExcelExportMixin, viewsets.ModelViewSet):
         recomputes the whole graph itself, inside its own atomic
         transaction, immediately before deleting anything.
         """
-        from django.core.exceptions import ValidationError as DjangoValidationError
-
         from inventory.services import ProductPurgeService
 
         product = self.get_object()
@@ -314,10 +282,6 @@ class ProductViewSet(ExcelExportMixin, viewsets.ModelViewSet):
         """Products at or below their minimum stock threshold.
         Ordered by current_stock ascending — most critical first."""
         from django.db.models import F
-        # order_by("current_stock") must come AFTER filter_queryset: the
-        # OrderingFilter applies the viewset's default ordering and would
-        # otherwise overwrite this action's intended "most critical first"
-        # sort.  (CLI-68 changed the default to internal_code, exposing this.)
         qs = self.filter_queryset(
             self.get_queryset().filter(
                 minimum_stock__gt=0, current_stock__lte=F("minimum_stock")
@@ -344,7 +308,6 @@ class ProductViewSet(ExcelExportMixin, viewsets.ModelViewSet):
         from datetime import datetime
         from inventory.models import ProductVendor as _PV
 
-        # Validate product exists (get_object handles 404)
         product = self.get_object()
 
         qs = (
@@ -356,7 +319,6 @@ class ProductViewSet(ExcelExportMixin, viewsets.ModelViewSet):
             .select_related("purchase", "purchase__vendor", "product")
         )
 
-        # Optional: filter by vendor
         vendor_id = request.query_params.get("vendor_id")
         if vendor_id is not None:
             try:
@@ -368,7 +330,6 @@ class ProductViewSet(ExcelExportMixin, viewsets.ModelViewSet):
                 )
             qs = qs.filter(purchase__vendor_id=vendor_id_int)
 
-        # Optional: date range filter
         date_from = request.query_params.get("date_from")
         if date_from:
             try:
@@ -391,7 +352,6 @@ class ProductViewSet(ExcelExportMixin, viewsets.ModelViewSet):
                 )
             qs = qs.filter(purchase__purchase_date__date__lte=dt_to.date())
 
-        # Optional: currency filter (via ProductVendor through table)
         currency = request.query_params.get("currency")
         if currency:
             vendor_ids_with_currency = (
@@ -402,7 +362,6 @@ class ProductViewSet(ExcelExportMixin, viewsets.ModelViewSet):
             qs = qs.filter(purchase__vendor_id__in=vendor_ids_with_currency)
 
         qs = qs.order_by("purchase__purchase_date")
-
         serializer = VendorPriceHistorySerializer(qs, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -552,8 +511,6 @@ class ProductViewSet(ExcelExportMixin, viewsets.ModelViewSet):
         in_stock  = sum(1 for p in products if not p.is_out_of_stock and not p.is_low_stock)
         low_stock = sum(1 for p in products if p.is_low_stock and not p.is_out_of_stock)
         out_of_stock = sum(1 for p in products if p.is_out_of_stock)
-        # Same rule the project already trusts elsewhere (PriceService /
-        # cost reports): stock value = current_stock × purchase_price.
         inventory_value = sum((p.current_stock * p.purchase_price for p in products), Decimal('0'))
         return [
             ('تعداد کل محصولات',    total),
@@ -586,7 +543,7 @@ class VendorViewSet(viewsets.ModelViewSet):
       name, current_balance, created_at  (default: name)
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # base, overridden for write
     filter_backends    = [
         DjangoFilterBackend,
         SearchFilter,
@@ -604,6 +561,11 @@ class VendorViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Vendor.objects.prefetch_related("additional_phones").distinct()
+
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [IsAuthenticated(), IsAdminOrInventoryUser()]
+        return [IsAuthenticated()]
 
     @action(detail=True, methods=["get"], url_path="purchased-products")
     def purchased_products(self, request, pk=None):
@@ -658,7 +620,7 @@ class ProductVendorViewSet(viewsets.ModelViewSet):
       (default: vendor__name, product__name)
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # base, overridden for write
     filter_backends    = [
         DjangoFilterBackend,
         SearchFilter,
@@ -685,6 +647,11 @@ class ProductVendorViewSet(viewsets.ModelViewSet):
             ProductVendor.objects
             .select_related("product", "vendor")
         )
+
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [IsAuthenticated(), IsAdminOrInventoryUser()]
+        return [IsAuthenticated()]
 
     def list(self, request, *args, **kwargs):
         """Override list to inject per-vendor purchase stats without N+1 queries.
@@ -767,7 +734,7 @@ class StockMovementViewSet(
       movement_date, quantity, created_at  (default: -movement_date)
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # base, overridden for create
     pagination_class   = ProductPagination
     filter_backends    = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields   = ["product", "movement_type", "source_type"]
@@ -787,6 +754,11 @@ class StockMovementViewSet(
 
     def get_queryset(self):
         return StockMovement.objects.select_related("product")
+
+    def get_permissions(self):
+        if self.action == 'create':
+            return [IsAuthenticated(), IsAdminOrInventoryUser()]
+        return [IsAuthenticated()]
 
     def perform_create(self, serializer):
         """Convert Django ValidationError (from _apply_stock_delta) to HTTP 400."""
@@ -821,7 +793,7 @@ class PurchaseViewSet(ExcelExportMixin, viewsets.ModelViewSet):
       purchase_date, created_at, status  (default: -purchase_date)
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # base, overridden for write
     pagination_class   = StandardPagination
     filter_backends    = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class    = PurchaseFilter
@@ -842,6 +814,11 @@ class PurchaseViewSet(ExcelExportMixin, viewsets.ModelViewSet):
             .select_related("vendor")
             .prefetch_related("items__product")
         )
+
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [IsAuthenticated(), IsAdminOrInventoryUser()]
+        return [IsAuthenticated()]
 
     @action(detail=True, methods=["post"], url_path="confirm")
     def confirm(self, request, pk=None):
@@ -866,19 +843,7 @@ class PurchaseViewSet(ExcelExportMixin, viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def destroy(self, request, *args, **kwargs):
-        """Block deletion of purchases that have already affected inventory.
-
-        A purchase with stock_applied=True has IN StockMovements tied to it
-        via reference_id.  Deleting the purchase would orphan those audit
-        records.  The correct remediation is to cancel the purchase first
-        (which creates balancing OUT movements) and then, if needed, archive
-        or hide the record at the application level.
-
-        Raises DRFValidationError (HTTP 400) when:
-          - stock_applied is True  (stock movements were ever created)
-          - status is CONFIRMED    (belt-and-suspenders: confirm() always sets
-                                    stock_applied, but guard both conditions)
-        """
+        """Block deletion of purchases that have already affected inventory."""
         purchase = self.get_object()
         if purchase.stock_applied or purchase.status == PurchaseStatus.CONFIRMED:
             raise DRFValidationError(
@@ -1065,12 +1030,7 @@ class PurchaseViewSet(ExcelExportMixin, viewsets.ModelViewSet):
         return excel_file_response(content, filename=self.get_excel_filename())
 
     def perform_update(self, serializer):
-        """After updating a purchase, recalculate all product prices.
-
-        purchase_date changes alter which PurchaseItem is 'latest' for every
-        product in the purchase.  Signals only fire on item saves; they do not
-        cover purchase-header-only edits.
-        """
+        """After updating a purchase, recalculate all product prices."""
         instance = serializer.save()
         from inventory.services import PriceService
         product_ids = set(instance.items.values_list("product_id", flat=True))
@@ -1101,7 +1061,7 @@ class PurchaseItemViewSet(viewsets.ModelViewSet):
       created_at  (default: purchase, product name)
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # base, overridden for write
     filter_backends    = [DjangoFilterBackend, OrderingFilter]
     filterset_fields   = ["purchase", "product"]
     ordering_fields    = ["created_at"]
@@ -1111,12 +1071,14 @@ class PurchaseItemViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return PurchaseItem.objects.select_related("purchase", "product")
 
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [IsAuthenticated(), IsAdminOrInventoryUser()]
+        return [IsAuthenticated()]
+
     def perform_update(self, serializer):
         """After updating a purchase item, recalculate the old product's price
-        if the product FK was changed.
-
-        The post_save signal handles the new product_id; this covers the old one.
-        """
+        if the product FK was changed."""
         old_product_id = serializer.instance.product_id
         instance = serializer.save()
         if old_product_id != instance.product_id:
@@ -1124,12 +1086,7 @@ class PurchaseItemViewSet(viewsets.ModelViewSet):
             PriceService.recalculate_product_price(old_product_id)
 
     def perform_destroy(self, instance):
-        """Block item deletion for non-PENDING purchases.
-
-        Confirmed and cancelled purchases are immutable to protect stock
-        history integrity.  Deleting items from a confirmed purchase would
-        create a zero-item confirmed purchase — an invalid state.
-        """
+        """Block item deletion for non-PENDING purchases."""
         from inventory.models import PurchaseStatus
         from rest_framework.exceptions import ValidationError as DRFValidationError
         if instance.purchase.status != PurchaseStatus.PENDING:
@@ -1172,13 +1129,11 @@ class InventoryStockReportView(APIView):
     out_of_stock = current_stock <= 0.
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminOrFinanceUser]
 
     def get(self, request):
         params = request.query_params
 
-        # Apply type / category filters to a base queryset used for both
-        # the summary counts and the paginated product list.
         base_qs = Product.objects.select_related('category')
 
         product_type     = params.get('product_type')
@@ -1191,7 +1146,6 @@ class InventoryStockReportView(APIView):
         if category:
             base_qs = base_qs.filter(category_id=category)
 
-        # Summary counts are always over the type/category filtered set
         low_stock_qs    = base_qs.filter(minimum_stock__gt=0, current_stock__lte=F('minimum_stock'))
         out_of_stock_qs = base_qs.filter(current_stock__lte=0)
 
@@ -1199,7 +1153,6 @@ class InventoryStockReportView(APIView):
         low_stock_count    = low_stock_qs.count()
         out_of_stock_count = out_of_stock_qs.count()
 
-        # Total inventory value (decimal-safe via Python aggregation fallback)
         value_rows = base_qs.values('current_stock', 'purchase_price')
         total_inventory_value = sum(
             (Decimal(str(r['current_stock'])) * Decimal(str(r['purchase_price'])))
@@ -1213,7 +1166,6 @@ class InventoryStockReportView(APIView):
             'total_inventory_value': total_inventory_value,
         }
 
-        # Apply stock-level filters for the product list
         list_qs = base_qs
         if low_stock_only:
             list_qs = list_qs.filter(minimum_stock__gt=0, current_stock__lte=F('minimum_stock'))
@@ -1222,7 +1174,6 @@ class InventoryStockReportView(APIView):
 
         list_qs = list_qs.order_by('name')
 
-        # Paginate
         paginator = ProductPagination()
         page      = paginator.paginate_queryset(list_qs, request)
         products  = InventoryStockProductSerializer(
@@ -1278,7 +1229,6 @@ class ProductCostReportView(APIView):
 
     _VALID_GROUP_BY = frozenset({'product', 'vendor', 'product_vendor'})
 
-    # Reusable ORM expression: cost of one purchase item line = qty × unit_price
     @staticmethod
     def _cost_expr():
         return ExpressionWrapper(
@@ -1298,10 +1248,8 @@ class ProductCostReportView(APIView):
         if group_by not in self._VALID_GROUP_BY:
             group_by = 'product'
 
-        # Base queryset — confirmed purchases only
         qs = PurchaseItem.objects.filter(purchase__status=PurchaseStatus.CONFIRMED)
 
-        # Date range — purchase_date is a DateTimeField so use __date for day precision
         if start_date:
             try:
                 qs = qs.filter(purchase__purchase_date__date__gte=start_date)
@@ -1313,18 +1261,15 @@ class ProductCostReportView(APIView):
             except (ValueError, TypeError):
                 pass
 
-        # Product type
         if product_type in ('medicine', 'equipment'):
             qs = qs.filter(product__product_type=product_type)
 
-        # Single-vendor filter
         if vendor_id:
             try:
                 qs = qs.filter(purchase__vendor_id=int(vendor_id))
             except (ValueError, TypeError):
                 pass
 
-        # Grand-total summary (computed before pagination)
         agg = qs.aggregate(
             grand_total_cost=Sum(self._cost_expr()),
             grand_total_qty=Sum('quantity'),
@@ -1342,10 +1287,8 @@ class ProductCostReportView(APIView):
             'total_line_items': agg['total_items'] or 0,
         }
 
-        # Build grouped queryset ordered by highest cost first
         rows_qs = self._grouped_qs(qs, group_by)
 
-        # ── Excel export (no pagination) ──────────────────────────────────────
         if params.get('export') == 'excel':
             total_count = rows_qs.count()
             if total_count > EXCEL_MAX_ROWS:
@@ -1365,7 +1308,6 @@ class ProductCostReportView(APIView):
                                    sheet_title='هزینه خرید', meta_rows=meta_rows)
             return excel_file_response(content, filename='product_cost_report.xlsx')
 
-        # Pagination
         try:
             page      = max(1, int(params.get('page', 1)))
             page_size = min(max(1, int(params.get('page_size', 50))), 100)
@@ -1378,7 +1320,6 @@ class ProductCostReportView(APIView):
 
         results = self._serialize_rows(page_rows, group_by)
 
-        # Build next/previous URLs
         def _page_url(p):
             params_copy = dict(params)
             params_copy['page']      = str(p)
@@ -1400,7 +1341,6 @@ class ProductCostReportView(APIView):
         })
 
     def _grouped_qs(self, qs, group_by):
-        """Return the fully-annotated, ordered queryset for the requested grouping."""
         cost_expr = self._cost_expr()
         common_annotations = dict(
             total_quantity=Sum('quantity'),
@@ -1432,7 +1372,6 @@ class ProductCostReportView(APIView):
                 .order_by('-total_cost')
             )
 
-        # Default: group by product
         return (
             qs
             .values(
@@ -1447,7 +1386,6 @@ class ProductCostReportView(APIView):
 
     @staticmethod
     def _serialize_rows(rows, group_by):
-        """Normalise ORM ValuesQuerySet rows to clean API field names."""
         result = []
         for row in rows:
             item = {
@@ -1469,7 +1407,6 @@ class ProductCostReportView(APIView):
 
     @staticmethod
     def _excel_columns(group_by):
-        """Return Persian column list for the given group_by mode."""
         base = [
             ('تعداد خرید',        'purchase_count'),
             ('مجموع تعداد',       'total_quantity'),
@@ -1483,7 +1420,6 @@ class ProductCostReportView(APIView):
                 ('محصول',          'product_name'),
                 ('تامین‌کننده',    'vendor_name'),
             ] + base
-        # Default: product
         return [
             ('محصول',      'product_name'),
             ('نوع محصول',  'product_type'),

@@ -2,6 +2,9 @@ from decimal import Decimal
 
 from django import forms
 from django.contrib import admin
+from django.db.models import Count
+from django.forms.models import BaseInlineFormSet
+from django.utils.html import format_html
 
 from common.admin import (
     DECIMAL_FORMFIELD_OVERRIDES,
@@ -13,10 +16,7 @@ from common.admin import (
     MoneyInput,
     clean_decimal_display,
 )
-from django.db.models import Count
-from django.utils.html import format_html
-from django.forms.models import BaseInlineFormSet
-
+from inventory.admin_views import product_purge_view
 from inventory.models import (
     MovementType,
     Product,
@@ -32,7 +32,23 @@ from inventory.models import (
 )
 
 
- 
+# ---------------------------------------------------------------------------
+# Custom AdminSite – replaces the default to avoid monkey‑patching
+# ---------------------------------------------------------------------------
+
+class InventoryAdminSite(admin.AdminSite):
+    """Custom admin site for the inventory app.
+
+    No extra URLs are needed here – ProductAdmin and VendorAdmin already
+    add their custom detail/purge views via their own get_urls() overrides.
+    """
+    pass
+
+
+# Replace the default admin site with our custom one
+admin.site = InventoryAdminSite()
+
+
 # ---------------------------------------------------------------------------
 # ProductVendor admin inline — form helpers (UI only, no model/logic changes)
 # ---------------------------------------------------------------------------
@@ -44,7 +60,6 @@ _CURRENCY_CHOICES = [
     ("USD", "USD"),
     ("EUR", "EUR"),
 ]
-
 
 
 class ProductVendorInlineForm(forms.ModelForm):
@@ -178,12 +193,6 @@ class ProductAdminForm(forms.ModelForm):
         # of `initial`, so setting this unconditionally is safe.
         if self.instance and self.instance.pk and "desired_current_stock" in self.fields:
             self.fields["desired_current_stock"].initial = self.instance.current_stock
-
-    # No clean() override needed anymore: stock_adjustment_reason is fully
-    # optional now — StockService.adjust_to_quantity() falls back to a
-    # generic "اصلاح دستی موجودی" description when it's left blank, so
-    # there is nothing left to cross-validate here between
-    # desired_current_stock and stock_adjustment_reason.
 
 
 @admin.register(Product)
@@ -364,8 +373,6 @@ class ProductAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
 
     def get_urls(self):
         from django.urls import path
-
-        from inventory.admin_views import product_purge_view
 
         urls = super().get_urls()
         custom_urls = [
@@ -566,7 +573,6 @@ class ProductVendorAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
 # ---------------------------------------------------------------------------
 # Vendor admin
 # ---------------------------------------------------------------------------
-
 
 class VendorPhoneFormSet(BaseInlineFormSet):
     """Inline formset for VendorPhone; validates for duplicate phone numbers."""
@@ -1213,3 +1219,10 @@ class PurchaseAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
             return HttpResponseRedirect(request.path)
 
         return super().response_change(request, obj)
+
+
+# ---------------------------------------------------------------------------
+# The monkey‑patching section has been removed.
+# Custom URLs are now added via each ModelAdmin's get_urls().
+# The custom AdminSite instance is set at the top of the file.
+# ---------------------------------------------------------------------------
