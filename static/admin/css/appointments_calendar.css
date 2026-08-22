@@ -1,0 +1,177 @@
+/* ================================================================
+   نوبت‌دهی (Appointments) — week-grid calendar page.
+   Card-based visual language matching the rest of the admin (see
+   patient_list.css / employee_list.css) applied to a custom hour-grid
+   instead of a table.
+================================================================= */
+
+#apt-root { direction: rtl; }
+
+/* ── Toolbar ───────────────────────────────────────────────────── */
+.apt-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 14px 16px;
+    margin-bottom: 16px;
+}
+.apt-toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.apt-label {
+    font-size: 13px;
+    color: var(--muted);
+    white-space: nowrap;
+}
+.apt-select {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-family: inherit;
+    font-size: 13.5px;
+    color: var(--text);
+    background: var(--bg);
+    min-width: 160px;
+}
+.apt-toolbar-group--nav { gap: 6px; }
+.apt-nav-btn {
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 15px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+}
+.apt-nav-btn:hover { background: var(--card); border-color: var(--purple); }
+.apt-nav-btn--today { font-size: 13px; padding: 6px 14px; }
+.apt-week-label {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text);
+    margin-right: 6px;
+    direction: ltr;
+    unicode-bidi: isolate;
+}
+
+/* ── Calendar card ─────────────────────────────────────────────── */
+.apt-calendar-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+.apt-calendar-loading {
+    padding: 60px 0;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.apt-calendar-grid {
+    display: flex;
+    flex-direction: column;
+    min-width: 900px;
+    overflow-x: auto;
+}
+
+/* ── Header row ────────────────────────────────────────────────── */
+.apt-grid-header {
+    display: grid;
+    grid-template-columns: 64px repeat(7, 1fr);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+}
+.apt-grid-header-cell {
+    padding: 10px 6px;
+    text-align: center;
+    border-inline-start: 1px solid var(--border);
+}
+.apt-grid-header-cell:first-child { border-inline-start: none; }
+.apt-day-name { font-size: 12.5px; font-weight: 700; color: var(--text); }
+.apt-day-date { font-size: 11.5px; color: var(--muted); margin-top: 2px; direction: ltr; unicode-bidi: isolate; }
+.apt-grid-header-cell.apt-is-today { background: color-mix(in srgb, var(--purple) 10%, transparent); }
+.apt-grid-header-cell.apt-is-today .apt-day-name { color: var(--purple); }
+
+/* ── Body: time gutter + 7 day columns ────────────────────────── */
+.apt-grid-body {
+    display: grid;
+    grid-template-columns: 64px repeat(7, 1fr);
+    height: 720px;
+    position: relative;
+}
+.apt-grid-time-col {
+    position: relative;
+    border-inline-start: none;
+}
+.apt-hour-label {
+    box-sizing: border-box;
+    border-top: 1px solid var(--border);
+    padding: 2px 6px 0;
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    direction: ltr;
+    unicode-bidi: isolate;
+}
+.apt-hour-label:first-child { border-top: none; }
+
+.apt-grid-day-col {
+    position: relative;
+    border-inline-start: 1px solid var(--border);
+    cursor: pointer;
+}
+.apt-grid-day-col:hover { background: color-mix(in srgb, var(--purple) 4%, transparent); }
+.apt-hour-line {
+    position: absolute;
+    left: 0; right: 0;
+    border-top: 1px solid var(--border);
+    pointer-events: none;
+}
+
+/* ── Appointment blocks ───────────────────────────────────────── */
+.apt-block {
+    position: absolute;
+    left: 3px; right: 3px;
+    border-radius: 6px;
+    padding: 3px 6px;
+    font-size: 11.5px;
+    line-height: 1.3;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(0,0,0,.12);
+    cursor: pointer;
+    border-inline-start: 3px solid var(--purple);
+    background: color-mix(in srgb, var(--purple) 14%, var(--card));
+    color: var(--text);
+    z-index: 1;
+}
+.apt-block:hover { filter: brightness(0.97); z-index: 2; }
+.apt-block-time   { font-weight: 700; direction: ltr; unicode-bidi: isolate; }
+.apt-block-name   { font-weight: 600; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+.apt-block-doctor { color: var(--muted); white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+
+.apt-block--completed { border-inline-start-color: var(--green); background: color-mix(in srgb, var(--green) 14%, var(--card)); }
+.apt-block--cancelled { border-inline-start-color: var(--red);   background: color-mix(in srgb, var(--red) 10%, var(--card)); opacity: .7; text-decoration: line-through; }
+.apt-block--no_show   { border-inline-start-color: #c2610c;      background: color-mix(in srgb, #c2610c 12%, var(--card)); }
+
+.apt-hint {
+    margin: 10px 2px 0;
+    font-size: 12.5px;
+    color: var(--muted);
+    text-align: center;
+}
+
+@media (max-width: 900px) {
+    .apt-toolbar { flex-direction: column; align-items: stretch; }
+}

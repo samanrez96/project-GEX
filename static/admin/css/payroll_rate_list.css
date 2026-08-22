@@ -1,0 +1,168 @@
+/* ================================================================
+   ثبت نرخ ساعتی کارکنان (HourlyRate) / ثبت ساعت کاری کارکنان
+   (HourlyWorkEntry) list pages — Django's native changelist, restyled to
+   match the same card-based visual language as the rest of the admin
+   (see rate_schedule_list.css / patient_list.css). Both pages only
+   override the `object-tools` block (see their change_list.html
+   templates) for the adm-page-header — search, the results table, and
+   pagination are all still Django's own rendering, just restyled here.
+   Neither page has a list_filter (removed by design — see their admin.py
+   docstrings), so no #changelist-filter sidebar column exists to style.
+================================================================= */
+
+body.app-payroll.model-hourlyrate.change-list #changelist,
+body.app-payroll.model-hourlyworkentry.change-list #changelist {
+    direction: rtl;
+    width: 100%;
+}
+
+/* ── Page header (object-tools block override) ──────────────────────── */
+body.app-payroll.model-hourlyrate.change-list .rts-list-header,
+body.app-payroll.model-hourlyworkentry.change-list .rts-list-header {
+    margin-bottom: 16px;
+}
+
+/* ── Search bar → same card language as Patient/Employee ─────────────── */
+body.app-payroll.model-hourlyrate.change-list #toolbar,
+body.app-payroll.model-hourlyworkentry.change-list #toolbar {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px;
+    margin: 0 0 16px;
+}
+body.app-payroll.model-hourlyrate.change-list #changelist-search > div,
+body.app-payroll.model-hourlyworkentry.change-list #changelist-search > div {
+    display: flex;
+    align-items: stretch;
+    direction: rtl;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    max-width: 420px;
+}
+body.app-payroll.model-hourlyrate.change-list #changelist-search label,
+body.app-payroll.model-hourlyworkentry.change-list #changelist-search label {
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    border-inline-start: 1px solid var(--border);
+    margin: 0;
+}
+body.app-payroll.model-hourlyrate.change-list #changelist-search #searchbar,
+body.app-payroll.model-hourlyworkentry.change-list #changelist-search #searchbar {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--text);
+    direction: rtl;
+}
+body.app-payroll.model-hourlyrate.change-list #changelist-search #searchbar:focus,
+body.app-payroll.model-hourlyworkentry.change-list #changelist-search #searchbar:focus {
+    outline: none;
+}
+body.app-payroll.model-hourlyrate.change-list #changelist-search input[type="submit"],
+body.app-payroll.model-hourlyworkentry.change-list #changelist-search input[type="submit"] {
+    border: none;
+    background: var(--purple);
+    color: #fff;
+    padding: 0 18px;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background .15s;
+}
+body.app-payroll.model-hourlyrate.change-list #changelist-search input[type="submit"]:hover,
+body.app-payroll.model-hourlyworkentry.change-list #changelist-search input[type="submit"]:hover {
+    background: var(--purple-dark);
+}
+
+/* ── Table card ────────────────────────────────────────────────────── */
+body.app-payroll.model-hourlyrate.change-list .results,
+body.app-payroll.model-hourlyworkentry.change-list .results {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    width: 100%;
+    direction: rtl;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+body.app-payroll.model-hourlyrate.change-list #result_list,
+body.app-payroll.model-hourlyworkentry.change-list #result_list {
+    width: 100%;
+    table-layout: auto;
+    border-collapse: collapse;
+    direction: rtl;
+}
+body.app-payroll.model-hourlyrate.change-list #result_list thead th,
+body.app-payroll.model-hourlyworkentry.change-list #result_list thead th {
+    background: var(--bg);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    text-align: right;
+}
+body.app-payroll.model-hourlyrate.change-list #result_list tbody td,
+body.app-payroll.model-hourlyrate.change-list #result_list tbody th,
+body.app-payroll.model-hourlyworkentry.change-list #result_list tbody td,
+body.app-payroll.model-hourlyworkentry.change-list #result_list tbody th {
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    text-align: right;
+}
+body.app-payroll.model-hourlyrate.change-list #result_list tbody tr:last-child td,
+body.app-payroll.model-hourlyrate.change-list #result_list tbody tr:last-child th,
+body.app-payroll.model-hourlyworkentry.change-list #result_list tbody tr:last-child td,
+body.app-payroll.model-hourlyworkentry.change-list #result_list tbody tr:last-child th {
+    border-bottom: none;
+}
+body.app-payroll.model-hourlyrate.change-list #result_list tbody tr:hover,
+body.app-payroll.model-hourlyworkentry.change-list #result_list tbody tr:hover {
+    background: var(--bg);
+}
+
+/* Numeric / Jalali-date columns render LTR for natural digit order, but
+   stay right-aligned under their RTL header — same fix applied across
+   patient_list.css / employee_list.css / rate_schedule_list.css. */
+body.app-payroll.model-hourlyrate.change-list #result_list .field-get_rate_display,
+body.app-payroll.model-hourlyrate.change-list #result_list .field-start_date_jalali,
+body.app-payroll.model-hourlyrate.change-list #result_list .field-end_date_jalali,
+body.app-payroll.model-hourlyrate.change-list #result_list .field-created_at_jalali,
+body.app-payroll.model-hourlyworkentry.change-list #result_list .field-work_date_jalali,
+body.app-payroll.model-hourlyworkentry.change-list #result_list .field-get_hours_display,
+body.app-payroll.model-hourlyworkentry.change-list #result_list .field-get_rate_used_display,
+body.app-payroll.model-hourlyworkentry.change-list #result_list .field-get_amount_display {
+    direction: ltr;
+    text-align: right;
+    unicode-bidi: isolate;
+}
+
+/* ── Paginator / row-count footer ─────────────────────────────────────── */
+body.app-payroll.model-hourlyrate.change-list .paginator,
+body.app-payroll.model-hourlyworkentry.change-list .paginator {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin: 0;
+    padding: 12px 16px;
+    color: var(--muted);
+    font-size: 13px;
+    text-align: right;
+    direction: rtl;
+}

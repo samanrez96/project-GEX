@@ -1,0 +1,205 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}هزینه‌های متفرقه | مرکز جراحی — مدیریت{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'admin/css/misc_expenses.css' %}?v=3">
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="ca-breadcrumbs">
+  <a href="{% url 'admin:index' %}">خانه</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <span>مالی</span>
+  <span class="ca-breadcrumbs-sep"></span>
+  <span>هزینه‌های متفرقه</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="me-list-root" dir="rtl">
+
+  {# ── Page header ──────────────────────────────────────────────── #}
+  <div class="adm-page-header">
+    <div class="adm-page-header__info">
+      <span class="adm-page-section-label">مالی</span>
+      <h1 class="adm-page-title">هزینه‌های متفرقه</h1>
+    </div>
+    {% if has_add_permission %}
+    <div class="adm-page-actions">
+      <a class="adm-btn adm-btn--primary" href="{{ add_url }}">+ افزودن هزینه</a>
+    </div>
+    {% endif %}
+  </div>
+
+  {# ── Summary cards ────────────────────────────────────────────── #}
+  <div class="me-summary-cards">
+    <div class="me-summary-card me-card--total">
+      <div class="me-summary-card__label">مجموع هزینه‌های متفرقه</div>
+      <div class="me-summary-card__value">{{ summary.total }} تومان</div>
+    </div>
+    <div class="me-summary-card me-card--count">
+      <div class="me-summary-card__label">تعداد هزینه‌ها</div>
+      <div class="me-summary-card__value">{{ summary.count }}</div>
+    </div>
+    <div class="me-summary-card me-card--avg">
+      <div class="me-summary-card__label">میانگین مبلغ</div>
+      <div class="me-summary-card__value">{{ summary.average }} تومان</div>
+    </div>
+    <div class="me-summary-card me-card--max">
+      <div class="me-summary-card__label">بیشترین هزینه</div>
+      <div class="me-summary-card__value">{{ summary.maximum }} تومان</div>
+    </div>
+  </div>
+
+  {# ── Filter toolbar ───────────────────────────────────────────── #}
+  <form class="me-filter-bar" method="get" action="">
+    <div class="me-filter-row">
+
+      <div class="me-filter-field me-filter-field--search">
+        <label class="me-filter-label" for="me-search">جستجو</label>
+        <input
+          id="me-search"
+          class="me-filter-input"
+          type="search"
+          name="search"
+          value="{{ search }}"
+          placeholder="جستجو بر اساس موضوع..."
+          autocomplete="off"
+          dir="rtl"
+        >
+      </div>
+
+      <div class="me-filter-field">
+        <label class="me-filter-label" for="me-date-from">از تاریخ</label>
+        <input
+          id="me-date-from"
+          class="me-filter-input me-filter-input--date jalali-date-input"
+          type="text"
+          name="date_from"
+          value="{{ date_from }}"
+          placeholder="۱۴۰۵/۰۱/۰۱"
+          dir="ltr"
+          inputmode="numeric"
+          autocomplete="off"
+        >
+      </div>
+
+      <div class="me-filter-field">
+        <label class="me-filter-label" for="me-date-to">تا تاریخ</label>
+        <input
+          id="me-date-to"
+          class="me-filter-input me-filter-input--date jalali-date-input"
+          type="text"
+          name="date_to"
+          value="{{ date_to }}"
+          placeholder="۱۴۰۵/۱۲/۲۹"
+          dir="ltr"
+          inputmode="numeric"
+          autocomplete="off"
+        >
+      </div>
+
+      <div class="me-filter-field me-filter-field--actions">
+        <label class="me-filter-label me-filter-label--empty" aria-hidden="true">&nbsp;</label>
+        <div class="me-filter-btn-row">
+          <button type="submit" class="adm-btn adm-btn--secondary adm-btn--sm">اعمال فیلتر</button>
+          {% if search or date_from or date_to %}
+          <a href="{% url 'admin:misc_expenses_list' %}" class="adm-btn adm-btn--secondary adm-btn--sm">پاک‌کردن</a>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+  </form>
+
+  {# ── Expenses table ───────────────────────────────────────────── #}
+  {% if expenses %}
+  <div class="me-table-wrap">
+    <table class="me-table">
+      <colgroup>
+        <col class="me-col-date">
+        <col class="me-col-subject">
+        <col class="me-col-amount">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>تاریخ</th>
+          <th>موضوع</th>
+          <th>مبلغ (تومان)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for expense in expenses %}
+        <tr
+          class="me-row me-clickable-row"
+          data-edit-url="{{ expense.change_url }}"
+          tabindex="0"
+          role="link"
+          aria-label="ویرایش هزینه متفرقه: {{ expense.subject }}"
+        >
+          <td class="me-td-date">{{ expense.date }}</td>
+          <td class="me-td-subject">
+            <a href="{{ expense.change_url }}" class="me-subject-link">{{ expense.subject }}</a>
+          </td>
+          <td class="me-td-amount">{{ expense.amount }} تومان</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="me-empty-state">
+    <div class="me-empty-icon">💸</div>
+    <div class="me-empty-title">
+      {% if search or date_from or date_to %}
+      هزینه‌ای با این فیلترها یافت نشد
+      {% else %}
+      هنوز هزینه‌ای ثبت نشده
+      {% endif %}
+    </div>
+    <div class="me-empty-desc">
+      {% if search or date_from or date_to %}
+      فیلترها را تغییر دهید یا <a href="{% url 'admin:misc_expenses_list' %}">همه هزینه‌ها</a> را ببینید.
+      {% else %}
+      برای ثبت اولین هزینه متفرقه روی دکمه + افزودن هزینه کلیک کنید.
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>{# /#me-list-root #}
+{% endblock %}
+
+{% block extrascript %}
+<script>
+(function () {
+  'use strict';
+
+  /* Full-row navigation for misc-expenses list.
+     Uses event delegation so server-rendered rows need no inline handlers. */
+  function isInteractive(el) {
+    return !!el.closest('a, button, input, select, textarea, [role="button"]');
+  }
+
+  document.addEventListener('click', function (e) {
+    var row = e.target.closest('tr.me-clickable-row');
+    if (!row) return;
+    if (isInteractive(e.target)) return;
+    var url = row.dataset.editUrl;
+    if (url) window.location.href = url;
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    var row = document.activeElement;
+    if (!row || !row.classList.contains('me-clickable-row')) return;
+    e.preventDefault();
+    var url = row.dataset.editUrl;
+    if (url) window.location.href = url;
+  });
+}());
+</script>
+{% endblock %}
+

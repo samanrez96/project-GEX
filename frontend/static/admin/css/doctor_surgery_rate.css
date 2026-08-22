@@ -1,0 +1,126 @@
+/* ================================================================
+   DoctorSurgeryRate inline formset — Doctor add/edit form.
+   Scoped entirely to .doctor-rates-wrapper: the project-wide
+   `#content-main .form-row { display: flex; ... }` rule (rtl_responsive.css)
+   targets the same `tr.form-row` class Django's default tabular-inline
+   template emits, which breaks table-row layout. The custom inline
+   template for this formset avoids that class, and every rule below is
+   scoped so it cannot affect any other admin page/inline.
+================================================================= */
+
+.doctor-rates-wrapper {
+    direction: rtl;
+    background: var(--card, #fff);
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: var(--radius, 8px);
+    margin-bottom: 20px;
+    box-shadow: var(--shadow, none);
+    overflow: hidden;
+}
+
+.doctor-rates-wrapper .inline-heading {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted, #64748b);
+    background: var(--bg, #f8fafc);
+    border-bottom: 1px solid var(--border, #e2e8f0);
+    padding: 10px 16px;
+    margin: 0;
+    text-align: right;
+}
+
+.doctor-rates-wrapper .doctor-rates-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    direction: rtl;
+}
+
+.doctor-rates-wrapper .doctor-rates-table th,
+.doctor-rates-wrapper .doctor-rates-table td {
+    padding: 8px 12px;
+    text-align: right;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border, #e2e8f0);
+    box-sizing: border-box;
+}
+
+.doctor-rates-wrapper .doctor-rates-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.doctor-rates-wrapper .doctor-rates-table th {
+    background: var(--bg, #f8fafc);
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--muted, #64748b);
+    white-space: nowrap;
+}
+
+.doctor-rates-wrapper .dsr-col-surgery-type,
+.doctor-rates-wrapper .dsr-cell--surgery-type {
+    width: 50%;
+}
+
+.doctor-rates-wrapper .dsr-col-rate,
+.doctor-rates-wrapper .dsr-cell--rate {
+    width: 35%;
+}
+
+.doctor-rates-wrapper .dsr-col-delete,
+.doctor-rates-wrapper .dsr-cell--delete {
+    width: 15%;
+    text-align: center;
+}
+
+.doctor-rates-wrapper .doctor-rates-table select,
+.doctor-rates-wrapper .doctor-rates-table input[type="number"],
+.doctor-rates-wrapper .doctor-rates-table input[type="text"] {
+    width: 100%;
+    box-sizing: border-box;
+    direction: rtl;
+}
+
+.doctor-rates-wrapper .dsr-delete-label,
+.doctor-rates-wrapper .dsr-remove-row {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: var(--red, #dc2626);
+    font-size: 12px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: inherit;
+}
+
+.doctor-rates-wrapper .dsr-add-row {
+    padding: 10px 16px;
+    border-top: 1px solid var(--border, #e2e8f0);
+}
+
+.doctor-rates-wrapper #doctor-rate-add-row {
+    color: var(--purple, #0066b3);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.doctor-rates-wrapper #doctor-rate-add-row:hover {
+    text-decoration: underline;
+}
+
+.doctor-rates-wrapper .errorlist {
+    list-style: none;
+    padding: 4px 8px;
+    margin: 0 0 4px;
+    background: var(--red-bg, #fef2f2);
+    color: var(--red, #dc2626);
+    border-radius: 6px;
+    font-size: 12px;
+    direction: rtl;
+    text-align: right;
+}

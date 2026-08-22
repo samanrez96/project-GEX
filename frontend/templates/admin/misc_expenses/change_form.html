@@ -1,0 +1,124 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}
+  {% if is_add %}افزودن هزینه متفرقه{% else %}ویرایش هزینه — {{ expense.subject }}{% endif %} | مرکز جراحی
+{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'admin/css/misc_expenses.css' %}?v=2">
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="ca-breadcrumbs">
+  <a href="{% url 'admin:index' %}">خانه</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <span>مالی</span>
+  <span class="ca-breadcrumbs-sep"></span>
+  <a href="{{ list_url }}">هزینه‌های متفرقه</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <span>{% if is_add %}هزینه جدید{% else %}{{ expense.subject }}{% endif %}</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="me-form-root" dir="rtl">
+
+  {# ── Page header ──────────────────────────────────────────────── #}
+  <div class="adm-page-header">
+    <div class="adm-page-header__info">
+      <span class="adm-page-section-label">مالی</span>
+      <h1 class="adm-page-title">
+        {% if is_add %}افزودن هزینه متفرقه{% else %}ویرایش: {{ expense.subject }}{% endif %}
+      </h1>
+    </div>
+    <div class="adm-page-actions">
+      <a href="{{ list_url }}" class="adm-btn adm-btn--secondary adm-btn--sm">بازگشت به لیست</a>
+    </div>
+  </div>
+
+  {# ── Non-field errors ─────────────────────────────────────────── #}
+  {% if form.non_field_errors %}
+  <div class="me-error-box">
+    {% for error in form.non_field_errors %}
+    <p>{{ error }}</p>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <form id="me-main-form" method="post" novalidate>
+    {% csrf_token %}
+
+    <div class="me-card">
+      <div class="me-card-header">
+        <h2 class="me-card-title">اطلاعات هزینه</h2>
+      </div>
+      <div class="me-card-body">
+        <div class="me-field-grid">
+
+          {# Date field #}
+          <div class="me-field-group">
+            <label class="me-label me-label--required" for="{{ form.date.id_for_label }}">تاریخ</label>
+            {{ form.date }}
+            {% if form.date.errors %}
+            <ul class="me-field-errors">
+              {% for error in form.date.errors %}<li>{{ error }}</li>{% endfor %}
+            </ul>
+            {% endif %}
+          </div>
+
+          {# Amount field #}
+          <div class="me-field-group">
+            <label class="me-label me-label--required" for="{{ form.amount.id_for_label }}">مبلغ (تومان)</label>
+            {{ form.amount }}
+            {% if form.amount.errors %}
+            <ul class="me-field-errors">
+              {% for error in form.amount.errors %}<li>{{ error }}</li>{% endfor %}
+            </ul>
+            {% endif %}
+          </div>
+
+          {# Subject field — full width #}
+          <div class="me-field-group me-field-group--full">
+            <label class="me-label me-label--required" for="{{ form.subject.id_for_label }}">موضوع</label>
+            {{ form.subject }}
+            {% if form.subject.errors %}
+            <ul class="me-field-errors">
+              {% for error in form.subject.errors %}<li>{{ error }}</li>{% endfor %}
+            </ul>
+            {% endif %}
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    {# ── Submit bar ───────────────────────────────────────────────── #}
+    <div class="me-submit-bar">
+      <button type="submit" name="_save" value="1" class="adm-btn adm-btn--primary">
+        {% if is_add %}ذخیره{% else %}ذخیره تغییرات{% endif %}
+      </button>
+      <a href="{{ list_url }}" class="adm-btn adm-btn--secondary">انصراف</a>
+      {% if not is_add and can_delete %}
+      <a href="{{ delete_url }}" class="adm-btn adm-btn--danger me-delete-btn">حذف هزینه</a>
+      {% endif %}
+    </div>
+
+  </form>
+
+  {# ── Readonly metadata (edit only) ────────────────────────────── #}
+  {% if not is_add %}
+  <div class="me-meta-row">
+    <span class="me-meta-item">
+      <span class="me-meta-label">تاریخ ثبت:</span>
+      <span class="me-meta-value">{{ expense.created_at|date:"Y-m-d H:i" }}</span>
+    </span>
+    <span class="me-meta-item">
+      <span class="me-meta-label">آخرین ویرایش:</span>
+      <span class="me-meta-value">{{ expense.updated_at|date:"Y-m-d H:i" }}</span>
+    </span>
+  </div>
+  {% endif %}
+
+</div>{# /#me-form-root #}
+{% endblock %}

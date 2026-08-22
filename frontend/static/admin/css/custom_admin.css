@@ -1,0 +1,442 @@
+/* ================================================================
+   Custom Django Admin — Surgery Clinic
+   RTL layout, blue brand, dark sidebar. No external CSS framework.
+================================================================= */
+
+:root {
+    /* Primary accent — corporate trust blue (from reference) */
+    --purple:        #0066B3;
+    --purple-dark:   #005BAC;
+    --purple-light:  #E8F1FA;
+
+    /* Sidebar */
+    --sidebar-bg:    #0F2B46;
+
+    /* Surface */
+    --bg:            #F5F7FA;
+    --card:          #ffffff;
+
+    /* Text */
+    --text:          #1F2A38;
+    --text-strong:   #0F2B46;
+    --muted:         #6B7888;
+
+    /* Border + shadow */
+    --border:        #DCE3EC;
+    --shadow:        0 1px 2px rgba(15,43,70,.06);
+
+    /* Status colours */
+    --green:         #1E9E6A;
+    --green-bg:      #E6F6EF;
+    --red:           #EB2D4B;
+    --red-bg:        #FDEAED;
+    --blue:          #0066B3;
+    --orange:        #F5A623;
+
+    /* Layout */
+    --sidebar-width: 260px;
+    --navbar-height: 66px;
+
+    /* Border radius scale — shared.css adds --radius-sm and --radius-lg */
+    --radius:        12px;
+}
+
+/* ── Hide Django Admin's built-in chrome (we replace it entirely) ── */
+#header,
+#nav-sidebar,
+.breadcrumbs,
+#footer { display: none !important; }
+
+/* ── Base ──────────────────────────────────────────────────────── */
+html,
+body,
+button,
+input,
+textarea,
+select,
+table {
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    direction: rtl;
+}
+
+/* ── Navbar ───────────────────────────────────────────────────── */
+.ca-navbar {
+    position: fixed;
+    top: 0; right: 0; left: 0;
+    height: var(--navbar-height);
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 12px;
+    z-index: 200;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+}
+
+.ca-hamburger {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    line-height: 1;
+    transition: background .12s, color .12s;
+}
+.ca-hamburger:hover { background: var(--bg); color: var(--text); }
+
+.ca-brand {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--purple);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.ca-navbar-right {
+    margin-inline-start: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ca-navbar-user {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.ca-navbar-logout-form { margin: 0; }
+
+.ca-navbar-logout {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 13px;
+    padding: 5px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .15s, color .15s, border-color .15s;
+}
+.ca-navbar-logout:hover {
+    background: var(--bg);
+    border-color: var(--purple);
+    color: var(--purple);
+}
+
+/* ── Layout wrapper ───────────────────────────────────────────── */
+.ca-wrapper {
+    display: flex;
+    flex-direction: row;     /* RTL: items flow right → left */
+    min-height: calc(100vh - var(--navbar-height));
+    margin-top: var(--navbar-height);
+}
+
+/* ── Sidebar — first in DOM → rightmost in RTL flex ──────────── */
+.ca-sidebar {
+    width: var(--sidebar-width);
+    flex-shrink: 0;
+    background: var(--sidebar-bg);
+    border-left: 1px solid rgba(255,255,255,.06);
+    overflow: hidden;          /* nav section scrolls; sidebar itself does not */
+    position: sticky;
+    top: var(--navbar-height);
+    height: calc(100vh - var(--navbar-height));
+    display: flex;
+    flex-direction: column;
+}
+
+/* Brand area at the top of the sidebar */
+.ca-sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 18px 16px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    flex-shrink: 0;
+}
+
+.ca-sidebar-brand-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #0066B3, #3385CC);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 3px 8px rgba(0,102,179,.35);
+}
+
+.ca-sidebar-brand-text { line-height: 1.3; }
+
+.ca-sidebar-brand-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: .2px;
+}
+
+.ca-sidebar-brand-sub {
+    font-size: 10.5px;
+    color: rgba(255,255,255,.42);
+    font-weight: 500;
+    margin-top: 1px;
+}
+
+/* User profile block at the bottom of the sidebar */
+.ca-sidebar-footer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    border-top: 1px solid rgba(255,255,255,.08);
+    flex-shrink: 0;           /* pinned to bottom; nav section scrolls above it */
+}
+
+.ca-sidebar-user-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(0,102,179,.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.ca-sidebar-user-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,.85);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+}
+
+.ca-sidebar-user-role {
+    font-size: 11px;
+    color: rgba(255,255,255,.40);
+    margin-top: 2px;
+}
+
+/* Slim scrollbar lives on the nav section (which is now the scrolling child) */
+.ca-sidebar-nav::-webkit-scrollbar { width: 4px; }
+.ca-sidebar-nav::-webkit-scrollbar-track { background: transparent; }
+.ca-sidebar-nav::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,.15);
+    border-radius: 4px;
+}
+
+.ca-sidebar-nav {
+    flex: 1 1 auto;   /* fills space between brand and footer */
+    min-height: 0;    /* allows flex child to shrink and scroll */
+    overflow-y: auto;
+    padding: 10px 10px 8px;
+}
+
+.ca-sidebar-section { margin-bottom: 0; }
+
+.ca-sidebar-section-title {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(255,255,255,.28);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 16px 18px 5px;
+    user-select: none;
+}
+
+.ca-sidebar-link {
+    display: flex;
+    align-items: center;
+    padding: 8px 20px;
+    color: rgba(255,255,255,.68);
+    text-decoration: none;
+    font-size: 14px;
+    transition: background .12s, color .12s;
+    border-inline-start: 3px solid transparent;
+}
+.ca-sidebar-link:hover {
+    background: rgba(255,255,255,.07);
+    color: rgba(255,255,255,.95);
+}
+.ca-sidebar-link--active {
+    background: rgba(0,102,179,.25);
+    color: #fff;
+    font-weight: 600;
+    border-inline-start-color: #3385CC;
+}
+
+/* Mobile: slide sidebar in from right */
+@media (max-width: 900px) {
+    .ca-sidebar {
+        position: fixed;
+        top: var(--navbar-height);
+        right: calc(-1 * var(--sidebar-width));
+        height: calc(100vh - var(--navbar-height));
+        z-index: 150;
+        transition: right .22s ease;
+        box-shadow: -4px 0 24px rgba(0,0,0,.28);
+    }
+    .ca-sidebar.ca-open { right: 0; }
+}
+
+/* ── Main content — second in DOM → left in RTL flex ─────────── */
+.ca-main {
+    flex: 1;
+    min-width: 0;
+    padding: 24px;
+    overflow: auto;
+}
+
+/* ── Breadcrumbs ────────────────────────────────────────────── */
+.ca-breadcrumbs {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.ca-breadcrumbs a {
+    color: var(--purple);
+    text-decoration: none;
+}
+.ca-breadcrumbs a:hover { text-decoration: underline; }
+.ca-breadcrumbs-sep {
+    color: var(--muted);
+    font-size: 12px;
+}
+.ca-breadcrumbs-sep::after { content: ' \2190 '; } /* ← */
+
+/* ── Flash messages ─────────────────────────────────────────── */
+.ca-messages {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px;
+}
+.ca-msg {
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+    font-size: 14px;
+    border: 1px solid transparent;
+}
+.ca-msg--success { background: var(--green-bg); color: #166534; border-color: #bbf7d0; }
+.ca-msg--error   { background: var(--red-bg);   color: #991b1b; border-color: #fecaca; }
+.ca-msg--warning { background: #fff7ed;          color: #9a3412; border-color: #fed7aa; }
+.ca-msg--info    { background: #E8F1FA;          color: #004F8A; border-color: #99C2E5; }
+
+/* ── Content header (used by standard Django Admin change forms) */
+#ca-content h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 20px;
+}
+
+/* ================================================================
+   Sidebar accordion navigation
+================================================================= */
+
+/* Section toggle button — acts as a collapsible nav group header */
+.ca-nav-toggle {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 9px 14px;
+    background: none;
+    border: none;
+    color: rgba(255,255,255,.55);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .2px;
+    text-transform: none;
+    cursor: pointer;
+    font-family: inherit;
+    direction: rtl;
+    border-radius: 7px;
+    transition: color .14s, background .12s;
+    gap: 6px;
+}
+.ca-nav-toggle:hover {
+    color: rgba(255,255,255,.88);
+    background: rgba(255,255,255,.06);
+}
+.ca-nav-section.is-open > .ca-nav-toggle {
+    color: rgba(255,255,255,.90);
+}
+
+/* CSS-only chevron via ::after — rotates on open */
+.ca-nav-toggle::after {
+    content: '';
+    display: block;
+    width: 7px;
+    height: 7px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg) translateY(-2px);
+    transition: transform .22s ease;
+    flex-shrink: 0;
+    margin-inline-start: auto;
+}
+.ca-nav-section.is-open > .ca-nav-toggle::after {
+    transform: rotate(225deg) translateY(2px);
+}
+
+/* Submenu — collapsed by default, smooth max-height expand */
+.ca-nav-submenu {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height .25s ease;
+}
+.ca-nav-section.is-open > .ca-nav-submenu {
+    max-height: 320px;
+}
+
+/* Links inside the submenu */
+.ca-nav-link {
+    display: flex;
+    align-items: center;
+    padding: 7px 24px 7px 12px;
+    color: rgba(255,255,255,.60);
+    text-decoration: none;
+    font-size: 13.5px;
+    transition: background .12s, color .12s;
+    border-inline-start: 3px solid transparent;
+    direction: rtl;
+}
+.ca-nav-link:hover {
+    background: rgba(255,255,255,.07);
+    color: rgba(255,255,255,.92);
+}
+.ca-nav-link.is-active {
+    background: rgba(0,102,179,.25);
+    color: #fff;
+    font-weight: 600;
+    border-inline-start-color: #3385CC;
+}
+
+/* ── Hide category field from Product add/edit form ──────────── */
+#product_form .form-row:has(#id_category),
+#product_form .form-group:has(#id_category),
+.change-form #id_category,
+.change-form .form-row.field-category,
+.change-form .form-group.field-category {
+    display: none !important;
+}

@@ -1,0 +1,100 @@
+/* Product hard-delete (purge) confirmation page.
+   Uses shared.css design tokens (--red, --card, --border, --radius, --muted). */
+
+#product-purge-root {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.pp-warning {
+    background: var(--red-bg);
+    color: var(--red);
+    border: 1px solid var(--red);
+    border-radius: var(--radius, 10px);
+    padding: 14px 18px;
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 22px;
+}
+
+.pp-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg, 16px);
+    box-shadow: var(--shadow-sm);
+    padding: 20px 22px;
+    margin-bottom: 20px;
+}
+
+.pp-card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 14px;
+}
+
+.pp-field-list { margin: 0; }
+.pp-field-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+}
+.pp-field-row:last-child { border-bottom: none; }
+.pp-field-row dt { color: var(--muted); }
+.pp-field-row dd { margin: 0; font-weight: 600; color: var(--text); }
+
+.pp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+.pp-table th, .pp-table td {
+    text-align: right;
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--border);
+}
+.pp-table--purchases thead th {
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 12px;
+}
+.pp-table tbody tr:last-child td { border-bottom: none; }
+
+.pp-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.pp-badge--danger { background: var(--red-bg); color: var(--red); }
+.pp-badge--ok { background: #e7f6ec; color: #1c7a3d; }
+
+.pp-card--confirm p {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.8;
+}
+
+.pp-confirm-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm, 6px);
+    font-size: 14px;
+    margin: 10px 0 16px;
+}
+.pp-confirm-input:focus {
+    outline: none;
+    border-color: var(--red);
+    box-shadow: 0 0 0 3px var(--red-bg);
+}
+
+.pp-confirm-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}

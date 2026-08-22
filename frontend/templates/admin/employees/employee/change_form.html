@@ -1,0 +1,87 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}{% if original %}{{ original.full_name }} | {% endif %}کارمند | مرکز جراحی — مدیریت{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'admin/css/employee_detail.css' %}">
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="ca-breadcrumbs">
+  <a href="{% url 'admin:index' %}">خانه</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <a href="{% url 'admin:employees_employee_changelist' %}">کارمندان</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <span id="ed-breadcrumb-name">{% if original %}{{ original.full_name }}{% else %}کارمند{% endif %}</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<noscript>
+  <p style="text-align:center;padding:40px;color:var(--red)">این صفحه نیاز به JavaScript دارد.</p>
+</noscript>
+
+<div id="employee-detail-root" data-employee-id="{{ original.pk }}">
+
+  {# ── Header card ─────────────────────────────────────────────── #}
+  <div class="ed-header-card adm-hero-card" id="ed-header">
+    <div class="ed-header-skeleton">
+      <div class="ed-skeleton ed-skeleton-title"></div>
+      <div class="ed-skeleton ed-skeleton-sub" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  {# ── Tab bar ──────────────────────────────────────────────────── #}
+  <div class="ed-tab-bar">
+    <button class="ed-tab ed-tab--active" data-tab="work"        type="button">اطلاعات کاری</button>
+    <button class="ed-tab"               data-tab="personal"     type="button">اطلاعات شخصی</button>
+    <button class="ed-tab"               data-tab="payroll"      type="button">حقوق و دستمزد</button>
+    <button class="ed-tab"               data-tab="commissions"  type="button">کمیسیون‌ها</button>
+    <button class="ed-tab"               data-tab="notes"        type="button">یادداشت‌ها</button>
+  </div>
+
+  {# ── Tab panels ───────────────────────────────────────────────── #}
+  <div class="ed-tab-panel ed-tab-panel--active" data-tab="work" id="ed-panel-work">
+    {# Populated by JS: renderWorkTab() #}
+  </div>
+
+  <div class="ed-tab-panel" data-tab="personal" id="ed-panel-personal">
+    {# Populated by JS: renderPersonalTab() on first click #}
+  </div>
+
+  <div class="ed-tab-panel" data-tab="payroll" id="ed-panel-payroll">
+    {# STUB: activates in CLI-27 #}
+  </div>
+
+  <div class="ed-tab-panel" data-tab="commissions" id="ed-panel-commissions">
+    {# STUB: activates in CLI-30 #}
+  </div>
+
+  <div class="ed-tab-panel" data-tab="notes" id="ed-panel-notes">
+    {# Populated by JS: renderNotesTab() on first click #}
+  </div>
+
+  {# ── Chatter / Activity ───────────────────────────────────────── #}
+  <div class="ed-chatter" id="ed-chatter">
+    {# Populated by JS: renderChatter() #}
+  </div>
+
+  {# ── Confirmation modal ───────────────────────────────────────── #}
+  <div class="ed-modal-overlay" id="ed-modal-overlay">
+    <div class="ed-modal" role="dialog" aria-modal="true">
+      <div class="ed-modal-title">آیا مطمئن هستید؟</div>
+      <p class="ed-modal-msg" id="ed-modal-msg"></p>
+      <div class="ed-modal-actions">
+        <button class="ed-btn" id="ed-modal-cancel"  type="button">انصراف</button>
+        <button class="ed-btn ed-btn--danger" id="ed-modal-confirm" type="button">تأیید</button>
+      </div>
+    </div>
+  </div>
+
+</div>{# /#employee-detail-root #}
+{% endblock %}
+
+{% block extrascript %}
+<script src="{% static 'admin/js/employee_detail.js' %}"></script>
+{% endblock %}

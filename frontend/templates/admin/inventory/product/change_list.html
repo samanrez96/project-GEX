@@ -1,0 +1,141 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}محصولات | مرکز جراحی — مدیریت{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'admin/css/product_list.css' %}">
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="ca-breadcrumbs">
+  <a href="{% url 'admin:index' %}">خانه</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <a href="{% url 'admin:app_list' 'inventory' %}">موجودی</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <span>محصولات</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<noscript>
+  <p style="text-align:center;padding:40px;color:var(--red)">این صفحه نیاز به JavaScript دارد.</p>
+</noscript>
+
+<div id="product-list-root">
+
+  {# ── Page header ────────────────────────────────────────────── #}
+  <div class="adm-page-header">
+    <div class="adm-page-header__info">
+      <span class="adm-page-section-label">موجودی</span>
+      <h1 class="adm-page-title">محصولات</h1>
+    </div>
+    <div class="adm-page-actions">
+      <a id="pl-export-btn" class="pl-export-btn adm-btn" href="/api/v1/inventory/products/?export=excel">⬇ خروجی اکسل</a>
+      {% if has_add_permission %}
+      <a class="pl-add-btn adm-btn adm-btn--primary" href="{% url 'admin:inventory_product_add' %}">+ افزودن محصول</a>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ── Summary stats ──────────────────────────────────────────── #}
+  <div class="pl-stats-row">
+    <div class="pl-stat-card">
+      <div class="pl-stat-label">کل محصولات</div>
+      <div class="pl-stat-value" id="pl-stat-total">—</div>
+    </div>
+    <div class="pl-stat-card pl-stat-card--danger">
+      <div class="pl-stat-label">ناموجود</div>
+      <div class="pl-stat-value" id="pl-stat-empty">—</div>
+    </div>
+  </div>
+
+  {# ── Search + Filters card ───────────────────────────────────── #}
+  <div class="pl-search-wrap">
+
+    <div class="pl-search-row">
+      <input
+        id="pl-search"
+        class="pl-search-input"
+        type="search"
+        placeholder="جستجو بر اساس نام یا کد داخلی..."
+        autocomplete="off"
+        dir="rtl"
+        data-global-search
+        data-search-param="search"
+        data-search-delay="300"
+      >
+      <div id="pl-spinner" class="pl-search-spinner" aria-hidden="true"></div>
+    </div>
+
+    <div class="pl-filter-row">
+
+      <label class="pl-filter-label" for="pl-filter-type">نوع</label>
+      <select id="pl-filter-type" class="pl-filter-select">
+        <option value="">همه</option>
+        <option value="medicine">دارو</option>
+        <option value="equipment">تجهیزات</option>
+      </select>
+
+      <label class="pl-filter-label">
+        <span id="pl-dot-price" class="pl-filter-dot"></span>
+        قیمت از
+      </label>
+      <input id="pl-filter-price-min" class="pl-filter-number" type="number" min="0" step="1" placeholder="۰">
+      <span class="pl-filter-sep">تا</span>
+      <input id="pl-filter-price-max" class="pl-filter-number" type="number" min="0" step="1" placeholder="...">
+
+      <label class="pl-filter-label" for="pl-sort-by">مرتب‌سازی</label>
+      <select id="pl-sort-by" class="pl-filter-select">
+        <option value="name">نام</option>
+        <option value="internal_code" selected>کد داخلی</option>
+        <option value="purchase_price">قیمت خرید</option>
+        <option value="current_stock">موجودی</option>
+        <option value="-created_at">جدیدترین</option>
+      </select>
+      <select id="pl-sort-dir" class="pl-filter-select">
+        <option value="asc">صعودی</option>
+        <option value="desc">نزولی</option>
+      </select>
+
+      <button id="pl-clear-filters" class="pl-clear-filters" type="button">پاک کردن فیلترها</button>
+
+    </div>
+  </div>
+
+  {# ── Unified product table ───────────────────────────────────── #}
+  <div class="pl-table-wrap">
+    <table class="pl-table" id="pl-table">
+      <thead>
+        <tr>
+          <th>کد داخلی</th>
+          <th>نام محصول</th>
+          <th>نوع</th>
+          <th>تعداد</th>
+          <th>قیمت</th>
+          <th>وضعیت موجودی</th>
+        </tr>
+      </thead>
+      <tbody id="pl-tbody">
+        {# Rows rendered by product_list.js #}
+      </tbody>
+    </table>
+    <div id="pl-empty" class="pl-empty-state" style="display:none">
+      <div class="pl-empty-icon">&#128230;</div>
+      <div class="pl-empty-title">محصولی یافت نشد</div>
+      <div class="pl-empty-desc">هنوز محصولی ثبت نشده یا فیلترها را تغییر دهید.</div>
+      <button class="pl-clear-filters-all pl-empty-btn" type="button" style="display:none">پاک کردن جستجو</button>
+    </div>
+  </div>
+
+  <div id="pl-pagination" class="pl-pagination" style="display:none">
+    <span id="pl-info" class="pl-pagination-info"></span>
+    <div id="pl-pages" class="pl-pagination-pages"></div>
+  </div>
+
+</div>{# /#product-list-root #}
+{% endblock %}
+
+{% block extrascript %}
+<script src="{% static 'admin/js/product_list.js' %}?v=2"></script>
+{% endblock %}

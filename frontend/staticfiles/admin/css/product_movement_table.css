@@ -1,0 +1,166 @@
+/* ================================================================
+   Product change page — تاریخچه حرکات موجودی (StockMovement inline)
+   Scoped under #stock_movements-group / .product-movement-table so
+   nothing here can leak onto unrelated admin tables/inlines.
+
+   Column order is fixed by StockMovementInline.fields (inventory/admin.py)
+   and addressed here by position, not by relying on JS to tag cells:
+
+     1  .original            (hidden pk/fk inputs only — no visible content)
+     2  نوع حرکت              movement_type
+     3  منبع حرکت              source_type
+     4  مقدار                 quantity_display
+     5  واحد                  unit
+     6  شناسه مرجع             reference_display
+     7  تاریخ حرکت             movement_date_jalali
+     8  توضیحات               description
+     9  تاریخ ایجاد            created_at_jalali
+     10 (delete — always empty; can_delete=False on this inline)
+
+   table-layout:fixed + explicit per-column widths (declared on the
+   header row, which is what the fixed algorithm keys off) is what
+   actually fixes the layout — with the previous auto layout, an empty
+   trailing "delete" column and an unstyled "تاریخ ایجاد" date column
+   were left to the browser's default column-width guessing, which is
+   what caused the last (leftmost, in RTL) column to render unstably.
+================================================================= */
+
+#stock_movements-group .product-movement-table-scroll {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+#stock_movements-group table.product-movement-table {
+    width: 100%;
+    min-width: 860px;
+    table-layout: fixed;
+    border-collapse: collapse;
+    direction: rtl;
+    font-size: 13px;
+}
+
+#stock_movements-group table.product-movement-table th,
+#stock_movements-group table.product-movement-table td {
+    padding: 8px 12px;
+    text-align: right;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: normal;
+}
+
+#stock_movements-group table.product-movement-table th {
+    background: var(--bg);
+    font-weight: 600;
+    color: var(--muted);
+    font-size: 12px;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+#stock_movements-group table.product-movement-table tbody tr:last-child td {
+    border-bottom: none;
+}
+#stock_movements-group table.product-movement-table tbody tr:hover td {
+    background: var(--bg);
+}
+
+/* ── Column 1: Django's "original" (__str__ + hidden pk/fk inputs) ──
+   Pure duplication of columns 2/4/5 plus form-management inputs with no
+   visible value of their own — hidden entirely so it can't eat width or
+   destabilize the layout. The hidden <input>s inside still submit fine;
+   display:none never excludes form fields from a POST. */
+#stock_movements-group table.product-movement-table th:nth-child(1),
+#stock_movements-group table.product-movement-table td:nth-child(1) {
+    display: none;
+}
+
+/* ── Column 10: the always-empty trailing "Delete?" cell ──
+   can_delete=False on this inline, so Django never puts a checkbox here —
+   it is unconditionally empty on every row. Hiding it removes another
+   unstyled, width-guessing column at the table's leftmost edge. */
+#stock_movements-group table.product-movement-table th:last-child,
+#stock_movements-group table.product-movement-table td:last-child {
+    display: none;
+}
+
+/* ── Explicit widths for the 8 real columns (sum to 100%) ── */
+#stock_movements-group table.product-movement-table th:nth-child(2),
+#stock_movements-group table.product-movement-table td:nth-child(2) { width: 11%; }
+#stock_movements-group table.product-movement-table th:nth-child(3),
+#stock_movements-group table.product-movement-table td:nth-child(3) { width: 12%; }
+#stock_movements-group table.product-movement-table th:nth-child(4),
+#stock_movements-group table.product-movement-table td:nth-child(4) { width: 7%; }
+#stock_movements-group table.product-movement-table th:nth-child(5),
+#stock_movements-group table.product-movement-table td:nth-child(5) { width: 7%; }
+#stock_movements-group table.product-movement-table th:nth-child(6),
+#stock_movements-group table.product-movement-table td:nth-child(6) { width: 13%; }
+#stock_movements-group table.product-movement-table th:nth-child(7),
+#stock_movements-group table.product-movement-table td:nth-child(7) { width: 13%; }
+#stock_movements-group table.product-movement-table th:nth-child(8),
+#stock_movements-group table.product-movement-table td:nth-child(8) { width: 24%; }
+#stock_movements-group table.product-movement-table th:nth-child(9),
+#stock_movements-group table.product-movement-table td:nth-child(9) { width: 13%; }
+
+/* ── Column 4: مقدار — compact numeric, centered ── */
+#stock_movements-group table.product-movement-table td:nth-child(4) {
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* ── Columns 7 & 9: تاریخ حرکت / تاریخ ایجاد — both Jalali datetimes.
+   Both need the SAME explicit direction handling (the remaining bug was
+   exactly this: تاریخ ایجاد never got it, so it was left to inherit the
+   table's direction:rtl with wrapping enabled, letting the Unicode
+   bidi algorithm reorder/clip the digit groups at the table's edge). ── */
+#stock_movements-group table.product-movement-table td:nth-child(7),
+#stock_movements-group table.product-movement-table td:nth-child(9) {
+    direction: ltr;
+    text-align: center;
+    unicode-bidi: isolate;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Column 6: شناسه مرجع — reference code / link, read LTR ── */
+#stock_movements-group table.product-movement-table td:nth-child(6) {
+    direction: ltr;
+    text-align: right;
+    unicode-bidi: isolate;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+#stock_movements-group table.product-movement-table td:nth-child(6) a {
+    color: var(--purple);
+    text-decoration: none;
+}
+#stock_movements-group table.product-movement-table td:nth-child(6) a:hover {
+    text-decoration: underline;
+}
+
+/* ── Column 8: توضیحات — the one column allowed to wrap onto 2+ lines ── */
+#stock_movements-group table.product-movement-table td:nth-child(8) {
+    white-space: normal;
+    overflow-wrap: break-word;
+}
+
+/* Empty-state row (inserted by product_movement_table.js when there are
+   zero movements) spans every visible column. */
+#stock_movements-group table.product-movement-table td.pmt-empty-state {
+    text-align: center;
+    padding: 28px 12px;
+    color: var(--muted);
+    font-size: 13px;
+    white-space: normal;
+}
+
+@media (max-width: 1366px) {
+    #stock_movements-group table.product-movement-table {
+        min-width: 720px;
+    }
+}

@@ -1,0 +1,103 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}دفترچه تماس | مرکز جراحی — مدیریت{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'admin/css/contacts_directory.css' %}">
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="ca-breadcrumbs">
+  <a href="{% url 'admin:index' %}">خانه</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <span>دفترچه تماس</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<noscript>
+  <p style="text-align:center;padding:40px;color:var(--red)">این صفحه نیاز به JavaScript دارد.</p>
+</noscript>
+
+<div id="contacts-root">
+
+  <div class="adm-page-header">
+    <div class="adm-page-header__info">
+      <span class="adm-page-section-label">تماس‌ها</span>
+      <h1 class="adm-page-title">دفترچه تماس</h1>
+    </div>
+    <div class="adm-page-actions">
+      <a id="ct-export-btn" class="ct-export-btn adm-btn" href="/api/v1/contacts/doctors/?export=excel">⬇ خروجی اکسل</a>
+      {% if has_add_permission %}
+      <a class="ct-add-btn adm-btn adm-btn--primary" href="{% url 'admin:contacts_doctor_add' %}">+ افزودن دکتر</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="ct-tabs">
+    <button class="ct-tab ct-tab--active" data-tab="doctors">👨‍⚕️ دکترها</button>
+    <button class="ct-tab" data-tab="employees">👥 کارمندان</button>
+  </div>
+
+  <div class="ct-search-wrap">
+    <input id="ct-search" class="ct-search-input" type="search"
+      placeholder="🔎 جستجو بر اساس نام، تلفن، ایمیل، کد ملی، شماره نظام پزشکی، تخصص..."
+      autocomplete="off" dir="rtl">
+    <div id="ct-spinner" class="ct-spinner" aria-hidden="true"></div>
+  </div>
+
+  <div id="panel-doctors" class="ct-panel">
+    <div class="ct-table-wrap">
+      <table class="ct-table">
+        <thead>
+          <tr>
+            <th>نام پزشک</th>
+            <th>تخصص</th>
+            <th>شماره تلفن همراه</th>
+            <th>شماره تلفن مطب / کلینیک</th>
+            <th>شماره نظام پزشکی</th>
+            <th>وضعیت همکاری</th>
+          </tr>
+        </thead>
+        <tbody id="doctors-tbody"></tbody>
+      </table>
+      <div id="doctors-empty" class="ct-empty" style="display:none">
+        <div class="ct-empty-icon">👨‍⚕️</div>
+        <div class="ct-empty-title">دکتری یافت نشد</div>
+        <div class="ct-empty-desc">جستجو را تغییر دهید یا دکتر جدید اضافه کنید.</div>
+      </div>
+    </div>
+    <div class="ct-pagination" id="doctors-pagination"></div>
+  </div>
+
+  <div id="panel-employees" class="ct-panel" style="display:none">
+    <div class="ct-table-wrap">
+      <table class="ct-table">
+        <thead>
+          <tr>
+            <th>نام کامل</th>
+            <th>سمت شغلی</th>
+            <th>شماره تلفن</th>
+            <th>ایمیل</th>
+            <th>تلفن اضطراری</th>
+            <th>وضعیت</th>
+          </tr>
+        </thead>
+        <tbody id="employees-tbody"></tbody>
+      </table>
+      <div id="employees-empty" class="ct-empty" style="display:none">
+        <div class="ct-empty-icon">👥</div>
+        <div class="ct-empty-title">کارمندی یافت نشد</div>
+        <div class="ct-empty-desc">جستجو را تغییر دهید.</div>
+      </div>
+    </div>
+    <div class="ct-pagination" id="employees-pagination"></div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extrascript %}
+<script src="{% static 'admin/js/contacts_directory.js' %}?v={{ contacts_directory_js_version }}"></script>
+{% endblock %}

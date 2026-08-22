@@ -1,0 +1,137 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}داشبورد مالی | مرکز جراحی — مدیریت{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'admin/css/finance_dashboard.css' %}?v=2">
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="ca-breadcrumbs">
+  <a href="{% url 'admin:index' %}">خانه</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <span>داشبورد مالی</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="finance-dashboard-root" dir="rtl">
+
+  {# ── Page header ──────────────────────────────────────────────── #}
+  <div class="adm-page-header">
+    <div class="adm-page-header__info">
+      <span class="adm-page-section-label">مالی</span>
+      <h1 class="adm-page-title">داشبورد مالی</h1>
+    </div>
+  </div>
+
+  {# ── Filters ─────────────────────────────────────────────────── #}
+  <div class="fd-filters-bar">
+    <div class="fd-filter-group">
+      <label class="fd-label" for="fd-start-date">از تاریخ</label>
+      <input id="fd-start-date" class="fd-input jalali-date-input" type="text"
+             inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۴/۰۳" dir="ltr">
+    </div>
+    <div class="fd-filter-group">
+      <label class="fd-label" for="fd-end-date">تا تاریخ</label>
+      <input id="fd-end-date" class="fd-input jalali-date-input" type="text"
+             inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۴/۰۳" dir="ltr">
+    </div>
+    <button id="fd-apply-btn" class="fd-btn fd-btn--primary" type="button">اعمال فیلتر</button>
+    <button id="fd-reset-btn"  class="fd-btn"                type="button">بازنشانی</button>
+  </div>
+
+  {# ── Summary cards — server-side rendered; JS updates dynamically ── #}
+  <div class="fd-cards" id="fd-cards">
+
+    <div class="fd-card fd-card--income">
+      <div class="fd-card-label">کل درآمد</div>
+      <div class="fd-card-value" id="fd-total-income">{{ ss_total_income }} تومان</div>
+    </div>
+
+    <div class="fd-card fd-card--expense">
+      <div class="fd-card-label">کل هزینه</div>
+      <div class="fd-card-value" id="fd-total-expense">{{ ss_total_expense }} تومان</div>
+    </div>
+
+    <div class="fd-card fd-card--balance{% if ss_is_negative %} fd-negative{% else %} fd-positive{% endif %}" id="fd-balance-card">
+      <div class="fd-card-label">سود / زیان</div>
+      <div class="fd-card-value" id="fd-final-balance">{{ ss_final_balance }} تومان</div>
+    </div>
+
+    <div class="fd-card fd-card--employee">
+      <div class="fd-card-label">هزینه کارکنان</div>
+      <div class="fd-card-value" id="fd-employee-cost">{{ ss_total_employee_cost }} تومان</div>
+    </div>
+
+    <div class="fd-card fd-card--equipment">
+      <div class="fd-card-label">هزینه تجهیزات</div>
+      <div class="fd-card-value" id="fd-equipment-cost">{{ ss_total_equipment_cost }} تومان</div>
+    </div>
+
+    <div class="fd-card fd-card--medicine">
+      <div class="fd-card-label">هزینه دارو</div>
+      <div class="fd-card-value" id="fd-medicine-cost">{{ ss_total_medicine_cost }} تومان</div>
+    </div>
+
+    <div class="fd-card fd-card--commission">
+      <div class="fd-card-label">کمیسیون مرکز</div>
+      <div class="fd-card-value" id="fd-center-commission">{{ ss_center_commission_income }} تومان</div>
+    </div>
+
+    <div class="fd-card fd-card--university">
+      <div class="fd-card-label">کمیسیون دانشگاه (۴۵٪)</div>
+      <div class="fd-card-value" id="fd-university-commission">{{ ss_university_commission }} تومان</div>
+    </div>
+
+    <div class="fd-card fd-card--anesthesia">
+      <div class="fd-card-label">هزینه ماهانه متخصصان بیهوشی</div>
+      <div class="fd-card-value" id="fd-anesthesia-cost">{{ ss_anesthesia_cost }} تومان</div>
+    </div>
+
+    <div class="fd-card fd-card--daily-supplies">
+      <div class="fd-card-label">هزینه ماهانه ملزومات روزمره</div>
+      <div class="fd-card-value" id="fd-daily-supplies-cost">{{ ss_daily_supplies_cost }} تومان</div>
+    </div>
+
+  </div>
+
+  {# ── Trend chart ──────────────────────────────────────────────── #}
+  <div class="fd-chart-section">
+    <div class="fd-chart-header">
+      <h3 class="fd-chart-title">روند درآمد و هزینه</h3>
+      <div class="fd-chart-legend">
+        <span class="fd-legend-dot fd-legend-dot--income"></span><span>درآمد</span>
+        <span class="fd-legend-dot fd-legend-dot--expense"></span><span>هزینه</span>
+      </div>
+    </div>
+    <div class="fd-chart-wrap">
+      <canvas id="fd-trend-chart" aria-label="نمودار روند درآمد و هزینه"></canvas>
+      <div id="fd-chart-empty" class="fd-chart-empty" style="display:none">داده‌ای برای نمایش وجود ندارد.</div>
+    </div>
+  </div>
+
+  {# Loading/error overlay (hidden by default) #}
+  <div id="fd-filter-status" style="display:none;text-align:center;padding:8px;font-size:13px;color:var(--muted)">
+    در حال به‌روزرسانی…
+  </div>
+
+</div>{# /#finance-dashboard-root #}
+{% endblock %}
+
+{% block extrascript %}
+{# Seed data for JS without a round-trip fetch on first load #}
+<script>
+  window.FD_INITIAL_TREND = {{ ss_trend_json|safe }};
+  window.FD_API_BALANCE   = "{% url 'finance:balance-report' %}";
+  window.FD_API_TREND     = "{% url 'finance:finance-trend' %}";
+</script>
+
+{# Chart.js — load without SRI (SRI mismatches silently block the script) #}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"
+        crossorigin="anonymous"
+        onerror="window.FD_CHARTJS_FAILED=true"></script>
+
+<script src="{% static 'admin/js/finance_dashboard.js' %}?v=5"></script>
+{% endblock %}

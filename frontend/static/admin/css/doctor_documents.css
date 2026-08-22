@@ -1,0 +1,62 @@
+/* ── Doctor document previews (مدارک پزشک section) ─────────────────── */
+.doc-preview {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.doc-preview-thumb {
+    max-width: 220px;
+    max-height: 160px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    display: block;
+}
+
+.doc-preview-link {
+    font-size: 13px;
+    color: var(--purple);
+    text-decoration: none;
+    white-space: nowrap;
+}
+.doc-preview-link:hover {
+    text-decoration: underline;
+}
+
+.doc-preview--empty {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+
+.doc-clear-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+}
+
+.doc-input-label {
+    display: inline-block;
+    font-size: 12px;
+    color: var(--muted);
+    margin: 6px 0 4px;
+}
+
+/* Prevent the file input / labels from forcing horizontal overflow on
+   narrower laptop widths. */
+.field-medical_certificate_image,
+.field-national_card_image {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}

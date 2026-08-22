@@ -1,0 +1,62 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}تأیید حذف هزینه متفرقه | مرکز جراحی{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'admin/css/misc_expenses.css' %}?v=2">
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="ca-breadcrumbs">
+  <a href="{% url 'admin:index' %}">خانه</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <span>مالی</span>
+  <span class="ca-breadcrumbs-sep"></span>
+  <a href="{{ list_url }}">هزینه‌های متفرقه</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <span>حذف</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="me-delete-root" dir="rtl">
+
+  <div class="adm-page-header">
+    <div class="adm-page-header__info">
+      <span class="adm-page-section-label">مالی</span>
+      <h1 class="adm-page-title">تأیید حذف هزینه متفرقه</h1>
+    </div>
+  </div>
+
+  <div class="me-delete-card">
+    <div class="me-delete-card__icon">⚠️</div>
+    <p class="me-delete-card__question">آیا از حذف این هزینه متفرقه مطمئن هستید؟</p>
+    <p class="me-delete-card__warn">این عمل غیرقابل بازگشت است.</p>
+
+    <div class="me-delete-details">
+      <div class="me-delete-detail-row">
+        <span class="me-delete-detail-label">تاریخ:</span>
+        <span class="me-delete-detail-value">{{ date_fmt }}</span>
+      </div>
+      <div class="me-delete-detail-row">
+        <span class="me-delete-detail-label">موضوع:</span>
+        <span class="me-delete-detail-value">{{ expense.subject }}</span>
+      </div>
+      <div class="me-delete-detail-row">
+        <span class="me-delete-detail-label">مبلغ:</span>
+        <span class="me-delete-detail-value">{{ amount_fmt }} تومان</span>
+      </div>
+    </div>
+
+    <div class="me-delete-actions">
+      <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="adm-btn adm-btn--danger">تأیید حذف</button>
+      </form>
+      <a href="{{ change_url }}" class="adm-btn adm-btn--secondary">انصراف</a>
+    </div>
+  </div>
+
+</div>{# /#me-delete-root #}
+{% endblock %}

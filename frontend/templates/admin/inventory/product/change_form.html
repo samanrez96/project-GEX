@@ -1,0 +1,87 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}{% if original %}{{ original.name }} | {% endif %}محصول | مرکز جراحی — مدیریت{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'admin/css/product_detail.css' %}">
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="ca-breadcrumbs">
+  <a href="{% url 'admin:index' %}">خانه</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <a href="{% url 'admin:inventory_product_changelist' %}">محصولات</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <span id="pd-breadcrumb-name">{% if original %}{{ original.name }}{% else %}محصول{% endif %}</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<noscript>
+  <p style="text-align:center;padding:40px;color:var(--red)">این صفحه نیاز به JavaScript دارد.</p>
+</noscript>
+
+<div id="product-detail-root" data-product-id="{{ original.pk }}" data-is-main-admin="{{ is_main_administrator|yesno:'1,0' }}">
+
+  {# ── Header card ─────────────────────────────────────────────── #}
+  <div class="pd-header-card adm-hero-card" id="pd-header">
+    <div class="pd-header-skeleton">
+      <div class="pd-skeleton pd-skeleton-title"></div>
+      <div class="pd-skeleton pd-skeleton-sub" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  {# ── Tab bar ──────────────────────────────────────────────────── #}
+  <div class="pd-tab-bar">
+    <button class="pd-tab pd-tab--active" data-tab="general"   type="button">اطلاعات عمومی</button>
+    <button class="pd-tab"               data-tab="vendors"    type="button">تامین‌کننده‌ها</button>
+    <button class="pd-tab"               data-tab="purchases"  type="button">خریدها</button>
+    <button class="pd-tab"               data-tab="stock"      type="button">موجودی</button>
+    <button class="pd-tab"               data-tab="chart"      type="button">نمودار قیمت</button>
+    <button class="pd-tab"               data-tab="notes"      type="button">توضیحات</button>
+  </div>
+
+  {# ── Tab panels ───────────────────────────────────────────────── #}
+  <div class="pd-tab-panel pd-tab-panel--active" data-tab="general" id="pd-panel-general">
+    {# Populated by JS: renderGeneralTab() #}
+  </div>
+
+  <div class="pd-tab-panel" data-tab="vendors" id="pd-panel-vendors">
+    {# STUB: activates in CLI-14 #}
+  </div>
+
+  <div class="pd-tab-panel" data-tab="purchases" id="pd-panel-purchases">
+    {# STUB: activates in CLI-15 #}
+  </div>
+
+  <div class="pd-tab-panel" data-tab="stock" id="pd-panel-stock">
+    {# STUB: activates in CLI-16 #}
+  </div>
+
+  <div class="pd-tab-panel" data-tab="chart" id="pd-panel-chart">
+    {# STUB: activates in CLI-17 #}
+  </div>
+
+  <div class="pd-tab-panel" data-tab="notes" id="pd-panel-notes">
+    {# Populated by JS: renderNotesTab() on first click #}
+  </div>
+
+  {# ── Confirmation modal ───────────────────────────────────────── #}
+  <div class="pd-modal-overlay" id="pd-modal-overlay">
+    <div class="pd-modal" role="dialog" aria-modal="true">
+      <div class="pd-modal-title">آیا مطمئن هستید؟</div>
+      <p class="pd-modal-msg" id="pd-modal-msg"></p>
+      <div class="pd-modal-actions">
+        <button class="pd-btn" id="pd-modal-cancel"  type="button">انصراف</button>
+        <button class="pd-btn pd-btn--danger" id="pd-modal-confirm" type="button">غیرفعال کردن</button>
+      </div>
+    </div>
+  </div>
+
+</div>{# /#product-detail-root #}
+{% endblock %}
+
+{% block extrascript %}
+<script src="{% static 'admin/js/product_detail.js' %}?v=6"></script>
+{% endblock %}

@@ -1,0 +1,977 @@
+/* ================================================================
+   Purchase Add / Edit Form  —  pf- prefix, scoped to #purchase-form-root
+   Consistent with the clinic admin design system (shared.css tokens).
+================================================================= */
+
+/* ── Root ─────────────────────────────────────────────────────── */
+#purchase-form-root {
+    direction: rtl;
+    max-width: 1100px;
+}
+
+/* ── Status banners ───────────────────────────────────────────── */
+.pf-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 20px;
+    border-radius: var(--radius-lg);
+    margin-bottom: 20px;
+    font-size: 14px;
+    line-height: 1.5;
+    border: 1px solid transparent;
+}
+
+.pf-banner--confirmed {
+    background: var(--green-bg);
+    border-color: rgba(22, 101, 52, .18);
+    color: #166534;
+}
+
+.pf-banner--cancelled {
+    background: var(--red-bg);
+    border-color: rgba(153, 27, 27, .18);
+    color: #991b1b;
+}
+
+.pf-banner--pending {
+    background: #fff7ed;
+    border-color: rgba(194, 65, 12, .18);
+    color: #c2410c;
+}
+
+.pf-banner--warning {
+    background: #fefce8;
+    border-color: rgba(161, 98, 7, .25);
+    color: #92400e;
+}
+
+.pf-banner-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+/* ── Error box ────────────────────────────────────────────────── */
+.pf-error-box {
+    background: var(--red-bg);
+    border: 1px solid rgba(153, 27, 27, .20);
+    border-radius: var(--radius-lg);
+    padding: 14px 20px;
+    margin-bottom: 20px;
+    color: #991b1b;
+    font-size: 14px;
+}
+
+.pf-error-box p { margin: 0 0 6px; }
+.pf-error-box p:last-child { margin-bottom: 0; }
+
+/* ── Main form card (purchase header fields) ──────────────────── */
+.pf-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+.pf-card-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+}
+
+.pf-card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+}
+
+.pf-card-body { padding: 20px; }
+
+/* ── Field grid: up to 3 columns ──────────────────────────────── */
+.pf-field-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 20px;
+    margin-bottom: 16px;
+}
+
+.pf-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.pf-field-group--wide {
+    grid-column: 1 / -1;
+}
+
+.pf-field-group--full {
+    margin-top: 4px;
+}
+
+/* ── Labels ────────────────────────────────────────────────────── */
+.pf-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: .2px;
+}
+
+.pf-label--required::after {
+    content: ' *';
+    color: var(--red);
+}
+
+/* ── Input/select/textarea inside pf-field-group ──────────────── */
+.pf-field-group input[type="text"],
+.pf-field-group input[type="number"],
+.pf-field-group input[type="email"],
+.pf-field-group textarea,
+.pf-field-group select {
+    width: 100%;
+    box-sizing: border-box;
+    height: 38px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--card);
+    direction: rtl;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+}
+
+.pf-field-group input[type="text"]:focus,
+.pf-field-group input[type="number"]:focus,
+.pf-field-group textarea:focus,
+.pf-field-group select:focus {
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(0, 102, 179, .12);
+}
+
+.pf-field-group textarea {
+    height: 80px;
+    resize: vertical;
+    padding: 8px 12px;
+    line-height: 1.5;
+}
+
+.pf-hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+}
+
+/* ── RelatedFieldWidgetWrapper inside field groups ────────────── */
+.pf-field-group .related-widget-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+}
+
+.pf-field-group .related-widget-wrapper select {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Hide change/delete/lookup links; keep the add (+) link for inline vendor creation */
+.pf-field-group .related-widget-wrapper a.change-related,
+.pf-field-group .related-widget-wrapper a.delete-related,
+.pf-field-group .related-widget-wrapper a.view-related,
+.pf-field-group .related-lookup,
+.pf-field-group .related-widget-wrapper-link {
+    display: none !important;
+}
+
+.pf-field-group .related-widget-wrapper a.add-related {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    background: var(--purple-light);
+    color: var(--purple);
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    font-size: 18px;
+    line-height: 1;
+    flex-shrink: 0;
+    margin-right: 4px;
+    transition: background .12s, color .12s;
+}
+
+.pf-field-group .related-widget-wrapper a.add-related:hover {
+    background: var(--purple);
+    color: #fff;
+}
+
+/* ── Field error list ─────────────────────────────────────────── */
+.pf-field-errors {
+    list-style: none;
+    margin: 2px 0 0;
+    padding: 0;
+    font-size: 12px;
+    color: var(--red);
+}
+
+/* ── Readonly info row (shown on existing purchases) ──────────── */
+.pf-readonly-row {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    align-items: center;
+    padding-top: 16px;
+    margin-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+}
+
+.pf-readonly-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pf-readonly-label {
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.pf-readonly-value { color: var(--text); }
+
+/* ── Items card ───────────────────────────────────────────────── */
+.pf-items-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+.pf-items-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.pf-items-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pf-items-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 20px;
+    padding: 0 7px;
+    background: var(--purple-light);
+    color: var(--purple);
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* ── Items table ──────────────────────────────────────────────── */
+.pf-items-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.pf-items-table {
+    width: 100%;
+    border-collapse: collapse;
+    direction: rtl;
+    min-width: 780px;
+}
+
+.pf-items-table thead th {
+    background: var(--bg);
+    padding: 10px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    text-align: right;
+    letter-spacing: .4px;
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+}
+
+.pf-items-table tbody td {
+    padding: 10px 10px;
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(226, 232, 240, .6);
+    line-height: 1.4;
+}
+
+.pf-items-table tbody tr:last-child td { border-bottom: none; }
+
+/* Column widths */
+.pf-th-product { min-width: 240px; width: 34%; }
+.pf-th-qty     { min-width: 80px;  width: 9%; }
+.pf-th-unit    { min-width: 70px;  width: 8%; }
+.pf-th-price   { min-width: 130px; width: 15%; }
+.pf-th-total   { min-width: 150px; width: 15%; }
+.pf-th-notes   { min-width: 120px; width: 14%; }
+.pf-th-del     { min-width: 44px;  width: 5%; text-align: center; }
+
+/* ── Item row states ──────────────────────────────────────────── */
+.pf-item-row--new { background: rgba(0, 102, 179, .025); }
+
+.pf-item-deleted {
+    opacity: .45;
+    text-decoration: line-through;
+    pointer-events: none;
+}
+
+.pf-item-deleted td:last-child { pointer-events: auto; }
+
+/* ── Inputs inside table cells ────────────────────────────────── */
+.pf-item-cell input[type="text"],
+.pf-item-cell input[type="number"],
+.pf-item-cell textarea {
+    width: 100%;
+    box-sizing: border-box;
+    height: 34px;
+    padding: 0 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--card);
+    direction: rtl;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+}
+
+.pf-item-cell input:focus,
+.pf-item-cell textarea:focus {
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(0, 102, 179, .10);
+}
+
+/* Compact notes textarea in table */
+.pf-item-cell textarea {
+    height: 34px;
+    min-height: 34px;
+    resize: none;
+    overflow: hidden;
+    padding: 7px 8px;
+}
+
+/* Product + unit_price selects */
+.pf-item-cell select {
+    width: 100%;
+    box-sizing: border-box;
+    height: 34px;
+    padding: 0 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--card);
+    direction: rtl;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: left 8px center;
+    background-size: 11px 7px;
+    padding-inline-end: 28px;
+    padding-inline-start: 8px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.pf-item-cell select:focus {
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(0, 102, 179, .10);
+}
+
+/* RelatedFieldWidgetWrapper in table cells */
+.pf-item-cell .related-widget-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+}
+
+.pf-item-cell .related-widget-wrapper select {
+    flex: 1;
+    min-width: 0;
+}
+
+.pf-item-cell .related-widget-wrapper a,
+.pf-item-cell .related-lookup,
+.pf-item-cell .related-widget-wrapper-link {
+    display: none !important;
+}
+
+/* ── Row total — editable manual override ─────────────────────── */
+.pf-row-total-wrap {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* The manual_total number input fills the cell width */
+.pf-item-cell--total .pf-row-total-wrap input[type="number"] {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+    direction: ltr;
+    unicode-bidi: isolate;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+}
+
+/* Placeholder shows the auto-calculated total in automatic mode */
+.pf-item-cell--total .pf-row-total-wrap input[type="number"]::placeholder {
+    color: var(--text);
+    font-weight: 600;
+    opacity: 1;
+}
+
+/* When input is focused but still empty, dim the placeholder */
+.pf-item-cell--total .pf-row-total-wrap input[type="number"]:focus::placeholder {
+    color: var(--muted);
+}
+
+/* Active manual override: highlight the border to signal manual mode */
+.pf-item-cell--total .pf-row-total-wrap input.pf-manual-active {
+    border-color: var(--purple);
+    background: var(--purple-light, #f5f3ff);
+    color: var(--purple, #7e22ce);
+}
+
+/* Reset-to-auto button — visible only when row is in manual mode */
+.pf-row-total-reset {
+    display: none;   /* shown by JS when manual mode is active */
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+    line-height: 1;
+    transition: background .12s, color .12s, border-color .12s;
+}
+
+.pf-row-total-reset:hover {
+    background: var(--purple-light, #f5f3ff);
+    color: var(--purple, #7e22ce);
+    border-color: rgba(0, 102, 179, .20);
+}
+
+/* ── Unit display ─────────────────────────────────────────────── */
+.pf-unit-text {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 500;
+    padding: 0 4px;
+    display: block;
+    white-space: nowrap;
+}
+
+/* ── Product selector: trigger + search dropdown ─────────────────
+   The native <select> is hidden but kept for form submission.
+   A trigger div shows the selected product label (or empty placeholder).
+   Clicking the trigger opens a body-appended dropdown (position:fixed)
+   that escapes the table-wrap's overflow:auto scroll container.
+   The dropdown contains:
+     • a visible search input fixed at the top
+     • a scrollable results list below
+──────────────────────────────────────────────────────────────── */
+
+/* Trigger — fits inside the related-widget-wrapper flex container */
+.pf-product-trigger {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    box-sizing: border-box;
+    height: 34px;
+    padding: 0 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--card);
+    direction: rtl;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color .15s, box-shadow .15s;
+}
+
+.pf-product-trigger:hover {
+    border-color: var(--purple);
+}
+
+.pf-product-trigger:focus {
+    outline: none;
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(0, 102, 179, .10);
+}
+
+.pf-product-trigger--open {
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(0, 102, 179, .10);
+}
+
+/* Locked state: CSS-level lock (no pointer events) used when
+   the purchase is CONFIRMED or CANCELLED */
+.pf-product-trigger--locked,
+.pf-items-locked .pf-product-trigger {
+    background: var(--bg);
+    color: var(--muted);
+    pointer-events: none;
+    cursor: not-allowed;
+    opacity: .75;
+}
+
+.pf-product-trigger-text {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: right;
+}
+
+.pf-product-trigger--empty .pf-product-trigger-text {
+    color: var(--muted);
+}
+
+.pf-product-trigger-arrow {
+    flex-shrink: 0;
+    font-size: 10px;
+    color: var(--muted);
+    transition: transform .15s;
+    line-height: 1;
+}
+
+/* Unicode down-caret rendered via ::after so we avoid encoding issues */
+.pf-product-trigger-arrow::after { content: '▾'; }
+
+.pf-product-trigger--open .pf-product-trigger-arrow {
+    transform: rotate(180deg);
+}
+
+/* Dropdown panel — body-appended, position:fixed */
+.pf-product-search-dropdown {
+    position: fixed;
+    z-index: 9999;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, .14);
+    max-height: 300px;
+    display: flex;
+    flex-direction: column;
+    direction: rtl;
+    overflow: hidden;
+    min-width: 240px;
+}
+
+/* Search header — always visible at the top of the dropdown */
+.pf-product-search-header {
+    flex-shrink: 0;
+    padding: 8px 8px 6px;
+    border-bottom: 1px solid var(--border);
+    background: #fff;
+}
+
+.pf-product-search-input {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--bg, #f8fafc);
+    direction: rtl;
+    outline: none;
+    transition: border-color .15s, background .15s;
+}
+
+.pf-product-search-input:focus {
+    border-color: var(--purple);
+    background: #fff;
+    box-shadow: 0 0 0 2px rgba(0, 102, 179, .08);
+}
+
+/* Results list — scrollable below the fixed search header */
+.pf-product-search-results {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 44px;
+}
+
+.pf-product-result-item {
+    padding: 9px 12px;
+    font-size: 13px;
+    color: var(--text);
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-bottom: 1px solid rgba(226, 232, 240, .4);
+    line-height: 1.4;
+}
+
+.pf-product-result-item:last-child { border-bottom: none; }
+
+.pf-product-result-item:hover {
+    background: var(--purple-light, #f5f3ff);
+    color: var(--purple, #7e22ce);
+}
+
+.pf-product-result-loading,
+.pf-product-result-empty {
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+}
+
+.pf-product-result-error {
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--red, #dc2626);
+    text-align: center;
+}
+
+/* ── Item errors ──────────────────────────────────────────────── */
+.pf-item-error {
+    font-size: 11px;
+    color: var(--red);
+    margin-top: 3px;
+}
+
+/* ── Remove button ────────────────────────────────────────────── */
+.pf-remove-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+    transition: background .12s, color .12s, border-color .12s;
+    margin: 0 auto;
+}
+
+.pf-remove-btn:hover {
+    background: var(--red-bg);
+    color: var(--red);
+    border-color: rgba(153, 27, 27, .20);
+}
+
+/* ── Empty items message ──────────────────────────────────────── */
+.pf-items-empty {
+    text-align: center;
+    padding: 28px 24px;
+    color: var(--muted);
+    font-size: 14px;
+    border-top: 1px solid var(--border);
+}
+
+/* ── Items table footer (grand total) ─────────────────────────── */
+.pf-items-footer {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    background: var(--bg);
+}
+
+.pf-grand-total-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.pf-grand-total-label {
+    font-weight: 600;
+    color: var(--muted);
+}
+
+.pf-grand-total {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    direction: ltr;
+    unicode-bidi: isolate;
+}
+
+.pf-grand-total-unit {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+/* ── Status badge — in card header ───────────────────────────── */
+.pf-card-header--with-badge {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.pf-status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    letter-spacing: .2px;
+}
+
+.pf-status-badge--pending {
+    background: #fff7ed;
+    color: #c2410c;
+    border: 1px solid rgba(194, 65, 12, .25);
+}
+
+.pf-status-badge--confirmed {
+    background: var(--green-bg, #f0fdf4);
+    color: #166534;
+    border: 1px solid rgba(22, 101, 52, .25);
+}
+
+.pf-status-badge--cancelled {
+    background: var(--red-bg, #fef2f2);
+    color: #991b1b;
+    border: 1px solid rgba(153, 27, 27, .20);
+}
+
+/* ── Submit bar ───────────────────────────────────────────────── */
+.pf-submit-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 20px 0 40px;
+}
+
+/* ── Workflow buttons (confirm / cancel purchase) ─────────────── */
+.pf-btn--workflow {
+    font-weight: 700;
+    letter-spacing: .3px;
+}
+
+.pf-btn--confirm {
+    background: #166534;
+    color: #fff;
+    border: 1px solid #166534;
+    border-radius: var(--radius);
+    padding: 0 18px;
+    height: 36px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+}
+
+.pf-btn--confirm:hover {
+    background: #14532d;
+    border-color: #14532d;
+}
+
+.pf-btn--cancel-purchase {
+    background: #fff;
+    color: #991b1b;
+    border: 1px solid rgba(153, 27, 27, .40);
+    border-radius: var(--radius);
+    padding: 0 18px;
+    height: 36px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, color .15s;
+}
+
+.pf-btn--cancel-purchase:hover {
+    background: var(--red-bg, #fef2f2);
+    border-color: #991b1b;
+}
+
+.pf-btn--restore {
+    background: #fff;
+    color: #1d4ed8;
+    border: 1px solid rgba(29, 78, 216, .40);
+    padding: 0 18px;
+    height: 38px;
+    border-radius: var(--radius, 6px);
+    font-size: .875rem;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, color .15s;
+}
+
+.pf-btn--restore:hover {
+    background: #eff6ff;
+    border-color: #1d4ed8;
+}
+
+/* ── Confirmation / cancellation modal ────────────────────────── */
+.pf-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: rgba(0, 0, 0, .45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.pf-modal {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .22);
+    max-width: 440px;
+    width: 100%;
+    overflow: hidden;
+    direction: rtl;
+}
+
+.pf-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid var(--border);
+}
+
+.pf-modal-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.pf-modal-icon--confirm {
+    background: #f0fdf4;
+    color: #166534;
+}
+
+.pf-modal-icon--cancel {
+    background: #fef2f2;
+    color: #991b1b;
+}
+
+.pf-modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+}
+
+.pf-modal-body {
+    padding: 18px 22px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text);
+}
+
+.pf-modal-body p { margin: 0 0 10px; }
+.pf-modal-body p:last-child { margin-bottom: 0; }
+
+.pf-modal-note {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.pf-modal-warning {
+    background: #fef3c7;
+    border: 1px solid rgba(161, 98, 7, .25);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    color: #92400e;
+    font-size: 13px;
+}
+
+.pf-modal-footer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 22px 20px;
+    border-top: 1px solid var(--border);
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+}
+
+/* ── Locked (confirmed/cancelled) purchase: disable item inputs ── */
+.pf-items-locked .pf-item-cell input,
+.pf-items-locked .pf-item-cell select,
+.pf-items-locked .pf-item-cell textarea {
+    background: var(--bg);
+    color: var(--muted);
+    pointer-events: none;
+    border-color: var(--border);
+}
+
+/* ── Responsive: single column on narrow screens ──────────────── */
+@media (max-width: 640px) {
+    .pf-field-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pf-field-group--wide {
+        grid-column: auto;
+    }
+}

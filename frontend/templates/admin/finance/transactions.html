@@ -1,0 +1,136 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}تراکنش‌های مالی | مرکز جراحی — مدیریت{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'admin/css/finance_transactions.css' %}">
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="ca-breadcrumbs">
+  <a href="{% url 'admin:index' %}">خانه</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <a href="{% url 'admin:finance_dashboard' %}">مالی</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <span>تراکنش‌های مالی</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<noscript>
+  <p style="text-align:center;padding:40px;color:var(--red)">این صفحه نیاز به JavaScript دارد.</p>
+</noscript>
+
+<div id="finance-transactions-root" dir="rtl">
+
+  {# ── Page header ──────────────────────────────────────────────── #}
+  <div class="adm-page-header">
+    <div class="adm-page-header__info">
+      <span class="adm-page-section-label">مالی</span>
+      <h1 class="adm-page-title">تراکنش‌های مالی</h1>
+    </div>
+  </div>
+
+  {# ── Summary cards ────────────────────────────────────────────── #}
+  <div class="ft-cards" id="ft-cards">
+    <div class="ft-card ft-card--income">
+      <div class="ft-card-label">مجموع درآمد</div>
+      <div class="ft-card-value" id="ft-total-income">—</div>
+    </div>
+    <div class="ft-card ft-card--expense">
+      <div class="ft-card-label">مجموع هزینه</div>
+      <div class="ft-card-value" id="ft-total-expense">—</div>
+    </div>
+    <div class="ft-card ft-card--balance" id="ft-balance-card">
+      <div class="ft-card-label">تراز مالی</div>
+      <div class="ft-card-value" id="ft-final-balance">—</div>
+    </div>
+    <div class="ft-card ft-card--count">
+      <div class="ft-card-label">تعداد تراکنش‌ها</div>
+      <div class="ft-card-value" id="ft-transaction-count">—</div>
+    </div>
+  </div>
+
+  {# ── Filters ──────────────────────────────────────────────────── #}
+  <div class="ft-filters-bar">
+    <div class="ft-filter-group">
+      <label class="ft-label" for="ft-filter-type">نوع تراکنش</label>
+      <select id="ft-filter-type" class="ft-input">
+        <option value="">همه</option>
+        <option value="income">درآمد</option>
+        <option value="expense">هزینه</option>
+      </select>
+    </div>
+    <div class="ft-filter-group">
+      <label class="ft-label" for="ft-filter-status">وضعیت پرداخت</label>
+      <select id="ft-filter-status" class="ft-input">
+        <option value="">همه</option>
+        <option value="pending">در انتظار پرداخت</option>
+        <option value="partial">پرداخت ناقص</option>
+        <option value="paid">پرداخت شده</option>
+        <option value="cancelled">لغو شده</option>
+      </select>
+    </div>
+    <div class="ft-filter-group">
+      <label class="ft-label" for="ft-filter-category">دسته‌بندی</label>
+      <select id="ft-filter-category" class="ft-input">
+        <option value="">همه</option>
+      </select>
+    </div>
+    <div class="ft-filter-group">
+      <label class="ft-label" for="ft-filter-date-from">از تاریخ</label>
+      <input id="ft-filter-date-from" class="ft-input jalali-date-input" type="text"
+             inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۴/۰۳" dir="ltr">
+    </div>
+    <div class="ft-filter-group">
+      <label class="ft-label" for="ft-filter-date-to">تا تاریخ</label>
+      <input id="ft-filter-date-to" class="ft-input jalali-date-input" type="text"
+             inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۴/۰۳" dir="ltr">
+    </div>
+    <button id="ft-apply-btn" class="ft-btn ft-btn--primary" type="button">اعمال فیلتر</button>
+    <button id="ft-reset-btn" class="ft-btn" type="button">بازنشانی</button>
+  </div>
+
+  {# ── Table ────────────────────────────────────────────────────── #}
+  <div class="ft-table-wrap">
+    <table class="ft-table" id="ft-table">
+      <thead>
+        <tr>
+          <th>تاریخ</th>
+          <th>نوع</th>
+          <th>دسته‌بندی</th>
+          <th>مبلغ (تومان)</th>
+          <th>وضعیت</th>
+          <th>توضیحات</th>
+        </tr>
+      </thead>
+      <tbody id="ft-tbody">
+        <tr>
+          <td colspan="6" class="ft-table-loading">در حال بارگذاری…</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div id="ft-empty-state" class="ft-empty-state" style="display:none">
+      <div class="ft-empty-icon">📋</div>
+      <div id="ft-empty-title" class="ft-empty-title">هنوز تراکنشی ثبت نشده است</div>
+      <div id="ft-empty-desc" class="ft-empty-desc">برای شروع مدیریت مالی، اولین تراکنش را ثبت کنید.</div>
+      <button id="ft-clear-search-btn" class="ft-empty-btn" type="button" style="display:none">
+        پاک کردن فیلترها
+      </button>
+    </div>
+  </div>
+
+  {# ── Pagination ───────────────────────────────────────────────── #}
+  <div class="ft-pagination">
+    <span id="ft-pagination-info" class="ft-pagination-info"></span>
+    <div id="ft-pagination-pages" class="ft-pagination-pages"></div>
+  </div>
+
+</div>{# /#finance-transactions-root #}
+{% endblock %}
+
+{% block extrascript %}
+<script src="{% static 'admin/js/finance_transactions.js' %}"></script>
+{% endblock %}

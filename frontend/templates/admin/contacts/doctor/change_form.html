@@ -1,0 +1,27 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin/css/doctor_specialty.css' %}?v={{ doctor_specialty_css_version }}">
+<link rel="stylesheet" href="{% static 'admin/css/doctor_documents.css' %}?v={{ doctor_documents_css_version }}">
+<link rel="stylesheet" href="{% static 'admin/css/doctor_surgery_rate.css' %}?v={{ doctor_surgery_rate_css_version }}">
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<script>
+  window.DOCTOR_SPECIALTY_CONFIG = {
+    createUrl: "{{ doctor_specialty_create_url }}",
+    deleteUrlTemplate: "{{ doctor_specialty_delete_url_template }}",
+    deactivateUrlTemplate: "{{ doctor_specialty_deactivate_url_template }}",
+    activateUrlTemplate: "{{ doctor_specialty_activate_url_template }}",
+    currentSpecialtyId: {{ doctor_current_specialty_id|default_if_none:"null" }},
+    canAdd: {{ can_add_doctorspecialty|yesno:"true,false" }},
+    canDelete: {{ can_delete_doctorspecialty|yesno:"true,false" }},
+    canChange: {{ can_change_doctorspecialty|yesno:"true,false" }}
+  };
+</script>
+<script src="{% static 'admin/js/doctor_specialty.js' %}?v={{ doctor_specialty_js_version }}"></script>
+<script src="{% static 'admin/js/doctor_surgery_rate.js' %}?v={{ doctor_surgery_rate_js_version }}"></script>
+{% endblock %}

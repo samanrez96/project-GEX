@@ -1,0 +1,179 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}کارمندان | مرکز جراحی — مدیریت{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'admin/css/employee_list.css' %}">
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="ca-breadcrumbs">
+  <a href="{% url 'admin:index' %}">خانه</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <span>کارمندان</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<noscript>
+  <p style="text-align:center;padding:40px;color:var(--red)">این صفحه نیاز به JavaScript دارد.</p>
+</noscript>
+
+<div id="employee-list-root">
+
+  {# ── Page header ──────────────────────────────────────────────── #}
+  <div class="adm-page-header">
+    <div class="adm-page-header__info">
+      <span class="adm-page-section-label">کارمندان</span>
+      <h1 class="adm-page-title">مدیریت کارمندان</h1>
+    </div>
+    <div class="adm-page-actions">
+      <a id="em-export-btn" class="em-export-btn adm-btn" href="/api/v1/employees/?export=excel">⬇ خروجی اکسل</a>
+      {% if has_add_permission %}
+      <a class="em-add-btn adm-btn adm-btn--primary" href="{% url 'admin:employees_employee_add' %}">+ افزودن کارمند</a>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ── Summary cards (current-page aggregates + API total) ─────── #}
+  <div class="em-summary-row">
+    <div class="em-summary-card em-summary-card--total">
+      <div class="em-summary-count" id="em-count-total">—</div>
+      <div class="em-summary-label">👥 مجموع کارمندان</div>
+    </div>
+    <div class="em-summary-card em-summary-card--active">
+      <div class="em-summary-count" id="em-count-active">—</div>
+      <div class="em-summary-label">✅ فعال <small class="em-summary-note">(صفحه جاری)</small></div>
+    </div>
+    <div class="em-summary-card em-summary-card--inactive">
+      <div class="em-summary-count" id="em-count-inactive">—</div>
+      <div class="em-summary-label">⏸ غیرفعال <small class="em-summary-note">(صفحه جاری)</small></div>
+    </div>
+    <div class="em-summary-card em-summary-card--position">
+      <div class="em-summary-count" id="em-count-positions">—</div>
+      <div class="em-summary-label">💼 پوزیشن‌ها <small class="em-summary-note">(صفحه جاری)</small></div>
+    </div>
+  </div>
+
+  {# ── Search + Filters card ─────────────────────────────────────── #}
+  <div class="em-search-wrap">
+
+    <div class="em-search-row">
+      <input
+        id="em-search"
+        class="em-search-input"
+        type="search"
+        placeholder="🔎 جستجو بر اساس نام، ایمیل، شماره ملی..."
+        autocomplete="off"
+        dir="rtl"
+        data-global-search
+        data-search-param="search"
+        data-search-delay="300"
+      >
+      <div id="em-spinner" class="em-search-spinner" aria-hidden="true"></div>
+    </div>
+
+    <div class="em-filter-row">
+
+      <label class="em-filter-label" for="em-filter-position">
+        <span id="em-dot-position" class="em-filter-dot"></span>
+        پوزیشن شغلی
+      </label>
+      <select id="em-filter-position" class="em-filter-select">
+        <option value="">همه</option>
+        {# Options populated by JS on load #}
+      </select>
+
+      <label class="em-filter-label" for="em-filter-active">
+        <span id="em-dot-active" class="em-filter-dot"></span>
+        وضعیت همکاری
+      </label>
+      <select id="em-filter-active" class="em-filter-select">
+        <option value="">همه</option>
+        <option value="true">فعال</option>
+        <option value="false">غیرفعال</option>
+      </select>
+
+      <label class="em-filter-label">
+        <span id="em-dot-startdate" class="em-filter-dot"></span>
+        شروع همکاری از
+      </label>
+      <input id="em-filter-start-from" class="em-filter-select jalali-date-input" type="text"
+             inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۴/۰۳" dir="ltr">
+      <span style="font-size:12px;color:var(--muted)">تا</span>
+      <input id="em-filter-start-to" class="em-filter-select jalali-date-input" type="text"
+             inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۴/۰۳" dir="ltr">
+
+      <label class="em-filter-label" for="em-sort-by">مرتب‌سازی</label>
+      <select id="em-sort-by" class="em-filter-select">
+        <option value="full_name">نام</option>
+        <option value="job_position__name">پوزیشن</option>
+        <option value="is_active">وضعیت</option>
+        <option value="start_date">تاریخ شروع</option>
+        <option value="created_at">تاریخ ثبت</option>
+      </select>
+      <select id="em-sort-dir" class="em-filter-select">
+        <option value="asc">صعودی</option>
+        <option value="desc">نزولی</option>
+      </select>
+
+      <button id="em-clear-filters" class="em-clear-filters" type="button">پاک کردن فیلترها</button>
+
+    </div>
+  </div>
+
+  {# ── Employee table ────────────────────────────────────────────── #}
+  <div class="em-table-wrap">
+    <table class="em-table" id="em-table">
+      <thead>
+        <tr>
+          <th>نام کامل</th>
+          <th>پوزیشن شغلی</th>
+          <th>ایمیل</th>
+          <th>تلفن</th>
+          <th>شماره ملی</th>
+          <th>وضعیت</th>
+        </tr>
+      </thead>
+      <tbody id="em-tbody">
+        {# Rows rendered by employee_list.js #}
+      </tbody>
+    </table>
+
+    <div id="em-empty-state" class="em-empty-state" style="display:none">
+      <div class="em-empty-icon">👥</div>
+      <div id="em-empty-title" class="em-empty-title">هنوز کارمندی ثبت نشده است</div>
+      <div id="em-empty-desc" class="em-empty-desc">برای مدیریت منابع انسانی، اولین کارمند را اضافه کنید.</div>
+      <button id="em-clear-search-btn" class="em-empty-btn" type="button" style="display:none">
+        پاک کردن فیلترها
+      </button>
+      {% if has_add_permission %}
+      <a id="em-add-first-btn" class="em-empty-btn" href="{% url 'admin:employees_employee_add' %}" style="display:none">
+        افزودن اولین کارمند
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ── Pagination bar ────────────────────────────────────────────── #}
+  <div class="em-pagination">
+    <span id="em-pagination-info" class="em-pagination-info"></span>
+    <div id="em-pagination-pages" class="em-pagination-pages"></div>
+    <div class="em-pagination-size">
+      تعداد در صفحه:
+      <select id="em-page-size-select" class="em-page-size-select">
+        <option value="10">۱۰</option>
+        <option value="25" selected>۲۵</option>
+        <option value="50">۵۰</option>
+        <option value="100">۱۰۰</option>
+      </select>
+    </div>
+  </div>
+
+</div>{# /#employee-list-root #}
+{% endblock %}
+
+{% block extrascript %}
+<script src="{% static 'admin/js/employee_list.js' %}"></script>
+{% endblock %}

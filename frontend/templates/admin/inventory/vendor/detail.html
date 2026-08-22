@@ -1,0 +1,220 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static jalali_filters %}
+
+{% block title %}{{ original.name }} | تامین‌کننده | مرکز جراحی — مدیریت{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'admin/css/vendor_form.css' %}?v=2">
+<link rel="stylesheet" href="{% static 'admin/css/vendor_detail.css' %}?v=1">
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="ca-breadcrumbs">
+  <a href="{% url 'admin:index' %}">خانه</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <a href="{% url 'admin:inventory_vendor_changelist' %}">تامین‌کنندگان</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <span>{{ original.name }}</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="vendor-detail-root" dir="rtl">
+
+  {# ── Page header ──────────────────────────────────────────────── #}
+  <div class="adm-page-header">
+    <div class="adm-page-header__info">
+      <span class="adm-page-section-label">موجودی</span>
+      <h1 class="adm-page-title">{{ original.name }}</h1>
+    </div>
+    <div class="adm-page-actions">
+      <a href="{% url 'admin:inventory_vendor_changelist' %}" class="adm-btn adm-btn--secondary adm-btn--sm">بازگشت به تامین‌کنندگان</a>
+      {% if has_change_permission %}
+      <a href="{% url 'admin:inventory_vendor_change' original.pk %}" class="adm-btn adm-btn--primary adm-btn--sm">ویرایش تامین‌کننده</a>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ── Card 1: Basic information ─────────────────────────────────── #}
+  <div class="vf-card">
+    <div class="vf-card-header">
+      <h2 class="vf-card-title">اطلاعات اصلی</h2>
+      {% if not original.is_active %}
+      <span class="vd-badge vd-badge--inactive">غیرفعال</span>
+      {% endif %}
+    </div>
+    <div class="vf-card-body">
+      <dl class="vd-field-list">
+
+        <div class="vd-field-row">
+          <dt class="vd-label">نام تامین‌کننده</dt>
+          <dd class="vd-value">{{ original.name }}</dd>
+        </div>
+
+        <div class="vd-field-row">
+          <dt class="vd-label">شماره تلفن اصلی</dt>
+          <dd class="vd-value">
+            {% if original.phone_number %}
+            <a class="vd-phone-link" href="tel:{{ original.phone_number }}" dir="ltr">{{ original.phone_number }}</a>
+            {% else %}—{% endif %}
+          </dd>
+        </div>
+
+        {% if additional_phones %}
+        <div class="vd-field-row">
+          <dt class="vd-label">شماره‌های تلفن دیگر</dt>
+          <dd class="vd-value">
+            <ul class="vd-phone-list">
+              {% for p in additional_phones %}
+              <li><a class="vd-phone-link" href="tel:{{ p.phone }}" dir="ltr">{{ p.phone }}</a></li>
+              {% endfor %}
+            </ul>
+          </dd>
+        </div>
+        {% endif %}
+
+        <div class="vd-field-row">
+          <dt class="vd-label">ایمیل</dt>
+          <dd class="vd-value">
+            {% if original.email %}
+            <a class="vd-email-link" href="mailto:{{ original.email }}">{{ original.email }}</a>
+            {% else %}—{% endif %}
+          </dd>
+        </div>
+
+        <div class="vd-field-row vd-field-row--full">
+          <dt class="vd-label">آدرس</dt>
+          <dd class="vd-value vd-value--pre">{{ original.address|default:"—" }}</dd>
+        </div>
+
+        <div class="vd-field-row vd-field-row--full">
+          <dt class="vd-label">یادداشت</dt>
+          <dd class="vd-value vd-value--pre">{{ original.notes|default:"—" }}</dd>
+        </div>
+
+      </dl>
+    </div>
+  </div>
+
+  {# ── Card 2: Products ──────────────────────────────────────────── #}
+  <div class="vf-card">
+    <div class="vf-card-header">
+      <h2 class="vf-card-title">
+        محصولات این تامین‌کننده
+        <span class="vd-product-count">({{ product_links|length }})</span>
+      </h2>
+    </div>
+    <div class="vf-card-body vf-card-body--no-pad">
+      {% if product_links %}
+      <table class="vd-products-table">
+        <thead>
+          <tr>
+            <th>نام محصول</th>
+            <th>کد داخلی</th>
+            <th>قیمت واحد (تومان)</th>
+            <th>اصلی</th>
+            <th>کد نزد تامین‌کننده</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pv in product_links %}
+          <tr>
+            <td>
+              <a class="vd-product-link" href="/admin/inventory/product/{{ pv.product.pk }}/detail/">
+                {{ pv.product.name }}
+              </a>
+            </td>
+            <td><span class="vd-code">{{ pv.product.internal_code|default:"—" }}</span></td>
+            <td>{{ pv.unit_price|default:"—" }}</td>
+            <td>{% if pv.is_primary %}<span class="vd-badge vd-badge--primary">اصلی</span>{% else %}—{% endif %}</td>
+            <td><span class="vd-code">{{ pv.supplier_product_code|default:"—" }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="vd-no-products">هنوز محصولی به این تامین‌کننده لینک نشده است.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ── Card 3: Purchase-derived product list ─────────────────────────── #}
+  <div class="vf-card">
+    <div class="vf-card-header">
+      <h2 class="vf-card-title">
+        محصولات تأمین‌کننده
+        <span class="vd-product-count">({{ purchased_products|length }})</span>
+      </h2>
+    </div>
+    <div class="vf-card-body vf-card-body--no-pad">
+      {% if purchased_products %}
+      <table class="vd-products-table vd-purchased-table">
+        <thead>
+          <tr>
+            <th>کد داخلی</th>
+            <th>نام محصول</th>
+            <th>نوع</th>
+            <th>واحد</th>
+            <th>موجودی فعلی</th>
+            <th>دفعات خرید</th>
+            <th>مجموع مقدار</th>
+            <th>آخرین قیمت (تومان)</th>
+            <th>تاریخ آخرین خرید</th>
+            <th>وضعیت</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in purchased_products %}
+          <tr>
+            <td><span class="vd-code">{{ p.internal_code|default:"—" }}</span></td>
+            <td>
+              <a class="vd-product-link" href="/admin/inventory/product/{{ p.pk }}/detail/">
+                {{ p.name }}
+              </a>
+            </td>
+            <td><span class="vd-type-badge">{{ p.get_product_type_display }}</span></td>
+            <td>{{ p.unit|default:"—" }}</td>
+            <td>{{ p.current_stock }}</td>
+            <td>{{ p.purchase_count }}</td>
+            <td>{{ p.total_quantity }}</td>
+            <td>{{ p.last_unit_price|default:"—" }}</td>
+            <td>{{ p.last_purchase_date|jalali_date|default:"—" }}</td>
+            <td>
+              {% if p.is_active %}
+              <span class="vd-badge vd-badge--active">فعال</span>
+              {% else %}
+              <span class="vd-badge vd-badge--inactive">غیرفعال</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="vd-no-products" id="vendor-no-purchased-products">
+        <p>هنوز محصولی از این تأمین‌کننده خریداری نشده است.</p>
+        {% if can_add_purchase %}
+        <a href="{% url 'admin:inventory_purchase_add' %}?vendor={{ original.pk }}"
+           class="adm-btn adm-btn--primary adm-btn--sm vd-new-purchase-btn">
+          ثبت خرید جدید
+        </a>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ── Metadata ──────────────────────────────────────────────────── #}
+  <div class="vf-meta-row">
+    <span class="vf-meta-item">
+      <span class="vf-meta-label">تاریخ ایجاد:</span>
+      <span class="vf-meta-value">{{ original.created_at|date:"Y-m-d H:i" }}</span>
+    </span>
+    <span class="vf-meta-item">
+      <span class="vf-meta-label">آخرین ویرایش:</span>
+      <span class="vf-meta-value">{{ original.updated_at|date:"Y-m-d H:i" }}</span>
+    </span>
+  </div>
+
+</div>{# /#vendor-detail-root #}
+{% endblock %}

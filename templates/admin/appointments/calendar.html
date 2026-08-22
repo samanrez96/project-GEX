@@ -1,0 +1,66 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}نوبت‌دهی | مرکز جراحی — مدیریت{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'admin/css/appointments_calendar.css' %}?v={{ appointments_calendar_css_version }}">
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="ca-breadcrumbs">
+  <a href="{% url 'admin:index' %}">خانه</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <span>نوبت‌دهی</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<noscript>
+  <p style="text-align:center;padding:40px;color:var(--red)">این صفحه نیاز به JavaScript دارد.</p>
+</noscript>
+
+<div id="apt-root" dir="rtl"
+     data-has-add-permission="{{ has_add_permission|yesno:'1,0' }}">
+
+  {# ── Page header ──────────────────────────────────────────────── #}
+  <div class="adm-page-header">
+    <div class="adm-page-header__info">
+      <span class="adm-page-section-label">نوبت‌دهی</span>
+      <h1 class="adm-page-title">تقویم نوبت‌ها</h1>
+    </div>
+    <div class="adm-page-actions">
+      <a id="apt-add-btn" class="adm-btn adm-btn--primary" href="/admin/appointments/appointment/add/">+ ثبت نوبت جدید</a>
+    </div>
+  </div>
+
+  {# ── Toolbar: doctor filter + week navigation ────────────────────── #}
+  <div class="apt-toolbar">
+    <div class="apt-toolbar-group">
+      <label class="apt-label" for="apt-filter-doctor">پزشک</label>
+      <select id="apt-filter-doctor" class="apt-select">
+        <option value="">همه پزشکان</option>
+      </select>
+    </div>
+    <div class="apt-toolbar-group apt-toolbar-group--nav">
+      <button id="apt-prev-week" class="apt-nav-btn" type="button" aria-label="هفته قبل">‹</button>
+      <button id="apt-today-btn" class="apt-nav-btn apt-nav-btn--today" type="button">امروز</button>
+      <button id="apt-next-week" class="apt-nav-btn" type="button" aria-label="هفته بعد">›</button>
+      <span id="apt-week-label" class="apt-week-label">—</span>
+    </div>
+  </div>
+
+  {# ── Calendar grid — rendered by appointments_calendar.js ────────── #}
+  <div class="apt-calendar-wrap">
+    <div id="apt-calendar-loading" class="apt-calendar-loading">در حال بارگذاری…</div>
+    <div id="apt-calendar-grid" class="apt-calendar-grid" style="display:none"></div>
+  </div>
+
+  <p class="apt-hint">برای ثبت نوبت جدید در یک بازه خالی کلیک کنید؛ برای مشاهده یا ویرایش، روی نوبت ثبت‌شده کلیک کنید.</p>
+
+</div>{# /#apt-root #}
+{% endblock %}
+
+{% block extrascript %}
+<script src="{% static 'admin/js/appointments_calendar.js' %}?v={{ appointments_calendar_js_version }}"></script>
+{% endblock %}

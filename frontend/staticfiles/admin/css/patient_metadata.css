@@ -1,0 +1,38 @@
+/* ================================================================
+   Patient age/gender read-only info row — SurgeryHistory add/edit form
+   only. Injected by patient_metadata.js directly below the Patient
+   selector's own .form-row. Purely informational (never a submitted
+   form field), so styled as a quiet inline summary rather than a real
+   input row.
+================================================================= */
+
+body.app-surgeries.model-surgeryhistory.change-form .pm-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 8px 12px;
+    margin: -6px 0 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    direction: rtl;
+    transition: opacity .15s;
+}
+body.app-surgeries.model-surgeryhistory.change-form .pm-row.pm-loading {
+    opacity: .55;
+}
+body.app-surgeries.model-surgeryhistory.change-form .pm-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+}
+body.app-surgeries.model-surgeryhistory.change-form .pm-label {
+    color: var(--muted);
+    font-weight: 600;
+}
+body.app-surgeries.model-surgeryhistory.change-form .pm-value {
+    color: var(--text);
+    font-weight: 600;
+}

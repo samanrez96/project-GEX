@@ -1,0 +1,576 @@
+/* ================================================================
+   Vendor Add / Edit Form  —  vf- prefix, scoped to #vendor-form-root
+   Consistent with the clinic admin design system (shared.css tokens).
+================================================================= */
+
+#vendor-form-root {
+    direction: rtl;
+    max-width: 960px;
+}
+
+/* ── Error box ───────────────────────────────────────────────── */
+.vf-error-box {
+    background: var(--red-bg);
+    border: 1px solid rgba(153,27,27,.20);
+    border-radius: var(--radius-lg);
+    padding: 14px 20px;
+    margin-bottom: 20px;
+    color: #991b1b;
+    font-size: 14px;
+}
+.vf-error-box p { margin: 0 0 6px; }
+.vf-error-box p:last-child { margin-bottom: 0; }
+
+/* ── Card ────────────────────────────────────────────────────── */
+.vf-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+.vf-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    cursor: default;
+    list-style: none;
+}
+
+.vf-card--collapsible > .vf-card-header--summary {
+    cursor: pointer;
+    user-select: none;
+}
+
+.vf-card--collapsible > .vf-card-header--summary::-webkit-details-marker {
+    display: none;
+}
+
+.vf-card-toggle-icon::before {
+    content: "▸";
+    font-size: 12px;
+    color: var(--muted);
+    transition: transform .15s;
+}
+
+.vf-card--collapsible[open] .vf-card-toggle-icon::before {
+    transform: rotate(90deg);
+}
+
+.vf-card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+}
+
+.vf-card-body { padding: 20px; }
+
+/* ── Field grid: 2 columns ───────────────────────────────────── */
+.vf-field-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 20px;
+}
+
+.vf-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.vf-field-group--full {
+    grid-column: 1 / -1;
+}
+
+/* ── Labels ──────────────────────────────────────────────────── */
+.vf-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: .2px;
+}
+
+.vf-label--required::after {
+    content: ' *';
+    color: var(--red);
+}
+
+.vf-hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+}
+
+/* ── Checkbox label ──────────────────────────────────────────── */
+.vf-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--text);
+    cursor: pointer;
+    margin-top: 4px;
+}
+
+.vf-checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--purple);
+}
+
+/* ── Inputs inside vf-field-group ────────────────────────────── */
+.vf-field-group input[type="text"],
+.vf-field-group input[type="email"],
+.vf-field-group input[type="number"],
+.vf-field-group input[type="url"],
+.vf-field-group textarea,
+.vf-field-group select {
+    width: 100%;
+    box-sizing: border-box;
+    height: 38px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--card);
+    direction: rtl;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+}
+
+.vf-field-group input:focus,
+.vf-field-group textarea:focus,
+.vf-field-group select:focus {
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(0,102,179,.10);
+}
+
+.vf-field-group textarea {
+    height: 80px;
+    resize: vertical;
+    padding: 8px 12px;
+    line-height: 1.5;
+}
+
+/* ── Field error list ────────────────────────────────────────── */
+.vf-field-errors {
+    list-style: none;
+    margin: 2px 0 0;
+    padding: 0;
+    font-size: 12px;
+    color: var(--red);
+}
+
+/* ── Submit bar ──────────────────────────────────────────────── */
+.vf-submit-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 20px 0 24px;
+}
+
+/* ── Products card ───────────────────────────────────────────── */
+.vf-products-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+.vf-products-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.vf-products-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vf-products-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 20px;
+    padding: 0 7px;
+    background: var(--purple-light);
+    color: var(--purple);
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* ── Products body ───────────────────────────────────────────── */
+.vf-products-body { padding: 0; }
+
+/* ── Inline add/edit form ────────────────────────────────────── */
+.vf-product-form {
+    padding: 16px 20px;
+    background: rgba(0,102,179,.03);
+    border-bottom: 1px solid var(--border);
+}
+
+.vf-product-form-error {
+    background: var(--red-bg);
+    border: 1px solid rgba(153,27,27,.18);
+    border-radius: var(--radius);
+    padding: 8px 14px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #991b1b;
+}
+
+.vf-product-form-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr auto;
+    gap: 12px 16px;
+    align-items: end;
+    margin-bottom: 12px;
+}
+
+@media (max-width: 700px) {
+    .vf-product-form-grid { grid-template-columns: 1fr; }
+}
+
+.vf-product-field { display: flex; flex-direction: column; gap: 5px; }
+.vf-product-field--wide { }
+.vf-product-field--checkbox { justify-content: flex-end; padding-bottom: 6px; }
+
+.vf-product-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+.vf-product-input {
+    width: 100%;
+    box-sizing: border-box;
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--card);
+    direction: rtl;
+    outline: none;
+    transition: border-color .15s;
+}
+
+.vf-product-input:focus {
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(0,102,179,.10);
+}
+
+.vf-product-form-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* ── Product autocomplete dropdown ───────────────────────────── */
+.vf-product-dropdown { direction: rtl; }
+
+.vf-ac-item:hover,
+.vf-ac-item:active {
+    background: var(--bg, #f5f5f5);
+    color: var(--purple, #0066b3);
+}
+
+.vf-product-input[readonly] {
+    background: var(--bg, #f9f9f9);
+    cursor: default;
+    color: var(--muted, #888);
+}
+
+/* ── Products table ──────────────────────────────────────────── */
+.vf-products-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.vf-products-table {
+    width: 100%;
+    border-collapse: collapse;
+    direction: rtl;
+    min-width: 600px;
+}
+
+.vf-products-table thead th {
+    background: var(--bg);
+    padding: 10px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    text-align: right;
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+    letter-spacing: .3px;
+}
+
+.vf-products-table tbody td {
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--text);
+    text-align: right;
+    border-bottom: 1px solid rgba(220,227,236,.55);
+    vertical-align: middle;
+}
+
+.vf-products-table tbody tr:last-child td { border-bottom: none; }
+.vf-products-table tbody tr:hover { background: var(--bg); }
+
+.vf-product-name-cell strong { font-weight: 600; }
+.vf-product-code { font-family: 'Courier New', monospace; font-size: 12px; color: var(--muted); }
+.vf-price-cell { font-variant-numeric: tabular-nums; }
+
+/* ── Action buttons in table ─────────────────────────────────── */
+.vf-action-btn {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--card);
+    color: var(--muted);
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .12s, border-color .12s, color .12s;
+}
+
+.vf-action-btn:hover { background: var(--bg); border-color: var(--purple); color: var(--purple); }
+
+.vf-action-btn--danger:hover { background: var(--red-bg); border-color: rgba(153,27,27,.2); color: var(--red); }
+
+.vf-actions-cell { display: flex; gap: 6px; align-items: center; }
+
+/* ── Empty/loading states ────────────────────────────────────── */
+.vf-products-empty {
+    text-align: center;
+    padding: 32px 24px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.vf-products-skeleton { padding: 20px; }
+.vf-skeleton {
+    background: linear-gradient(90deg, var(--border) 25%, var(--bg) 50%, var(--border) 75%);
+    background-size: 200% 100%;
+    animation: vf-shimmer 1.2s infinite;
+    border-radius: 4px;
+    height: 14px;
+}
+.vf-skeleton-sm  { width: 80px; }
+.vf-skeleton-med { width: 140px; }
+.vf-skeleton-lg  { width: 220px; }
+@keyframes vf-shimmer { to { background-position: -200% 0; } }
+
+/* ── Primary badge ───────────────────────────────────────────── */
+.vf-primary-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--green-bg);
+    color: var(--green);
+}
+
+/* ── Metadata row ────────────────────────────────────────────── */
+.vf-meta-row {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: var(--muted);
+    padding: 12px 0 8px;
+}
+
+.vf-meta-item { display: flex; gap: 6px; }
+.vf-meta-label { font-weight: 600; }
+.vf-meta-value { font-family: inherit; }
+
+/* ── Confirmation modal ──────────────────────────────────────── */
+.vf-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.vf-modal {
+    background: var(--card);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 40px rgba(0,0,0,.2);
+    padding: 28px 32px;
+    max-width: 380px;
+    width: 90%;
+    direction: rtl;
+    text-align: right;
+}
+
+.vf-modal-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+.vf-modal-msg   { font-size: 14px; color: var(--muted); margin: 0 0 20px; }
+.vf-modal-actions { display: flex; gap: 10px; justify-content: flex-start; }
+
+/* ── Toast ───────────────────────────────────────────────────── */
+.vf-toast {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    padding: 12px 20px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    z-index: 10000;
+    animation: vf-toast-in .2s ease;
+    direction: rtl;
+}
+
+.vf-toast--success { background: var(--green); }
+.vf-toast--error   { background: var(--red); }
+
+@keyframes vf-toast-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Phone section ───────────────────────────────────────────── */
+
+/* Primary phone row: input + [+] button side-by-side */
+.vf-phone-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.vf-phone-input-wrap input[type="text"] {
+    flex: 1;
+    min-width: 0;
+}
+
+/* [+] add-phone button */
+.vf-phone-add-btn {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm, 4px);
+    background: var(--card);
+    color: var(--purple, #0066b3);
+    cursor: pointer;
+    font-size: 18px;
+    font-family: inherit;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .12s, border-color .12s;
+}
+
+.vf-phone-add-btn:hover {
+    background: var(--purple-light, #e6f0fa);
+    border-color: var(--purple, #0066b3);
+}
+
+/* Additional phones container — hidden until phones exist */
+.vf-phones-extra-section { display: none; }
+.vf-phones-extra-section.has-phones { display: block; }
+
+/* Single extra phone row */
+.vf-phone-extra-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.vf-phone-extra-row .vf-label {
+    flex-shrink: 0;
+    min-width: 110px;
+    text-align: right;
+}
+
+.vf-phone-extra-row .vf-phone-input-wrap {
+    flex: 1;
+    min-width: 0;
+}
+
+/* [×] remove-phone button */
+.vf-phone-remove-btn {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm, 4px);
+    background: transparent;
+    color: var(--muted, #888);
+    cursor: pointer;
+    font-size: 15px;
+    font-family: inherit;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .12s, color .12s, border-color .12s;
+}
+
+.vf-phone-remove-btn:hover {
+    background: var(--red-bg, #fef2f2);
+    color: var(--red, #991b1b);
+    border-color: rgba(153,27,27,.18);
+}
+
+/* Formset-level error display */
+.vf-phone-formset-errors {
+    background: var(--red-bg, #fef2f2);
+    border: 1px solid rgba(153,27,27,.18);
+    border-radius: var(--radius, 6px);
+    padding: 8px 14px;
+    margin-top: 8px;
+    font-size: 13px;
+    color: #991b1b;
+}
+
+.vf-phone-formset-errors p { margin: 0; }
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 640px) {
+    .vf-field-grid { grid-template-columns: 1fr; }
+    .vf-field-group--full { grid-column: auto; }
+    .vf-phone-extra-row .vf-label { min-width: 80px; }
+}

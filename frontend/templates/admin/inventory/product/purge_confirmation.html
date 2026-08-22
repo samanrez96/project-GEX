@@ -1,0 +1,122 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}حذف کامل محصول | {{ original.name }} | مرکز جراحی — مدیریت{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'admin/css/product_purge.css' %}">
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="ca-breadcrumbs">
+  <a href="{% url 'admin:index' %}">خانه</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <a href="{% url 'admin:inventory_product_changelist' %}">محصولات</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <span>حذف کامل — {{ original.name }}</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="product-purge-root" dir="rtl">
+
+  <div class="adm-page-header">
+    <div class="adm-page-header__info">
+      <span class="adm-page-section-label">عملیات مدیریتی حساس</span>
+      <h1 class="adm-page-title">حذف کامل محصول: {{ original.name }}</h1>
+    </div>
+    <div class="adm-page-actions">
+      <a href="{{ changelist_url }}" class="adm-btn adm-btn--secondary adm-btn--sm">انصراف و بازگشت</a>
+    </div>
+  </div>
+
+  <div class="pp-warning">
+    این عملیات دائمی است و تمام سوابق وابسته مشخص‌شده را حذف یا به‌روزرسانی می‌کند.
+  </div>
+
+  <div class="pp-card">
+    <h2 class="pp-card-title">اطلاعات محصول</h2>
+    <dl class="pp-field-list">
+      <div class="pp-field-row"><dt>نام</dt><dd>{{ preview.product.name }}</dd></div>
+      <div class="pp-field-row"><dt>کد داخلی</dt><dd dir="ltr">{{ preview.product.internal_code }}</dd></div>
+      <div class="pp-field-row"><dt>نوع محصول</dt><dd>{{ preview.product.product_type }}</dd></div>
+      <div class="pp-field-row"><dt>موجودی فعلی</dt><dd>{{ preview.product.current_stock }}</dd></div>
+    </dl>
+  </div>
+
+  <div class="pp-card">
+    <h2 class="pp-card-title">سوابق وابسته‌ای که حذف یا به‌روزرسانی می‌شوند</h2>
+    <table class="pp-table">
+      <tbody>
+        <tr><th>حرکات موجودی (StockMovement)</th><td>{{ preview.stock_movements_count }}</td></tr>
+        <tr><th>اقلام مصرف در تاریخچه عمل جراحی</th><td>{{ preview.surgery_used_items_count }}</td></tr>
+        <tr><th>تعداد عمل‌های جراحی متأثر (تاریخچه جدید)</th><td>{{ preview.affected_surgery_history_count }}</td></tr>
+        <tr><th>اقلام مصرف در عمل جراحی (سامانه قدیمی)</th><td>{{ preview.surgery_consumption_items_count }}</td></tr>
+        <tr><th>تعداد عمل‌های جراحی متأثر (سامانه قدیمی)</th><td>{{ preview.affected_legacy_surgery_count }}</td></tr>
+        <tr><th>ردیف‌های خرید (PurchaseItem)</th><td>{{ preview.purchase_items_count }}</td></tr>
+        <tr><th>تعداد خریدهای متأثر</th><td>{{ preview.affected_purchases|length }}</td></tr>
+        <tr><th>ارتباط با فروشندگان (ProductVendor)</th><td>{{ preview.product_vendor_count }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  {% if preview.affected_purchases %}
+  <div class="pp-card">
+    <h2 class="pp-card-title">خریدهای متأثر و برآورد تغییرات مالی</h2>
+    <table class="pp-table pp-table--purchases">
+      <thead>
+        <tr>
+          <th>شماره خرید</th>
+          <th>وضعیت</th>
+          <th>جمع فعلی</th>
+          <th>جمع پس از حذف</th>
+          <th>نتیجه</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in preview.affected_purchases %}
+        <tr>
+          <td>#{{ p.id }}{% if p.reference_number %} ({{ p.reference_number }}){% endif %}</td>
+          <td>{{ p.status }}</td>
+          <td>{{ p.current_total }}</td>
+          <td>{{ p.new_total }}</td>
+          <td>
+            {% if p.will_be_emptied %}
+            <span class="pp-badge pp-badge--danger">لغو می‌شود (خالی از قلم)</span>
+            {% else %}
+            <span class="pp-badge pp-badge--ok">بازمحاسبه می‌شود</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <div class="pp-card pp-card--confirm">
+    <h2 class="pp-card-title">تأیید نهایی</h2>
+    <p>
+      برای حذف کامل و دائمی این محصول، کد داخلی آن را در کادر زیر وارد کنید:
+      <strong dir="ltr">{{ preview.product.internal_code }}</strong>
+    </p>
+    <form method="post" action="{{ purge_url }}">
+      {% csrf_token %}
+      <input
+        type="text"
+        name="confirmation_code"
+        class="pp-confirm-input"
+        dir="ltr"
+        autocomplete="off"
+        placeholder="کد داخلی محصول را دقیقاً وارد کنید"
+        required
+      >
+      <div class="pp-confirm-actions">
+        <a href="{{ changelist_url }}" class="adm-btn adm-btn--secondary">انصراف</a>
+        <button type="submit" class="adm-btn adm-btn--danger">حذف کامل محصول و سوابق وابسته</button>
+      </div>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

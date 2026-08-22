@@ -1,0 +1,430 @@
+/* ================================================================
+   Employee List Page — all classes scoped under .em- prefix
+   Depends on CSS variables defined in custom_admin.css.
+================================================================= */
+
+/* ── Summary cards row ──────────────────────────────────────── */
+.em-summary-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+@media (max-width: 900px) {
+    .em-summary-row { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 500px) {
+    .em-summary-row { grid-template-columns: 1fr; }
+}
+
+.em-summary-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    box-shadow: var(--shadow);
+    border-right: 4px solid var(--border);
+}
+.em-summary-card--total    { border-right-color: var(--blue); }
+.em-summary-card--active   { border-right-color: var(--green); }
+.em-summary-card--inactive { border-right-color: var(--red); }
+.em-summary-card--position { border-right-color: var(--purple); }
+
+.em-summary-count {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+}
+
+.em-summary-label {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.em-summary-note {
+    font-size: 11px;
+    color: var(--muted);
+    opacity: .7;
+}
+
+/* ── Search + filters card ──────────────────────────────────── */
+.em-search-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+}
+
+.em-search-row {
+    position: relative;
+    margin-bottom: 12px;
+}
+
+.em-search-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 16px 10px 40px;
+    font-size: 15px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text);
+    direction: rtl;
+    font-family: inherit;
+    transition: border-color .15s, background .15s;
+}
+.em-search-input:focus {
+    outline: none;
+    border-color: var(--purple);
+    background: var(--card);
+}
+
+.em-search-spinner {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--purple);
+    border-radius: 50%;
+    animation: em-spin .6s linear infinite;
+    display: none;
+    pointer-events: none;
+}
+.em-search-spinner.em-visible { display: block; }
+@keyframes em-spin { to { transform: translateY(-50%) rotate(360deg); } }
+
+.em-filter-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.em-filter-label {
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.em-filter-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--purple);
+    display: none;
+    flex-shrink: 0;
+}
+.em-filter-dot.em-active { display: inline-block; }
+
+.em-filter-select,
+.em-filter-input {
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    background: var(--bg);
+    color: var(--text);
+    direction: rtl;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color .15s;
+}
+.em-filter-select:focus,
+.em-filter-input:focus { outline: none; border-color: var(--purple); }
+.em-filter-input { cursor: text; }
+
+.em-clear-filters {
+    margin-inline-start: auto;
+    font-size: 13px;
+    color: var(--red);
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: inherit;
+    text-decoration: underline;
+    display: none;
+    padding: 0;
+}
+.em-clear-filters.em-visible { display: inline; }
+
+/* ── Table ──────────────────────────────────────────────────── */
+.em-table-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.em-table {
+    width: 100%;
+    border-collapse: collapse;
+    direction: rtl;
+}
+
+.em-table th {
+    padding: 11px 16px;
+    background: var(--bg);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    text-align: right;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    user-select: none;
+}
+
+.em-table td {
+    padding: 12px 16px;
+    font-size: 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+.em-table tr:last-child td { border-bottom: none; }
+
+.em-table tbody tr {
+    cursor: pointer;
+    transition: background .1s;
+}
+.em-table tbody tr:hover { background: var(--bg); }
+
+/* LTR cells — email, phone, national_id */
+.em-td--ltr {
+    direction: ltr;
+    text-align: left;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.em-name-link {
+    font-weight: 600;
+    color: var(--text);
+    text-decoration: none;
+}
+.em-name-link:hover { color: var(--purple); text-decoration: underline; }
+
+.em-national-id {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    letter-spacing: .5px;
+}
+
+/* Status badges */
+.em-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.em-badge--active   { background: var(--green-bg); color: var(--green); }
+.em-badge--inactive { background: var(--red-bg);   color: var(--red); }
+
+/* Job position badge */
+.em-badge--position {
+    background: var(--purple-light);
+    color: var(--purple);
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.em-muted { color: var(--muted); }
+
+/* Row action buttons */
+.em-actions {
+    display: flex;
+    gap: 4px;
+    justify-content: flex-end;
+}
+.em-action-btn {
+    padding: 5px 10px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    font-size: 12px;
+    cursor: pointer;
+    background: var(--card);
+    color: var(--text);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    transition: background .1s, border-color .1s, color .1s;
+    font-family: inherit;
+    white-space: nowrap;
+}
+.em-action-btn:hover {
+    background: var(--bg);
+    border-color: var(--purple);
+    color: var(--purple);
+}
+
+/* Loading skeleton rows */
+.em-loading-row td { padding: 14px 16px; }
+.em-skeleton {
+    height: 14px;
+    border-radius: 4px;
+    background: linear-gradient(
+        90deg,
+        var(--border) 25%,
+        var(--bg) 50%,
+        var(--border) 75%
+    );
+    background-size: 200% 100%;
+    animation: em-shimmer 1.4s infinite;
+}
+@keyframes em-shimmer { to { background-position: -200% 0; } }
+.em-skeleton-sm  { width: 55%; }
+.em-skeleton-med { width: 75%; }
+.em-skeleton-lg  { width: 90%; }
+
+/* Empty state */
+.em-empty-state {
+    text-align: center;
+    padding: 56px 20px;
+    color: var(--muted);
+}
+.em-empty-icon  { font-size: 40px; margin-bottom: 10px; }
+.em-empty-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.em-empty-desc  { font-size: 14px; margin-bottom: 16px; }
+.em-empty-btn {
+    display: inline-block;
+    padding: 8px 18px;
+    background: var(--purple);
+    color: #fff;
+    border-radius: var(--radius);
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+    margin: 4px;
+}
+.em-empty-btn:hover { background: var(--purple-dark); color: #fff; }
+
+/* ── Pagination bar ─────────────────────────────────────────── */
+.em-pagination {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    box-shadow: var(--shadow);
+}
+
+.em-pagination-info {
+    font-size: 13px;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+.em-pagination-pages {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    flex: 1;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.em-page-btn {
+    min-width: 34px;
+    height: 34px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .1s, border-color .1s, color .1s;
+    font-family: inherit;
+    padding: 0 8px;
+}
+.em-page-btn:hover:not(:disabled) {
+    background: var(--purple-light);
+    border-color: var(--purple);
+    color: var(--purple);
+}
+.em-page-btn--active {
+    background: var(--purple) !important;
+    color: #fff !important;
+    border-color: var(--purple) !important;
+    font-weight: 600;
+}
+.em-page-btn:disabled { opacity: .4; cursor: not-allowed; }
+.em-page-btn--ellipsis {
+    border-color: transparent;
+    background: none;
+    cursor: default;
+    color: var(--muted);
+}
+
+.em-pagination-size {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+.em-page-size-select {
+    padding: 5px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    background: var(--bg);
+    color: var(--text);
+    direction: rtl;
+    font-family: inherit;
+    cursor: pointer;
+}
+.em-page-size-select:focus { outline: none; border-color: var(--purple); }
+
+/* ── Toast notifications ────────────────────────────────────── */
+.em-toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 500;
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .2);
+    z-index: 9100;
+    animation: em-slide-up .25s ease;
+    direction: rtl;
+    white-space: nowrap;
+}
+.em-toast--success { background: var(--green); }
+.em-toast--error   { background: var(--red); }
+@keyframes em-slide-up {
+    from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}

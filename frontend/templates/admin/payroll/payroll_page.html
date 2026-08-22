@@ -1,0 +1,155 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}حقوق و دستمزد | مرکز جراحی — مدیریت{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'admin/css/payroll_page.css' %}">
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="ca-breadcrumbs">
+  <a href="{% url 'admin:index' %}">خانه</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <span>حقوق و دستمزد</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<noscript>
+  <p style="text-align:center;padding:40px;color:var(--red)">این صفحه نیاز به JavaScript دارد.</p>
+</noscript>
+
+<div id="payroll-root" class="payroll-page" dir="rtl">
+
+  {# ── Page header ──────────────────────────────────────────────── #}
+  <div class="adm-page-header">
+    <div class="adm-page-header__info">
+      <span class="adm-page-section-label">کارمندان</span>
+      <h1 class="adm-page-title">حقوق و دستمزد</h1>
+    </div>
+  </div>
+
+  {# ── Filters ──────────────────────────────────────────────────── #}
+  <div class="py-filters-bar">
+    <div class="py-filter-group">
+      <label class="py-label" for="py-filter-year">سال شمسی</label>
+      <input id="py-filter-year" class="py-input py-input--narrow" type="number" min="1380" max="1420" step="1" placeholder="۱۴۰۴">
+    </div>
+    <div class="py-filter-group">
+      <label class="py-label" for="py-filter-month">ماه</label>
+      <select id="py-filter-month" class="py-input py-input--narrow">
+        <option value="">همه</option>
+        <option value="1">فروردین (۱)</option>
+        <option value="2">اردیبهشت (۲)</option>
+        <option value="3">خرداد (۳)</option>
+        <option value="4">تیر (۴)</option>
+        <option value="5">مرداد (۵)</option>
+        <option value="6">شهریور (۶)</option>
+        <option value="7">مهر (۷)</option>
+        <option value="8">آبان (۸)</option>
+        <option value="9">آذر (۹)</option>
+        <option value="10">دی (۱۰)</option>
+        <option value="11">بهمن (۱۱)</option>
+        <option value="12">اسفند (۱۲)</option>
+      </select>
+    </div>
+    <div class="py-filter-group">
+      <label class="py-label" for="py-filter-wage-type">نوع حقوق</label>
+      <select id="py-filter-wage-type" class="py-input">
+        <option value="both">همه</option>
+        <option value="fixed">فقط حقوق ثابت</option>
+        <option value="commission">فقط کمیسیون</option>
+        <option value="hourly">فقط حقوق ساعتی</option>
+      </select>
+    </div>
+    <button id="py-apply-btn" class="py-btn py-btn--primary" type="button">اعمال فیلتر</button>
+    <button id="py-reset-btn" class="py-btn" type="button">بازنشانی</button>
+  </div>
+
+  {# ── Summary cards ────────────────────────────────────────────── #}
+  <div class="py-cards" id="py-cards">
+    <div class="py-card py-card--total py-card--prominent">
+      <div class="py-card-label">مجموع پرداختی</div>
+      <div class="py-card-value" id="py-total-labor">—</div>
+    </div>
+    <div class="py-card py-card--count">
+      <div class="py-card-label">تعداد کارمندان</div>
+      <div class="py-card-value" id="py-employee-count">—</div>
+    </div>
+    <div class="py-card py-card--fixed">
+      <div class="py-card-label">مجموع حقوق ثابت</div>
+      <div class="py-card-value" id="py-total-fixed">—</div>
+    </div>
+    <div class="py-card py-card--commission">
+      <div class="py-card-label">مجموع کمیسیون‌ها</div>
+      <div class="py-card-value" id="py-total-commission">—</div>
+    </div>
+    <div class="py-card py-card--hourly">
+      <div class="py-card-label">مجموع حقوق ساعتی</div>
+      <div class="py-card-value" id="py-total-hourly">—</div>
+      <div class="py-card-subvalue" id="py-total-hours">—</div>
+    </div>
+  </div>
+
+  {# ── Table heading ─────────────────────────────────────────────── #}
+  <div class="payroll-page__heading">
+    <div class="payroll-page__heading-text">
+      <h2 class="payroll-page__heading-title">جزئیات حقوق کارمندان</h2>
+      <p class="payroll-page__heading-subtitle" id="py-period-subtitle">همه دوره‌ها</p>
+    </div>
+    <button id="py-expand-all-btn" class="payroll-page__expand-all" type="button" aria-pressed="false">
+      نمایش جزئیات همه
+    </button>
+  </div>
+
+  {# ── Table — column widths come from the <colgroup> below and are reused as-is by every row ── #}
+  <div class="payroll-table__wrap" dir="rtl">
+    <table class="payroll-table" id="py-table" dir="rtl">
+      <colgroup>
+        <col class="payroll-table__col--name">
+        <col class="payroll-table__col--position">
+        <col class="payroll-table__col--money">
+        <col class="payroll-table__col--money">
+        <col class="payroll-table__col--hourly">
+        <col class="payroll-table__col--total">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>نام کارمند</th>
+          <th>پوزیشن</th>
+          <th>حقوق ثابت</th>
+          <th>کمیسیون‌ها</th>
+          <th>حقوق ساعتی</th>
+          <th>مجموع پرداختی</th>
+        </tr>
+      </thead>
+      <tbody id="py-tbody">
+        <tr>
+          <td colspan="6" class="py-table-loading">در حال بارگذاری…</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div id="py-empty-state" class="py-empty-state" style="display:none">
+      <div class="py-empty-icon">💰</div>
+      <div id="py-empty-title" class="py-empty-title">هنوز حقوق یا کمیسیونی ثبت نشده است</div>
+      <div id="py-empty-desc" class="py-empty-desc">برای مشاهده اطلاعات حقوق و دستمزد، ابتدا تنظیمات حقوقی کارمندان را تعریف کنید.</div>
+      <button id="py-clear-filters-btn" class="py-empty-btn" type="button" style="display:none">
+        پاک کردن فیلترها
+      </button>
+    </div>
+  </div>
+
+  {# ── Pagination ───────────────────────────────────────────────── #}
+  <div class="py-pagination">
+    <span id="py-pagination-info" class="py-pagination-info"></span>
+    <div id="py-pagination-pages" class="py-pagination-pages"></div>
+  </div>
+
+</div>{# /#payroll-root #}
+{% endblock %}
+
+{% block extrascript %}
+<script src="{% static 'admin/js/payroll_page.js' %}"></script>
+{% endblock %}

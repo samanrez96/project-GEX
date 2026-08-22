@@ -1,0 +1,117 @@
+/* ── Specialty selector buttons (Doctor add/edit form) ─────────── */
+.ds-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-inline-start: 6px;
+    padding: 5px 12px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    font-family: inherit;
+    transition: background .15s, border-color .15s, color .15s;
+}
+.ds-icon-btn:hover {
+    background: var(--bg);
+    border-color: var(--purple);
+    color: var(--purple);
+}
+
+/* ── Modal / confirm dialog ──────────────────────────────────────── */
+.ds-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .45);
+    z-index: 500;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+.ds-overlay.ds-open { display: flex; }
+
+.ds-modal {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 28px 28px 20px;
+    width: 380px;
+    max-width: calc(100vw - 48px);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, .18);
+    direction: rtl;
+}
+.ds-modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 14px;
+}
+.ds-modal-label {
+    display: block;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 6px;
+}
+.ds-modal-input {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    font-size: 14px;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+.ds-modal-message {
+    font-size: 14px;
+    color: var(--text);
+    margin: 0 0 20px;
+    line-height: 1.6;
+}
+.ds-modal-error {
+    color: var(--red);
+    font-size: 13px;
+    margin-top: 8px;
+}
+.ds-modal-actions {
+    display: flex;
+    justify-content: flex-start;
+    gap: 8px;
+    margin-top: 18px;
+}
+
+.ds-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    font-family: inherit;
+}
+.ds-btn--primary { background: var(--purple); color: #fff; border-color: var(--purple); }
+.ds-btn--danger  { background: var(--red);    color: #fff; border-color: var(--red); }
+.ds-btn:disabled { opacity: .55; cursor: not-allowed; }
+
+/* ── Toast ────────────────────────────────────────────────────────── */
+.ds-toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 24px;
+    border-radius: 99px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 600;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .15);
+    white-space: nowrap;
+    pointer-events: none;
+}
+.ds-toast--success { background: var(--green); color: #fff; }
+.ds-toast--error   { background: var(--red);   color: #fff; }

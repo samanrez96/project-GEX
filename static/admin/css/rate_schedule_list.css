@@ -1,0 +1,258 @@
+/* ================================================================
+   کمیسیون ماهانه (CommissionSchedule) / نرخ عمل (SurgeryTypeRateSchedule) /
+   نرخ ثابت بیهوشی (AnesthesiaRateSchedule) list pages — Django's native
+   changelist, restyled to match the same card-based visual language as
+   the rest of the admin (see patient_list.css / employee_list.css). All
+   three pages only override the `object-tools` block (see their
+   change_list.html templates) for the adm-page-header — search, the
+   native sidebar filter, the results table, and pagination are all still
+   Django's own rendering, just restyled here.
+================================================================= */
+
+body.app-finance.model-commissionschedule.change-list #changelist,
+body.app-finance.model-surgerytyperateschedule.change-list #changelist,
+body.app-finance.model-anesthesiarateschedule.change-list #changelist {
+    direction: rtl;
+    width: 100%;
+    display: flex;
+    flex-direction: row-reverse;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+body.app-finance.model-commissionschedule.change-list .changelist-form-container,
+body.app-finance.model-surgerytyperateschedule.change-list .changelist-form-container,
+body.app-finance.model-anesthesiarateschedule.change-list .changelist-form-container {
+    min-width: 0;
+    flex: 1;
+}
+
+/* ── Page header (object-tools block override) ──────────────────────── */
+body.app-finance.model-commissionschedule.change-list .rts-list-header,
+body.app-finance.model-surgerytyperateschedule.change-list .rts-list-header,
+body.app-finance.model-anesthesiarateschedule.change-list .rts-list-header {
+    margin-bottom: 16px;
+}
+
+/* ── Search bar → same card language as Patient/Employee ─────────────── */
+body.app-finance.model-commissionschedule.change-list #toolbar,
+body.app-finance.model-surgerytyperateschedule.change-list #toolbar,
+body.app-finance.model-anesthesiarateschedule.change-list #toolbar {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px;
+    margin: 0 0 16px;
+}
+body.app-finance.model-commissionschedule.change-list #changelist-search > div,
+body.app-finance.model-surgerytyperateschedule.change-list #changelist-search > div,
+body.app-finance.model-anesthesiarateschedule.change-list #changelist-search > div {
+    display: flex;
+    align-items: stretch;
+    direction: rtl;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    max-width: 420px;
+}
+body.app-finance.model-commissionschedule.change-list #changelist-search label,
+body.app-finance.model-surgerytyperateschedule.change-list #changelist-search label,
+body.app-finance.model-anesthesiarateschedule.change-list #changelist-search label {
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    border-inline-start: 1px solid var(--border);
+    margin: 0;
+}
+body.app-finance.model-commissionschedule.change-list #changelist-search #searchbar,
+body.app-finance.model-surgerytyperateschedule.change-list #changelist-search #searchbar,
+body.app-finance.model-anesthesiarateschedule.change-list #changelist-search #searchbar {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--text);
+    direction: rtl;
+}
+body.app-finance.model-commissionschedule.change-list #changelist-search #searchbar:focus,
+body.app-finance.model-surgerytyperateschedule.change-list #changelist-search #searchbar:focus,
+body.app-finance.model-anesthesiarateschedule.change-list #changelist-search #searchbar:focus {
+    outline: none;
+}
+body.app-finance.model-commissionschedule.change-list #changelist-search input[type="submit"],
+body.app-finance.model-surgerytyperateschedule.change-list #changelist-search input[type="submit"],
+body.app-finance.model-anesthesiarateschedule.change-list #changelist-search input[type="submit"] {
+    border: none;
+    background: var(--purple);
+    color: #fff;
+    padding: 0 18px;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background .15s;
+}
+body.app-finance.model-commissionschedule.change-list #changelist-search input[type="submit"]:hover,
+body.app-finance.model-surgerytyperateschedule.change-list #changelist-search input[type="submit"]:hover,
+body.app-finance.model-anesthesiarateschedule.change-list #changelist-search input[type="submit"]:hover {
+    background: var(--purple-dark);
+}
+
+/* ── Sidebar filter card (year / month) — surgerytyperateschedule no
+   longer has list_filter, so #changelist-filter never renders for it;
+   only commissionschedule/anesthesiarateschedule still use this. ───── */
+body.app-finance.model-commissionschedule.change-list #changelist-filter,
+body.app-finance.model-anesthesiarateschedule.change-list #changelist-filter {
+    flex: 0 0 220px;
+    margin: 0 !important;
+}
+body.app-finance.model-commissionschedule.change-list #changelist-filter h2,
+body.app-finance.model-anesthesiarateschedule.change-list #changelist-filter h2 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 10px;
+}
+body.app-finance.model-commissionschedule.change-list #changelist-filter h3,
+body.app-finance.model-anesthesiarateschedule.change-list #changelist-filter h3 {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--muted);
+    margin: 14px 0 6px;
+}
+body.app-finance.model-commissionschedule.change-list #changelist-filter ul,
+body.app-finance.model-anesthesiarateschedule.change-list #changelist-filter ul {
+    list-style: none;
+    margin: 0 0 4px;
+    padding: 0;
+}
+body.app-finance.model-commissionschedule.change-list #changelist-filter li,
+body.app-finance.model-anesthesiarateschedule.change-list #changelist-filter li {
+    padding: 3px 0;
+}
+body.app-finance.model-commissionschedule.change-list #changelist-filter a,
+body.app-finance.model-anesthesiarateschedule.change-list #changelist-filter a {
+    color: var(--muted);
+    font-size: 13px;
+    text-decoration: none;
+    transition: color .15s;
+}
+body.app-finance.model-commissionschedule.change-list #changelist-filter a:hover,
+body.app-finance.model-anesthesiarateschedule.change-list #changelist-filter a:hover {
+    color: var(--purple);
+}
+body.app-finance.model-commissionschedule.change-list #changelist-filter li.selected a,
+body.app-finance.model-anesthesiarateschedule.change-list #changelist-filter li.selected a {
+    color: var(--purple);
+    font-weight: 700;
+}
+
+/* ── Table card ────────────────────────────────────────────────────── */
+body.app-finance.model-commissionschedule.change-list .results,
+body.app-finance.model-surgerytyperateschedule.change-list .results,
+body.app-finance.model-anesthesiarateschedule.change-list .results {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    width: 100%;
+    direction: rtl;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+body.app-finance.model-commissionschedule.change-list #result_list,
+body.app-finance.model-surgerytyperateschedule.change-list #result_list,
+body.app-finance.model-anesthesiarateschedule.change-list #result_list {
+    width: 100%;
+    table-layout: auto;
+    border-collapse: collapse;
+    direction: rtl;
+}
+body.app-finance.model-commissionschedule.change-list #result_list thead th,
+body.app-finance.model-surgerytyperateschedule.change-list #result_list thead th,
+body.app-finance.model-anesthesiarateschedule.change-list #result_list thead th {
+    background: var(--bg);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    text-align: right;
+}
+body.app-finance.model-commissionschedule.change-list #result_list tbody td,
+body.app-finance.model-commissionschedule.change-list #result_list tbody th,
+body.app-finance.model-surgerytyperateschedule.change-list #result_list tbody td,
+body.app-finance.model-surgerytyperateschedule.change-list #result_list tbody th,
+body.app-finance.model-anesthesiarateschedule.change-list #result_list tbody td,
+body.app-finance.model-anesthesiarateschedule.change-list #result_list tbody th {
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    text-align: right;
+}
+body.app-finance.model-commissionschedule.change-list #result_list tbody tr:last-child td,
+body.app-finance.model-commissionschedule.change-list #result_list tbody tr:last-child th,
+body.app-finance.model-surgerytyperateschedule.change-list #result_list tbody tr:last-child td,
+body.app-finance.model-surgerytyperateschedule.change-list #result_list tbody tr:last-child th,
+body.app-finance.model-anesthesiarateschedule.change-list #result_list tbody tr:last-child td,
+body.app-finance.model-anesthesiarateschedule.change-list #result_list tbody tr:last-child th {
+    border-bottom: none;
+}
+body.app-finance.model-commissionschedule.change-list #result_list tbody tr:hover,
+body.app-finance.model-surgerytyperateschedule.change-list #result_list tbody tr:hover,
+body.app-finance.model-anesthesiarateschedule.change-list #result_list tbody tr:hover {
+    background: var(--bg);
+}
+
+/* Numeric columns (year, percent, base rate, anesthesia rate) render LTR
+   for natural digit order, but stay right-aligned under their RTL header
+   — same fix applied across patient_list.css / employee_list.css /
+   contacts_directory.css / surgery_history_list.css. */
+body.app-finance.model-commissionschedule.change-list #result_list .field-year,
+body.app-finance.model-commissionschedule.change-list #result_list .field-center_percent,
+body.app-finance.model-commissionschedule.change-list #result_list .field-university_percent,
+body.app-finance.model-surgerytyperateschedule.change-list #result_list .field-year,
+body.app-finance.model-surgerytyperateschedule.change-list #result_list .field-get_base_rate_display,
+body.app-finance.model-anesthesiarateschedule.change-list #result_list .field-year,
+body.app-finance.model-anesthesiarateschedule.change-list #result_list .field-get_rate_display {
+    direction: ltr;
+    text-align: right;
+    unicode-bidi: isolate;
+}
+
+/* ── Paginator / row-count footer ─────────────────────────────────────── */
+body.app-finance.model-commissionschedule.change-list .paginator,
+body.app-finance.model-surgerytyperateschedule.change-list .paginator,
+body.app-finance.model-anesthesiarateschedule.change-list .paginator {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin: 0;
+    padding: 12px 16px;
+    color: var(--muted);
+    font-size: 13px;
+    text-align: right;
+    direction: rtl;
+}
+
+@media (max-width: 900px) {
+    body.app-finance.model-commissionschedule.change-list #changelist,
+    body.app-finance.model-surgerytyperateschedule.change-list #changelist,
+    body.app-finance.model-anesthesiarateschedule.change-list #changelist {
+        flex-direction: column;
+    }
+    body.app-finance.model-commissionschedule.change-list #changelist-filter,
+    body.app-finance.model-anesthesiarateschedule.change-list #changelist-filter {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+}
