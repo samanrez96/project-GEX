@@ -64,34 +64,6 @@ def finance_transactions_view(request):
 
 
 # ---------------------------------------------------------------------------
-# Custom Admin Site (Standard approach, replacing monkey patching)
-# ---------------------------------------------------------------------------
-
-class FinanceAdminSite(admin.AdminSite):
-    """Custom admin site to inject finance dashboard and transactions URLs."""
-
-    def get_urls(self):
-        urls = super().get_urls()
-        custom = [
-            path(
-                'finance/dashboard/',
-                self.admin_view(finance_dashboard_view),
-                name='finance_dashboard',
-            ),
-            path(
-                'finance/transactions/',
-                self.admin_view(finance_transactions_view),
-                name='finance_transactions',
-            ),
-        ]
-        return custom + urls
-
-
-# Replace the default admin site with our custom one
-admin.site = FinanceAdminSite()
-
-
-# ---------------------------------------------------------------------------
 # ModelAdmins (Registered after assigning custom admin site)
 # ---------------------------------------------------------------------------
 

@@ -23,31 +23,6 @@ from .models import (
 
 
 # ---------------------------------------------------------------------------
-# Custom AdminSite – replaces the default to avoid monkey‑patching
-# ---------------------------------------------------------------------------
-
-class PayrollAdminSite(admin.AdminSite):
-    """Custom admin site for the payroll app.
-
-    Adds the custom payroll page URL.
-    """
-    def get_urls(self):
-        urls = super().get_urls()
-        custom = [
-            path(
-                'payroll/payroll-page/',
-                self.admin_view(payroll_page_view),
-                name='payroll_page',
-            ),
-        ]
-        return custom + urls
-
-
-# Replace the default admin site with our custom one
-admin.site = PayrollAdminSite()
-
-
-# ---------------------------------------------------------------------------
 # Payroll page — custom admin view
 # ---------------------------------------------------------------------------
 
@@ -332,4 +307,3 @@ class HourlyWorkRecordAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
 
 
 # The monkey‑patching section has been removed.
-# Custom URLs are now added via PayrollAdminSite.get_urls().

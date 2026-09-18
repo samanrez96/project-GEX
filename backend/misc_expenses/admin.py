@@ -194,37 +194,3 @@ def misc_expenses_delete_view(request, pk):
     }
     return render(request, "admin/misc_expenses/delete_confirm.html", context)
 
-
-# ---------------------------------------------------------------------------
-# Monkey-patch admin site URLs (chains with any existing patches)
-# ---------------------------------------------------------------------------
-
-_original_get_urls = admin.site.__class__.get_urls
-
-def _patched_get_urls(self):
-    base = _original_get_urls(self)
-    extra = [
-        path(
-            "misc-expenses/",
-            self.admin_view(misc_expenses_list_view),
-            name="misc_expenses_list",
-        ),
-        path(
-            "misc-expenses/add/",
-            self.admin_view(misc_expenses_add_view),
-            name="misc_expenses_add",
-        ),
-        path(
-            "misc-expenses/<int:pk>/change/",
-            self.admin_view(misc_expenses_change_view),
-            name="misc_expenses_change",
-        ),
-        path(
-            "misc-expenses/<int:pk>/delete/",
-            self.admin_view(misc_expenses_delete_view),
-            name="misc_expenses_delete",
-        ),
-    ]
-    return extra + base
-
-admin.site.__class__.get_urls = _patched_get_urls

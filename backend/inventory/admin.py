@@ -33,23 +33,6 @@ from inventory.models import (
 
 
 # ---------------------------------------------------------------------------
-# Custom AdminSite – replaces the default to avoid monkey‑patching
-# ---------------------------------------------------------------------------
-
-class InventoryAdminSite(admin.AdminSite):
-    """Custom admin site for the inventory app.
-
-    No extra URLs are needed here – ProductAdmin and VendorAdmin already
-    add their custom detail/purge views via their own get_urls() overrides.
-    """
-    pass
-
-
-# Replace the default admin site with our custom one
-admin.site = InventoryAdminSite()
-
-
-# ---------------------------------------------------------------------------
 # ProductVendor admin inline — form helpers (UI only, no model/logic changes)
 # ---------------------------------------------------------------------------
 
@@ -1224,5 +1207,4 @@ class PurchaseAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
 # ---------------------------------------------------------------------------
 # The monkey‑patching section has been removed.
 # Custom URLs are now added via each ModelAdmin's get_urls().
-# The custom AdminSite instance is set at the top of the file.
 # ---------------------------------------------------------------------------

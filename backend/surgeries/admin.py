@@ -31,50 +31,6 @@ from surgeries.models import (
 )
 
 
-# ---------------------------------------------------------------------------
-# Custom AdminSite – replaces the default to avoid monkey‑patching
-# ---------------------------------------------------------------------------
-
-class SurgeriesAdminSite(admin.AdminSite):
-    """Custom admin site for the surgeries app.
-
-    Adds custom URLs for detail views and AnesthesiaType management.
-    """
-    def get_urls(self):
-        urls = super().get_urls()
-        custom = [
-            path(
-                'surgeryhistory/<int:surgery_id>/detail/',
-                self.admin_view(surgery_history_detail_view),
-                name='surgeries_surgeryhistory_detail',
-            ),
-            path(
-                'anesthesia-type/create/',
-                self.admin_view(anesthesia_type_create_view),
-                name='surgeries_anesthesia_type_create',
-            ),
-            path(
-                'anesthesia-type/<int:pk>/delete/',
-                self.admin_view(anesthesia_type_delete_view),
-                name='surgeries_anesthesia_type_delete',
-            ),
-            path(
-                'anesthesia-type/<int:pk>/deactivate/',
-                self.admin_view(anesthesia_type_deactivate_view),
-                name='surgeries_anesthesia_type_deactivate',
-            ),
-            path(
-                'anesthesia-type/<int:pk>/activate/',
-                self.admin_view(anesthesia_type_activate_view),
-                name='surgeries_anesthesia_type_activate',
-            ),
-        ]
-        return custom + urls
-
-
-# Replace the default admin site with our custom one
-admin.site = SurgeriesAdminSite()
-
 
 _PERSIAN_DIGITS = '۰۱۲۳۴۵۶۷۸۹'
 
@@ -562,8 +518,6 @@ class SurgeryHistoryAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
         })
         return super().render_change_form(request, context, add=add, change=change, form_url=form_url, obj=obj)
 
-    # get_urls is no longer needed; all custom URLs are now in SurgeriesAdminSite
-
 
 # ---------------------------------------------------------------------------
 # SurgeryHistory detail standalone view — read-only tab UI
@@ -639,4 +593,3 @@ class SurgeryUsedItemAdmin(JalaliAdminDatesMixin, admin.ModelAdmin):
 
 
 # The monkey‑patching section has been removed.
-# Custom URLs are now added via SurgeriesAdminSite.get_urls().
