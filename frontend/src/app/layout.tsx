@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Vazirmatn } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/lib/auth";
 
 const vazir = Vazirmatn({
   variable: "--font-vazir",
@@ -21,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="fa" dir="rtl" className={`${vazir.variable} h-full`}>
       <body className="min-h-full font-[family-name:var(--font-vazir)]">
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

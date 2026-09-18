@@ -10,7 +10,17 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
-  ...compat.extends("next/core-web-vitals"),
+  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  {
+    rules: {
+      // Catch silent-failure patterns like `.catch(() => {})`
+      "no-empty": ["error", { allowEmptyCatch: false }],
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
+    },
+  },
 ];
 
 export default eslintConfig;

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { get, post, type PaginatedResponse, type SurgeryHistory, type SurgeryType, type Doctor, type Patient } from "@/lib/api";
-import { formatCurrency, formatDate, toPersianDigits, getPaymentStatusLabel, getPaymentStatusColor, getSurgeryStatusLabel } from "@/lib/utils";
+import { formatCurrency, formatDate, toPersianDigits, getSurgeryStatusLabel } from "@/lib/utils";
 
 const PAGE_SIZE = 20;
 
@@ -19,11 +19,10 @@ interface SurgeryForm {
   case_code_new: string;
   phone_new: string;
   surgery_type: string;
-  doctor_or_therapist: string;
+  clinical_doctor: string;
   surgery_date: string;
   amount: string;
   payment_status: "PENDING" | "PARTIAL" | "PAID";
-  center_commission_percent: string;
   description: string;
   status: "PLANNED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
   use_new_patient: boolean;
@@ -35,11 +34,10 @@ const EMPTY_FORM: SurgeryForm = {
   case_code_new: "",
   phone_new: "",
   surgery_type: "",
-  doctor_or_therapist: "",
+  clinical_doctor: "",
   surgery_date: new Date().toISOString().slice(0, 10) + "T00:00",
   amount: "0",
   payment_status: "PENDING",
-  center_commission_percent: "",
   description: "",
   status: "PLANNED",
   use_new_patient: false,
@@ -124,6 +122,8 @@ export default function SurgeriesList() {
         setError("بیمار را انتخاب کنید یا بیمار جدید اضافه کنید."); setSaving(false); return;
       }
 
+      // Per API docs: create payload uses `clinical_doctor`.
+      // `doctor_or_therapist` is a filter-only query param.
       const payload: Record<string, unknown> = {
         patient: parseInt(patientId),
         surgery_type: parseInt(form.surgery_type),
@@ -133,8 +133,7 @@ export default function SurgeriesList() {
         status: form.status,
         description: form.description.trim(),
       };
-      if (form.doctor_or_therapist) payload.doctor_or_therapist = parseInt(form.doctor_or_therapist);
-      if (form.center_commission_percent) payload.center_commission_percent = parseFloat(form.center_commission_percent);
+      if (form.clinical_doctor) payload.clinical_doctor = parseInt(form.clinical_doctor);
 
       await post("/surgeries/history/", payload);
       setSuccess("عمل جراحی با موفقیت ثبت شد.");
@@ -341,7 +340,7 @@ export default function SurgeriesList() {
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-semibold text-muted">پزشک / درمانگر</label>
-                    <select value={form.doctor_or_therapist} onChange={(e) => setForm({ ...form, doctor_or_therapist: e.target.value })}
+                    <select value={form.clinical_doctor} onChange={(e) => setForm({ ...form, clinical_doctor: e.target.value })}
                       className="h-[38px] px-3 border border-border rounded-xl text-sm text-text bg-bg-page outline-none focus:border-purple transition-all">
                       <option value="">انتخاب پزشک / درمانگر</option>
                       {doctors.map((d) => (
@@ -386,11 +385,6 @@ export default function SurgeriesList() {
                       <option value="PAID">پرداخت شده</option>
                     </select>
                   </div>
-                </div>
-                <div className="mt-3 flex flex-col gap-1">
-                  <label className="text-xs font-semibold text-muted">درصد کمیسیون مرکز (اختیاری)</label>
-                  <input type="number" min="0" max="100" step="0.01" value={form.center_commission_percent} onChange={(e) => setForm({ ...form, center_commission_percent: e.target.value })}
-                    className="h-[38px] px-3 border border-border rounded-xl text-sm text-text bg-bg-page outline-none focus:border-purple transition-all" placeholder="مثال: ۱۰" />
                 </div>
               </div>
 

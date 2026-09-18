@@ -10,7 +10,6 @@ const navSections = [
     label: "داشبورد",
     links: [
       { href: "/dashboard", label: "داشبورد اصلی" },
-      { href: "/finance", label: "داشبورد مالی" },
     ],
   },
   {

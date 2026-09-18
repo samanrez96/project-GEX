@@ -5,10 +5,13 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: "http://localhost:8000/api/:path*",
+        // Trailing slash is REQUIRED — Django's URL conf uses it on every endpoint
+        // and APPEND_SLASH cannot redirect POST requests.
+        destination: "http://localhost:8000/api/:path*/",
       },
     ];
   },
+  skipTrailingSlashRedirect: true,
 };
 
 export default nextConfig;

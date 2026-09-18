@@ -146,10 +146,11 @@ export default function ProductsDetail({ id }: { id?: string }) {
     if (qty <= 0) { return; }
     setAdjusting(true);
     try {
+      // NOTE: `unit` is NOT part of the stock-movement API contract —
+      // the backend derives it from the product record.
       await post("/inventory/stock-movements/", {
         product: productId,
         quantity: qty,
-        unit: product?.unit || "عدد",
         movement_type: adjustType,
         source_type: "MANUAL_ADJUSTMENT",
         description: adjustNote || "تنظیم دستی موجودی",

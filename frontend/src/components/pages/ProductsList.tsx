@@ -84,10 +84,11 @@ export default function ProductsList() {
       const created = await post<{ id: number }>("/inventory/products/", payload);
       const initQty = parseFloat(form.initial_quantity || "0");
       if (initQty > 0) {
+        // NOTE: `unit` is NOT part of the stock-movement API contract —
+        // the backend derives it from the product record.
         await post("/inventory/stock-movements/", {
           product: created.id,
           quantity: initQty,
-          unit: "عدد",
           movement_type: "IN",
           source_type: "MANUAL_ADJUSTMENT",
           description: "موجودی اولیه",

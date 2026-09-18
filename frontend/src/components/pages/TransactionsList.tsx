@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { get, type PaginatedResponse, type Transaction } from "@/lib/api";
+import { get, getTransactionCategoryName, type PaginatedResponse, type Transaction } from "@/lib/api";
 import { formatCurrency, formatDate, toPersianDigits, getPaymentStatusLabel, getPaymentStatusColor } from "@/lib/utils";
 
 const TYPE_MAP: Record<string, { cls: string; label: string }> = {
@@ -104,14 +104,17 @@ export default function TransactionsList() {
                   return (
                     <tr key={t.id} className="hover:bg-bg-page">
                       <td className="px-4 py-3 text-sm text-text border-b border-border/55">{formatDate(t.transaction_date)}</td>
-                      <td className="px-4 py-3 text-sm text-text border-b border-border/55">{t.category_name || t.category || "—"}</td>
+                      <td className="px-4 py-3 text-sm text-text border-b border-border/55">{getTransactionCategoryName(t)}</td>
                       <td className="px-4 py-3 text-sm text-text border-b border-border/55 max-w-[300px] truncate">{t.description || "—"}</td>
                       <td className="px-4 py-3 text-sm text-text border-b border-border/55 text-left font-bold" dir="ltr">{formatCurrency(parseFloat(t.amount || "0"))}</td>
                       <td className="px-4 py-3 border-b border-border/55">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${tp.cls}`}>{tp.label}</span>
                       </td>
                       <td className="px-4 py-3 border-b border-border/55">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${pay.bg} ${pay.text}`}>
+                        <span
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                          style={{ background: pay.bg, color: pay.text }}
+                        >
                           {getPaymentStatusLabel(t.payment_status)}
                         </span>
                       </td>

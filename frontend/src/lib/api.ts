@@ -1,33 +1,222 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api/v2";
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
+// ============================================================
+// Token storage
+// ============================================================
+const ACCESS_KEY = "access_token";
+const REFRESH_KEY = "refresh_token";
+
+export function getAccessToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(ACCESS_KEY);
+}
+
+export function getRefreshToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(REFRESH_KEY);
+}
+
+export function setTokens(access: string, refresh?: string) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(ACCESS_KEY, access);
+  if (refresh) localStorage.setItem(REFRESH_KEY, refresh);
+}
+
+export function clearTokens() {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(ACCESS_KEY);
+  localStorage.removeItem(REFRESH_KEY);
+}
+
+// ============================================================
+// Error type that carries the backend response
+// ============================================================
+export class ApiError extends Error {
+  status: number;
+  body: unknown;
+  constructor(status: number, body: unknown, message?: string) {
+    super(message || `API ${status}`);
+    this.status = status;
+    this.body = body;
+  }
+}
+
+// ============================================================
+// Refresh coordination — avoid parallel refresh storms
+// ============================================================
+let refreshPromise: Promise<string> | null = null;
+
+async function refreshAccessToken(): Promise<string> {
+  if (refreshPromise) return refreshPromise;
+  const refresh = getRefreshToken();
+  if (!refresh) throw new ApiError(401, null, "No refresh token");
+
+  refreshPromise = (async () => {
+    const res = await fetch(`${API_BASE}/auth/refresh/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh }),
+    });
+    if (!res.ok) {
+      clearTokens();
+      throw new ApiError(res.status, null, "Refresh failed");
+    }
+    const data = (await res.json()) as { access: string };
+    setTokens(data.access);
+    return data.access;
+  })();
+
+  try {
+    return await refreshPromise;
+  } finally {
+    refreshPromise = null;
+  }
+}
+
+// ============================================================
+// Core request
+// ============================================================
+interface RequestOptions extends RequestInit {
+  /** Skip attaching Authorization header (used by login/refresh) */
+  skipAuth?: boolean;
+  /** Do not attempt auto-refresh on 401 (used by login) */
+  skipRefresh?: boolean;
+  /** Parse as blob instead of JSON (Excel exports) */
+  asBlob?: boolean;
+}
+
+async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const { skipAuth, skipRefresh, asBlob, ...fetchOptions } = options;
+
+  const headers = new Headers(fetchOptions.headers);
+  if (!headers.has("Content-Type") && !asBlob && fetchOptions.body) {
+    headers.set("Content-Type", "application/json");
+  }
+  if (!skipAuth) {
+    const token = getAccessToken();
+    if (token) headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  let res = await fetch(`${API_BASE}${path}`, {
+    ...fetchOptions,
+    headers,
     credentials: "include",
-    headers: { "Content-Type": "application/json", ...options.headers },
-    ...options,
   });
-  if (!res.ok) throw new Error(`API ${res.status}: ${path}`);
-  return res.json();
+
+  // Auto-refresh on 401
+  if (res.status === 401 && !skipRefresh && !skipAuth) {
+    try {
+      const newToken = await refreshAccessToken();
+      headers.set("Authorization", `Bearer ${newToken}`);
+      res = await fetch(`${API_BASE}${path}`, {
+        ...fetchOptions,
+        headers,
+        credentials: "include",
+      });
+    } catch {
+      clearTokens();
+      if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
+        window.location.href = "/login";
+      }
+      throw new ApiError(401, null, "Unauthorized");
+    }
+  }
+
+  if (!res.ok) {
+    let body: unknown = null;
+    try {
+      body = await res.json();
+    } catch {
+      /* not JSON */
+    }
+    throw new ApiError(res.status, body, `API ${res.status}: ${path}`);
+  }
+
+  if (asBlob) return (await res.blob()) as unknown as T;
+
+  // 204 No Content
+  if (res.status === 204) return undefined as unknown as T;
+
+  return (await res.json()) as T;
 }
 
-export function get<T>(path: string) {
-  return request<T>(path);
+// ============================================================
+// HTTP verbs
+// ============================================================
+export function get<T>(path: string, options?: RequestOptions) {
+  return request<T>(path, { ...options, method: "GET" });
 }
 
-export function post<T>(path: string, body: unknown) {
-  return request<T>(path, { method: "POST", body: JSON.stringify(body) });
+export function post<T>(path: string, body?: unknown, options?: RequestOptions) {
+  return request<T>(path, {
+    ...options,
+    method: "POST",
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
 }
 
-export function put<T>(path: string, body: unknown) {
-  return request<T>(path, { method: "PUT", body: JSON.stringify(body) });
+export function put<T>(path: string, body: unknown, options?: RequestOptions) {
+  return request<T>(path, { ...options, method: "PUT", body: JSON.stringify(body) });
 }
 
-export function patch<T>(path: string, body: unknown) {
-  return request<T>(path, { method: "PATCH", body: JSON.stringify(body) });
+export function patch<T>(path: string, body: unknown, options?: RequestOptions) {
+  return request<T>(path, { ...options, method: "PATCH", body: JSON.stringify(body) });
 }
 
-export function del<T>(path: string) {
-  return request<T>(path, { method: "DELETE" });
+export function del<T>(path: string, options?: RequestOptions) {
+  return request<T>(path, { ...options, method: "DELETE" });
+}
+
+/** Excel/binary downloads — returns a Blob. */
+export function download(path: string) {
+  return request<Blob>(path, { asBlob: true });
+}
+
+// ============================================================
+// Auth helpers
+// ============================================================
+export interface AuthUser {
+  id: number;
+  username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  is_staff: boolean;
+  is_superuser: boolean;
+  roles: string[];
+}
+
+export interface TokenPair {
+  access: string;
+  refresh: string;
+}
+
+export async function login(username: string, password: string): Promise<TokenPair> {
+  const tokens = await post<TokenPair>(
+    "/auth/login/",
+    { username, password },
+    { skipAuth: true, skipRefresh: true }
+  );
+  setTokens(tokens.access, tokens.refresh);
+  return tokens;
+}
+
+export async function logout(): Promise<void> {
+  const refresh = getRefreshToken();
+  try {
+    if (refresh) {
+      await post("/auth/logout/", { refresh });
+    }
+  } catch {
+    /* ignore — we're logging out regardless */
+  } finally {
+    clearTokens();
+    if (typeof window !== "undefined") window.location.href = "/login";
+  }
+}
+
+export function me() {
+  return get<AuthUser>("/auth/me/");
 }
 
 // ============================================================
@@ -41,12 +230,12 @@ export interface PaginatedResponse<T> {
 }
 
 // ============================================================
-// Finance Category (با فیلد slug جدید)
+// Finance
 // ============================================================
 export interface FinanceCategory {
   id: number;
   name: string;
-  slug: string; // ← جدید
+  slug: string;
   category_type: "income" | "expense";
   description?: string;
   is_active: boolean;
@@ -54,34 +243,57 @@ export interface FinanceCategory {
   updated_at: string;
 }
 
-// ============================================================
-// Balance Report (فیلدها تغییر نام داده‌اند)
-// ============================================================
 export interface BalanceReport {
-  total_income_period: number;          // ← تغییر نام
-  total_expense_period: number;         // ← تغییر نام
-  final_balance_cumulative: number;     // ← تغییر نام
-  total_employee_cost_period: number;   // ← تغییر نام
-  total_equipment_cost_period: number;  // ← تغییر نام
-  total_medicine_cost_period: number;   // ← تغییر نام
-  center_commission_income_period: number; // ← تغییر نام
-  university_commission_period?: number; // جدید
-  anesthesia_cost_period?: number;      // جدید
-  daily_supplies_cost_period?: number;  // جدید
+  total_income_period: number;
+  total_expense_period: number;
+  final_balance_cumulative: number;
+  total_employee_cost_period: number;
+  total_equipment_cost_period: number;
+  total_medicine_cost_period: number;
+  center_commission_income_period: number;
+  university_commission_period?: number;
+  anesthesia_cost_period?: number;
+  daily_supplies_cost_period?: number;
 }
 
-// ============================================================
-// Finance Trend (با cumulative_balance)
-// ============================================================
 export interface FinanceTrend {
   month: string;
   income: number;
   expense: number;
-  cumulative_balance: number; // ← جدید
+  cumulative_balance: number;
+}
+
+export interface TransactionCategoryRef {
+  id: number;
+  name: string;
+  slug: string;
+  category_type: "income" | "expense";
+}
+
+export interface Transaction {
+  id: number;
+  transaction_type: "income" | "expense";
+  transaction_type_display?: string;
+  category?: number | TransactionCategoryRef | null;
+  amount: string;
+  transaction_date: string;
+  description?: string;
+  payment_status: "pending" | "partial" | "paid" | "cancelled";
+  payment_status_display?: string;
+  content_type?: number | null;
+  object_id?: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export function getTransactionCategoryName(t: Transaction): string {
+  if (t.category == null) return "—";
+  if (typeof t.category === "number") return String(t.category);
+  return t.category.name || "—";
 }
 
 // ============================================================
-// Product
+// Inventory
 // ============================================================
 export interface Product {
   id: number;
@@ -89,6 +301,8 @@ export interface Product {
   internal_code: string;
   product_type: "medicine" | "equipment";
   product_type_display: string;
+  category?: number | null;
+  category_name?: string | null;
   current_stock: string;
   minimum_stock: string;
   purchase_price: string;
@@ -96,7 +310,6 @@ export interface Product {
   is_out_of_stock: boolean;
   stock_status: string;
   is_active: boolean;
-  category_name?: string | null; // جدید (برای لیست)
 }
 
 export interface ProductDetail {
@@ -115,6 +328,7 @@ export interface ProductDetail {
   unit?: string;
   purchase_price: string;
   sale_price?: string;
+  barcode?: string | null;
   current_stock: string;
   minimum_stock: string;
   internal_notes?: string;
@@ -126,9 +340,6 @@ export interface ProductDetail {
   updated_at: string;
 }
 
-// ============================================================
-// Vendor
-// ============================================================
 export interface Vendor {
   id: number;
   name: string;
@@ -142,37 +353,107 @@ export interface Vendor {
   tax_id?: string;
   bank_account?: string;
   created_at?: string;
+  updated_at?: string;
+  phones?: string[];
 }
 
 export interface ProductVendorLink {
   id: number;
   product: number;
   product_name: string;
+  product_code?: string;
   vendor: number;
   vendor_name: string;
+  supplier_product_code?: string;
   unit_price: string;
+  currency?: string;
   is_primary: boolean;
   is_active: boolean;
-  supplier_product_code?: string;
-  notes?: string;
+  total_purchased_quantity?: string;
+  latest_purchase_date?: string | null;
 }
 
-// ============================================================
-// Purchase
-// ============================================================
 export interface Purchase {
   id: number;
+  vendor: number;
   vendor_name: string;
-  purchase_date: string;
-  total_amount: string;
-  status: string;
-  status_display: string;
   reference_number?: string;
+  purchase_date: string;
+  status: "PENDING" | "CONFIRMED" | "CANCELLED" | string;
+  status_display: string;
   stock_applied: boolean;
+  item_count?: number;
+  average_unit_price?: string;
+  total_amount: string;
+  product_names_display?: string;
+  created_at: string;
+}
+
+export interface PurchaseItem {
+  id: number;
+  purchase: number;
+  product: number;
+  product_name: string;
+  product_code: string;
+  quantity: string;
+  unit: string;
+  unit_price: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StockMovement {
+  id: number;
+  product: number;
+  product_name: string;
+  product_code: string;
+  quantity: string;
+  unit: string;
+  movement_type: "IN" | "OUT" | "ADJUSTMENT";
+  movement_type_display: string;
+  source_type: string;
+  source_type_display: string;
+  reference_id?: string;
+  movement_date: string;
+  description?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface InventoryStockReportSummary {
+  total_products: number;
+  low_stock_count: number;
+  out_of_stock_count: number;
+  total_inventory_value: string;
+}
+
+export interface ProductCostReportSummary {
+  start_date?: string | null;
+  end_date?: string | null;
+  product_type: string;
+  group_by: string;
+  vendor_id?: number | null;
+  total_cost: string;
+  total_quantity: string;
+  total_line_items: number;
+}
+
+export interface ProductCostReportRow {
+  product_id?: number | null;
+  product_name?: string | null;
+  product_code?: string | null;
+  product_type?: string | null;
+  vendor_id?: number | null;
+  vendor_name?: string | null;
+  total_quantity: string;
+  total_cost: string;
+  avg_unit_price: string;
+  purchase_count: number;
 }
 
 // ============================================================
-// Employee
+// Employees
 // ============================================================
 export interface Employee {
   id: number;
@@ -220,6 +501,24 @@ export interface JobPosition {
   is_active: boolean;
 }
 
+export interface EmployeePurchaseCommission {
+  id: number;
+  employee: number;
+  employee_name: string;
+  purchase?: number | null;
+  purchase_pk?: number | null;
+  purchase_ref?: string | null;
+  purchase_date?: string | null;
+  purchase_amount?: string | null;
+  items_summary?: string | null;
+  vendor_name?: string | null;
+  amount: string;
+  commission_date: string;
+  description?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 // ============================================================
 // Payroll
 // ============================================================
@@ -255,7 +554,46 @@ export interface CommissionRule {
   notes?: string;
 }
 
-// گزارش حقوق و دستمزد (با فیلدهای ساعتی جدید)
+export interface PayrollTypeConfig {
+  id: number;
+  employee: number;
+  employee_name: string;
+  has_monthly_wage: boolean;
+  has_commission: boolean;
+  has_hourly_wage: boolean;
+  notes?: string;
+  updated_at: string;
+}
+
+export interface HourlyWorkEntry {
+  id: number;
+  employee: number;
+  employee_name: string;
+  work_date: string;
+  hours_worked: string;
+  rate_used?: string | null;
+  amount?: string | null;
+  payroll_period?: number | null;
+  is_processed: boolean;
+  description?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CommissionTransaction {
+  id: number;
+  surgery: number;
+  employee: number;
+  employee_name: string;
+  job_position_name: string;
+  commission_rule: number;
+  surgery_type_name: string;
+  commission_percent: string;
+  amount: string;
+  notes?: string;
+  created_at: string;
+}
+
 export interface PayrollReportEmployee {
   employee_id: number;
   employee_name: string;
@@ -265,8 +603,8 @@ export interface PayrollReportEmployee {
   purchase_commission?: string;
   total_commission: string;
   has_commission: boolean;
-  hourly_salary: string;        // ← جدید
-  total_hours_worked: string;   // ← جدید
+  hourly_salary: string;
+  total_hours_worked: string;
   total_payment: string;
 }
 
@@ -275,15 +613,40 @@ export interface PayrollReport {
   end_date?: string;
   total_fixed_salary: string;
   total_commission: string;
-  total_hourly_salary: string;  // ← جدید
-  total_hours_worked: string;   // ← جدید
+  total_hourly_salary: string;
+  total_hours_worked: string;
   total_labor_cost: string;
   employee_count: number;
   employees: PayrollReportEmployee[];
 }
 
+export interface EmployeeCostReportSummary {
+  start_date?: string | null;
+  end_date?: string | null;
+  wage_type: string;
+  employee_id?: number | null;
+  position_id?: number | null;
+  total_fixed_wages: string;
+  total_commissions: string;
+  total_hourly_wages: string;
+  total_hours_worked: string;
+  total_payments: string;
+  employee_count: number;
+}
+
+export interface EmployeeCostReportRow {
+  employee_id: number;
+  employee_name: string;
+  position_name: string;
+  total_fixed_wages: string;
+  total_commissions: string;
+  total_hourly_wages: string;
+  total_hours_worked: string;
+  total_payments: string;
+}
+
 // ============================================================
-// Surgery
+// Surgeries
 // ============================================================
 export interface SurgeryType {
   id: number;
@@ -317,9 +680,11 @@ export interface Patient {
   national_id?: string;
   age?: number | null;
   gender?: string | null;
+  gender_display?: string | null;
+  is_hidden?: boolean;
+  created_at?: string;
 }
 
-// SurgeryHistory (با فیلدهای جدید)
 export interface SurgeryHistory {
   id: number;
   patient_name: string;
@@ -345,7 +710,33 @@ export interface SurgeryHistory {
   created_at: string;
 }
 
-// SurgeryProfitReport
+export interface SurgeryUsedItem {
+  id: number;
+  surgery: number;
+  product: number;
+  product_name: string;
+  product_code: string;
+  quantity: string;
+  unit: string;
+  description?: string;
+  current_stock?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SurgeryConsumptionItem {
+  id: number;
+  surgery: number;
+  product: number;
+  product_name: string;
+  product_code: string;
+  quantity: string;
+  unit: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface SurgeryProfitReportSummary {
   start_date?: string | null;
   end_date?: string | null;
@@ -363,7 +754,7 @@ export interface SurgeryProfitReportSummary {
   average_profit_per_surgery?: string | null;
   profitable_surgeries_count: number;
   loss_surgeries_count: number;
-  missing_cost_items_count: number; // ← جدید
+  missing_cost_items_count: number;
 }
 
 export interface SurgeryProfitReportRow {
@@ -384,8 +775,7 @@ export interface SurgeryProfitReportRow {
   profit_margin_percent?: string | null;
   used_items_count?: number | null;
   commission_transactions_count?: number | null;
-  has_missing_cost_data: boolean; // ← جدید
-  // group_by=surgery_type/doctor fields
+  has_missing_cost_data: boolean;
   surgeries_count?: number | null;
   average_profit_per_surgery?: string | null;
   average_profit_margin_percent?: string | null;
@@ -395,228 +785,4 @@ export interface SurgeryProfitReportRow {
   total_consumed_items_cost?: string | null;
   total_employee_commission_cost?: string | null;
   total_approximate_profit?: string | null;
-}
-
-// ============================================================
-// Transaction (با وضعیت پرداخت)
-// ============================================================
-export interface Transaction {
-  id: number;
-  transaction_type: "income" | "expense";
-  transaction_type_display: string;
-  category?: number | null;
-  category_name?: string;
-  amount: string;
-  transaction_date: string;
-  description?: string;
-  payment_status: "pending" | "partial" | "paid" | "cancelled"; // ← جدید
-  payment_status_display?: string;
-  content_type?: number | null;
-  object_id?: number | null;
-  created_at: string;
-  updated_at: string;
-}
-
-// ============================================================
-// CommissionTransaction
-// ============================================================
-export interface CommissionTransaction {
-  id: number;
-  surgery: number;
-  employee: number;
-  employee_name: string;
-  job_position_name: string;
-  commission_rule: number;
-  surgery_type_name: string;
-  commission_percent: string;
-  amount: string;
-  notes?: string;
-  created_at: string;
-}
-
-// ============================================================
-// Purchase Commission (EmployeePurchaseCommission)
-// ============================================================
-export interface EmployeePurchaseCommission {
-  id: number;
-  employee: number;
-  employee_name: string;
-  purchase?: number | null;
-  purchase_ref?: string | null;
-  purchase_date?: string | null;
-  purchase_amount?: string | null;
-  vendor_name?: string | null;
-  amount: string;
-  commission_date: string;
-  description?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-// ============================================================
-// Hourly Work Entry
-// ============================================================
-export interface HourlyWorkEntry {
-  id: number;
-  employee: number;
-  employee_name: string;
-  work_date: string;
-  hours_worked: string;
-  rate_used?: string | null;
-  amount?: string | null;
-  payroll_period?: number | null;
-  is_processed: boolean;
-  description?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-// ============================================================
-// Inventory Stock Report
-// ============================================================
-export interface InventoryStockReportSummary {
-  total_products: number;
-  low_stock_count: number;
-  out_of_stock_count: number;
-  total_inventory_value: string;
-}
-
-export interface InventoryStockProduct {
-  id: number;
-  name: string;
-  internal_code: string;
-  product_type: string;
-  category?: number | null;
-  category_name?: string | null;
-  unit?: string;
-  purchase_price: string;
-  current_stock: string;
-  minimum_stock: string;
-  is_low_stock: boolean;
-  is_out_of_stock: boolean;
-  inventory_value: string;
-  is_active: boolean;
-}
-
-// ============================================================
-// Surgery Used Item
-// ============================================================
-export interface SurgeryUsedItem {
-  id: number;
-  surgery: number;
-  product: number;
-  product_name: string;
-  product_code: string;
-  quantity: string;
-  unit: string;
-  description?: string;
-  current_stock?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-// ============================================================
-// Surgery Consumption Item (legacy)
-// ============================================================
-export interface SurgeryConsumptionItem {
-  id: number;
-  surgery: number;
-  product: number;
-  product_name: string;
-  product_code: string;
-  quantity: string;
-  unit: string;
-  notes?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-// ============================================================
-// Stock Movement
-// ============================================================
-export interface StockMovement {
-  id: number;
-  product: number;
-  product_name: string;
-  product_code: string;
-  quantity: string;
-  unit: string;
-  movement_type: "IN" | "OUT" | "ADJUSTMENT";
-  movement_type_display: string;
-  source_type: string;
-  source_type_display: string;
-  reference_id?: string;
-  movement_date: string;
-  description?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-// ============================================================
-// Payroll Type Config
-// ============================================================
-export interface PayrollTypeConfig {
-  id: number;
-  employee: number;
-  employee_name: string;
-  has_monthly_wage: boolean;
-  has_commission: boolean;
-  has_hourly_wage: boolean;
-  notes?: string;
-  updated_at: string;
-}
-
-// ============================================================
-// Employee Cost Report (CLI-52)
-// ============================================================
-export interface EmployeeCostReportSummary {
-  start_date?: string | null;
-  end_date?: string | null;
-  wage_type: string;
-  employee_id?: number | null;
-  position_id?: number | null;
-  total_fixed_wages: string;
-  total_commissions: string;
-  total_hourly_wages: string;
-  total_hours_worked: string;
-  total_payments: string;
-  employee_count: number;
-}
-
-export interface EmployeeCostReportRow {
-  employee_id: number;
-  employee_name: string;
-  position_name: string;
-  total_fixed_wages: string;
-  total_commissions: string;
-  total_hourly_wages: string;
-  total_hours_worked: string;
-  total_payments: string;
-}
-
-// ============================================================
-// Product Cost Report
-// ============================================================
-export interface ProductCostReportSummary {
-  start_date?: string | null;
-  end_date?: string | null;
-  product_type: string;
-  group_by: string;
-  vendor_id?: number | null;
-  total_cost: string;
-  total_quantity: string;
-  total_line_items: number;
-}
-
-export interface ProductCostReportRow {
-  product_id?: number | null;
-  product_name?: string | null;
-  product_code?: string | null;
-  product_type?: string | null;
-  vendor_id?: number | null;
-  vendor_name?: string | null;
-  total_quantity: string;
-  total_cost: string;
-  avg_unit_price: string;
-  purchase_count: number;
 }
