@@ -1,0 +1,207 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}تاریخچه عمل های جراحی | مرکز جراحی — مدیریت{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'admin/css/surgery_history_list.css' %}">
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="ca-breadcrumbs">
+  <a href="{% url 'admin:index' %}">خانه</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <span>تاریخچه عمل های جراحی</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<noscript>
+  <p style="text-align:center;padding:40px;color:var(--red)">این صفحه نیاز به JavaScript دارد.</p>
+</noscript>
+
+<div id="surgery-history-list-root">
+
+  {# ── Page header ──────────────────────────────────────────────── #}
+  <div class="adm-page-header">
+    <div class="adm-page-header__info">
+      <span class="adm-page-section-label">جراحی‌ها</span>
+      <h1 class="adm-page-title">تاریخچه عمل های جراحی</h1>
+    </div>
+    <div class="adm-page-actions">
+      <a id="sh-export-btn" class="sh-export-btn adm-btn" href="/api/v2/surgeries/history/?export=excel">⬇ خروجی اکسل</a>
+      {% if has_add_permission %}
+      <a class="sh-add-btn adm-btn adm-btn--primary" href="{% url 'admin:surgeries_surgeryhistory_add' %}">+ ثبت عمل جدید</a>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ── Summary cards ────────────────────────────────────────────── #}
+  <div class="sh-summary-row">
+    <div class="sh-summary-card sh-summary-card--total">
+      <div class="sh-summary-count" id="sh-count-total">—</div>
+      <div class="sh-summary-label">🏥 مجموع عملیات</div>
+    </div>
+    <div class="sh-summary-card sh-summary-card--completed">
+      <div class="sh-summary-count" id="sh-count-completed">—</div>
+      <div class="sh-summary-label">✅ انجام شده <small class="sh-summary-note">(صفحه جاری)</small></div>
+    </div>
+    <div class="sh-summary-card sh-summary-card--pending">
+      <div class="sh-summary-count" id="sh-count-pending">—</div>
+      <div class="sh-summary-label">⏳ در انتظار پرداخت <small class="sh-summary-note">(صفحه جاری)</small></div>
+    </div>
+    <div class="sh-summary-card sh-summary-card--amount">
+      <div class="sh-summary-count sh-summary-count--sm" id="sh-total-amount">—</div>
+      <div class="sh-summary-label">💰 مجموع مبالغ <small class="sh-summary-note">(صفحه جاری)</small></div>
+    </div>
+  </div>
+
+  {# ── Search + Filters ─────────────────────────────────────────── #}
+  <div class="sh-search-wrap">
+    <div class="sh-search-row">
+      <input
+        id="sh-search"
+        class="sh-search-input"
+        type="search"
+        placeholder="🔎 جستجو بر اساس نام بیمار، ردیف، کد پرونده، شماره تلفن..."
+        autocomplete="off"
+        dir="rtl"
+        data-global-search
+        data-search-param="search"
+        data-search-delay="300"
+      >
+      <div id="sh-spinner" class="sh-search-spinner" aria-hidden="true"></div>
+    </div>
+
+    <div class="sh-filter-row">
+
+      <label class="sh-filter-label" for="sh-filter-surgery-type">
+        <span id="sh-dot-surgery-type" class="sh-filter-dot"></span>
+        نوع عمل
+      </label>
+      <select id="sh-filter-surgery-type" class="sh-filter-select">
+        <option value="">همه</option>
+      </select>
+
+      <label class="sh-filter-label" for="sh-filter-status">
+        <span id="sh-dot-status" class="sh-filter-dot"></span>
+        وضعیت عمل
+      </label>
+      <select id="sh-filter-status" class="sh-filter-select">
+        <option value="">همه</option>
+        <option value="PLANNED">برنامه‌ریزی شده</option>
+        <option value="IN_PROGRESS">در حال انجام</option>
+        <option value="COMPLETED">انجام شده</option>
+        <option value="CANCELLED">لغو شده</option>
+      </select>
+
+      <label class="sh-filter-label" for="sh-filter-payment">
+        <span id="sh-dot-payment" class="sh-filter-dot"></span>
+        وضعیت پرداخت
+      </label>
+      <select id="sh-filter-payment" class="sh-filter-select">
+        <option value="">همه</option>
+        <option value="PENDING">در انتظار پرداخت</option>
+        <option value="PARTIAL">پرداخت ناقص</option>
+        <option value="PAID">پرداخت شده</option>
+      </select>
+
+      <label class="sh-filter-label" for="sh-filter-doctor">
+        <span id="sh-dot-doctor" class="sh-filter-dot"></span>
+        پزشک معالج
+      </label>
+      <select id="sh-filter-doctor" class="sh-filter-select">
+        <option value="">همه</option>
+      </select>
+
+      <label class="sh-filter-label">
+        <span id="sh-dot-date" class="sh-filter-dot"></span>
+        تاریخ عمل از
+      </label>
+      <input id="sh-filter-date-from" class="sh-filter-select jalali-date-input" type="text"
+             inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۴/۰۳" dir="ltr">
+      <span style="font-size:12px;color:var(--muted)">تا</span>
+      <input id="sh-filter-date-to" class="sh-filter-select jalali-date-input" type="text"
+             inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۴/۰۳" dir="ltr">
+
+      <label class="sh-filter-label">
+        <span id="sh-dot-amount" class="sh-filter-dot"></span>
+        مبلغ از
+      </label>
+      <input id="sh-filter-amount-min" class="sh-filter-select" type="number" min="0" step="1" placeholder="۰" style="width:100px">
+      <span style="font-size:12px;color:var(--muted)">تا</span>
+      <input id="sh-filter-amount-max" class="sh-filter-select" type="number" min="0" step="1" placeholder="..." style="width:100px">
+
+      <label class="sh-filter-label" for="sh-sort-by">مرتب‌سازی</label>
+      <select id="sh-sort-by" class="sh-filter-select">
+        <option value="surgery_date">تاریخ عمل</option>
+        <option value="amount">مبلغ</option>
+        <option value="patient__full_name">بیمار</option>
+        <option value="surgery_type__name">نوع عمل</option>
+        <option value="status">وضعیت</option>
+        <option value="payment_status">وضعیت پرداخت</option>
+        <option value="created_at">تاریخ ثبت</option>
+      </select>
+      <select id="sh-sort-dir" class="sh-filter-select">
+        <option value="desc">نزولی</option>
+        <option value="asc">صعودی</option>
+      </select>
+
+      <button id="sh-clear-filters" class="sh-clear-filters" type="button">پاک کردن فیلترها</button>
+
+    </div>
+  </div>
+
+  {# ── Table ────────────────────────────────────────────────────── #}
+  <div class="sh-table-wrap">
+    <table class="sh-table" id="sh-table">
+      {% comment %}
+      Header cells are rendered by surgery_history_list.js from the single
+      COLUMNS mapping — the same source used for row cells, the loading
+      -row skeleton and the error-row colspan — so they can never fall
+      out of sync with each other.
+      {% endcomment %}
+      <thead>
+        <tr id="sh-thead-row"></tr>
+      </thead>
+      <tbody id="sh-tbody">
+        {# Rows rendered by surgery_history_list.js #}
+      </tbody>
+    </table>
+
+    <div id="sh-empty-state" class="sh-empty-state" style="display:none">
+      <div class="sh-empty-icon">🏥</div>
+      <div id="sh-empty-title" class="sh-empty-title">هنوز عملی ثبت نشده است</div>
+      <div id="sh-empty-desc" class="sh-empty-desc">برای شروع ثبت سوابق درمانی، اولین عمل را اضافه کنید.</div>
+      <button id="sh-clear-search-btn" class="sh-empty-btn" type="button" style="display:none">
+        پاک کردن فیلترها
+      </button>
+      {% if has_add_permission %}
+      <a id="sh-add-first-btn" class="sh-empty-btn" href="{% url 'admin:surgeries_surgeryhistory_add' %}" style="display:none">
+        ثبت عمل جدید
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ── Pagination ───────────────────────────────────────────────── #}
+  <div class="sh-pagination">
+    <span id="sh-pagination-info" class="sh-pagination-info"></span>
+    <div id="sh-pagination-pages" class="sh-pagination-pages"></div>
+    <div class="sh-pagination-size">
+      تعداد در صفحه:
+      <select id="sh-page-size-select" class="sh-page-size-select">
+        <option value="10">۱۰</option>
+        <option value="25" selected>۲۵</option>
+        <option value="50">۵۰</option>
+        <option value="100">۱۰۰</option>
+      </select>
+    </div>
+  </div>
+
+</div>{# /#surgery-history-list-root #}
+{% endblock %}
+
+{% block extrascript %}
+<script src="{% static 'admin/js/surgery_history_list.js' %}"></script>
+{% endblock %}

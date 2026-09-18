@@ -1,0 +1,171 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}خریدها | مرکز جراحی — مدیریت{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'admin/css/purchase_list.css' %}?v=3">
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="ca-breadcrumbs">
+  <a href="{% url 'admin:index' %}">خانه</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <a href="{% url 'admin:app_list' 'inventory' %}">موجودی</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <span>خریدها</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<noscript>
+  <p style="text-align:center;padding:40px;color:var(--red)">این صفحه نیاز به JavaScript دارد.</p>
+</noscript>
+
+<div id="purchase-list-root">
+
+  {# ── Page header ──────────────────────────────────────────────── #}
+  <div class="adm-page-header">
+    <div class="adm-page-header__info">
+      <span class="adm-page-section-label">موجودی</span>
+      <h1 class="adm-page-title">خریدها</h1>
+    </div>
+    <div class="adm-page-actions">
+      <a id="pu-export-btn" class="pu-export-btn adm-btn" href="/api/v2/inventory/purchases/?export=excel">⬇ خروجی اکسل</a>
+      {% if has_add_permission %}
+      <a class="pu-add-btn adm-btn adm-btn--primary" href="{% url 'admin:inventory_purchase_add' %}">+ ثبت خرید جدید</a>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ── Single summary card — total amount only ──────────────────── #}
+  <div class="pu-summary-row pu-summary-row--single">
+    <div class="pu-summary-card pu-summary-card--total">
+      <div class="pu-summary-count" id="pu-total-amount">—</div>
+      <div class="pu-summary-label">مجموع مبلغ (تومان) <small class="pu-summary-note">(صفحه جاری)</small></div>
+    </div>
+  </div>
+
+  {# ── Search + Filters card ─────────────────────────────────────── #}
+  <div class="pu-search-wrap">
+
+    <div class="pu-search-row">
+      <input
+        id="pu-search"
+        class="pu-search-input"
+        type="search"
+        placeholder="جستجو بر اساس نام تامین‌کننده، یادداشت..."
+        autocomplete="off"
+        dir="rtl"
+        data-global-search
+        data-search-param="search"
+        data-search-delay="300"
+      >
+      <div id="pu-spinner" class="pu-search-spinner" aria-hidden="true"></div>
+    </div>
+
+    <div class="pu-filter-row">
+
+      <label class="pu-filter-label" for="pu-filter-vendor">
+        <span id="pu-dot-vendor" class="pu-filter-dot"></span>
+        تامین‌کننده
+      </label>
+      <select id="pu-filter-vendor" class="pu-filter-select">
+        <option value="">همه</option>
+        {# Options populated by JS on load #}
+      </select>
+
+      <label class="pu-filter-label">
+        <span id="pu-dot-date" class="pu-filter-dot"></span>
+        از تاریخ
+      </label>
+      <input id="pu-filter-date-from" class="pu-filter-date jalali-date-input" type="text"
+             inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۴/۰۳" dir="ltr">
+      <span class="pu-filter-sep">تا</span>
+      <input id="pu-filter-date-to" class="pu-filter-date jalali-date-input" type="text"
+             inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۴/۰۳" dir="ltr">
+
+      <label class="pu-filter-label" for="pu-sort-by">مرتب‌سازی</label>
+      <select id="pu-sort-by" class="pu-filter-select">
+        <option value="purchase_date">تاریخ خرید</option>
+        <option value="vendor__name">تامین‌کننده</option>
+        <option value="created_at">تاریخ ثبت</option>
+      </select>
+      <select id="pu-sort-dir" class="pu-filter-select">
+        <option value="desc">نزولی</option>
+        <option value="asc">صعودی</option>
+      </select>
+
+      <label class="pu-filter-label" for="pu-filter-status">
+        <span id="pu-dot-status" class="pu-filter-dot"></span>
+        وضعیت
+      </label>
+      <select id="pu-filter-status" class="pu-filter-select">
+        <option value="">همه</option>
+        <option value="PENDING">در انتظار تأیید</option>
+        <option value="CONFIRMED">تأیید شده</option>
+        <option value="CANCELLED">لغو شده</option>
+      </select>
+
+      <button id="pu-clear-filters" class="pu-clear-filters" type="button">پاک کردن فیلترها</button>
+
+    </div>
+  </div>
+
+  {# ── Purchase table ────────────────────────────────────────────── #}
+  <div class="pu-table-wrap">
+    <table class="pu-table" id="pu-table">
+      <thead>
+        <tr>
+          <th class="pu-th-num">#</th>
+          <th class="pu-th-product">نام محصول</th>
+          <th class="pu-th-vendor">تامین‌کننده</th>
+          <th class="pu-th-date">تاریخ خرید</th>
+          <th class="pu-th-items">تعداد اقلام</th>
+          <th class="pu-th-amount">مبلغ تک (تومان)</th>
+          <th class="pu-th-amount">مبلغ کل (تومان)</th>
+          <th class="pu-th-status">وضعیت</th>
+        </tr>
+      </thead>
+      <tbody id="pu-tbody">
+        {# Rows rendered by purchase_list.js #}
+      </tbody>
+    </table>
+
+    <div id="pu-empty-state" class="pu-empty-state" style="display:none">
+      <div class="pu-empty-icon">&#128717;</div>
+      <div id="pu-empty-title" class="pu-empty-title">هنوز خریدی ثبت نشده است</div>
+      <div id="pu-empty-desc" class="pu-empty-desc">برای شروع مدیریت موجودی، اولین خرید را ثبت کنید.</div>
+      <button id="pu-clear-search-btn" class="pu-empty-btn" type="button" style="display:none">
+        پاک کردن فیلترها
+      </button>
+      {% if has_add_permission %}
+      <a id="pu-add-first-btn" class="pu-empty-btn" href="{% url 'admin:inventory_purchase_add' %}" style="display:none">
+        ثبت اولین خرید
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ── Pagination bar ────────────────────────────────────────────── #}
+  <div class="pu-pagination">
+    <span id="pu-pagination-info" class="pu-pagination-info"></span>
+    <div id="pu-pagination-pages" class="pu-pagination-pages"></div>
+    <div class="pu-pagination-size">
+      تعداد در صفحه:
+      <select id="pu-page-size-select" class="pu-page-size-select">
+        <option value="10">۱۰</option>
+        <option value="25" selected>۲۵</option>
+        <option value="50">۵۰</option>
+        <option value="100">۱۰۰</option>
+      </select>
+    </div>
+  </div>
+
+
+</div>{# /#purchase-list-root #}
+{% endblock %}
+
+{% block extrascript %}
+<script src="{% static 'admin/js/purchase_list.js' %}?v=3"></script>
+{% endblock %}

@@ -10,14 +10,14 @@ const navSections = [
     label: "داشبورد",
     links: [
       { href: "/dashboard", label: "داشبورد اصلی" },
-      { href: "/finance/dashboard", label: "داشبورد مالی" },
+      { href: "/finance", label: "داشبورد مالی" },
     ],
   },
   {
     key: "inventory",
     label: "موجودی",
     links: [
-      { href: "/inventory/products", label: "محصولات" },
+      { href: "/inventory", label: "محصولات" },
       { href: "/inventory/vendors", label: "تامین‌کنندگان" },
       { href: "/inventory/purchases", label: "خریدها" },
     ],
@@ -34,13 +34,13 @@ const navSections = [
     key: "finance",
     label: "مالی",
     links: [
-      { href: "/finance/dashboard", label: "داشبورد مالی" },
+      { href: "/finance", label: "داشبورد مالی" },
       { href: "/finance/transactions", label: "تراکنش‌ها" },
     ],
   },
   {
     key: "surgeries",
-    label: "جراحی‌ها",
+    label: "عمل‌های جراحی",
     links: [
       { href: "/surgeries", label: "عمل‌های جراحی" },
     ],

@@ -1,0 +1,517 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}
+  {% if original %}ویرایش خرید{% if original.reference_number %} — {{ original.reference_number }}{% endif %}{% else %}ثبت خرید جدید{% endif %} | مرکز جراحی
+{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'admin/css/purchase_form.css' %}?v=2">
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="ca-breadcrumbs">
+  <a href="{% url 'admin:index' %}">خانه</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <a href="{% url 'admin:app_list' 'inventory' %}">موجودی</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <a href="{% url 'admin:inventory_purchase_changelist' %}">خریدها</a>
+  <span class="ca-breadcrumbs-sep"></span>
+  <span>{% if original %}ویرایش خرید{% else %}خرید جدید{% endif %}</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="purchase-form-root" dir="rtl">
+
+  {# ── Page header ───────────────────────────────────────────── #}
+  <div class="adm-page-header">
+    <div class="adm-page-header__info">
+      <span class="adm-page-section-label">موجودی</span>
+      <h1 class="adm-page-title">
+        {% if original %}
+          ویرایش خرید{% if original.reference_number %} — {{ original.reference_number }}{% endif %}
+        {% else %}
+          ثبت خرید جدید
+        {% endif %}
+      </h1>
+    </div>
+    <div class="adm-page-actions">
+      <a href="{% url 'admin:inventory_purchase_changelist' %}" class="adm-btn adm-btn--secondary adm-btn--sm">بازگشت</a>
+    </div>
+  </div>
+
+  {# ── Status banners ────────────────────────────────────────── #}
+  {% if original %}
+    {% if original.status == 'CONFIRMED' %}
+    <div class="pf-banner pf-banner--confirmed">
+      <span class="pf-banner-icon">✔</span>
+      <div>
+        <strong>خرید تأیید شده</strong> — موجودی اعمال شده است.
+        ویرایش اقلام مجاز است و تغییرات به‌طور خودکار در موجودی و اطلاعات مالی اعمال می‌شوند.
+      </div>
+    </div>
+    {% elif original.status == 'CANCELLED' %}
+    <div class="pf-banner pf-banner--cancelled">
+      <span class="pf-banner-icon">✕</span>
+      <div>
+        <strong>خرید لغو شده</strong> — این خرید ردشده است.
+        موجودی و اطلاعات مالی مرتبط معکوس شده‌اند.
+      </div>
+    </div>
+    {% else %}
+    <div class="pf-banner pf-banner--pending">
+      <span class="pf-banner-icon">⏳</span>
+      <div>
+        <strong>در انتظار تأیید</strong> — این خرید هنوز تأیید نشده است.
+        ذخیره اطلاعات، موجودی یا سوابق مالی را تغییر نمی‌دهد.
+        برای اعمال اثر مالی و موجودی، از دکمه <strong>تأیید خرید</strong> استفاده کنید.
+      </div>
+    </div>
+    {% endif %}
+  {% endif %}
+
+  {# ── Top-level form errors ─────────────────────────────────── #}
+  {% if adminform.form.non_field_errors %}
+  <div class="pf-error-box">
+    {% for error in adminform.form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+  </div>
+  {% endif %}
+
+  {% if inline_admin_formsets %}
+  {% with ifs=inline_admin_formsets.0.formset %}
+  {% if ifs.non_form_errors %}
+  <div class="pf-error-box">
+    {% for error in ifs.non_form_errors %}<p>{{ error }}</p>{% endfor %}
+  </div>
+  {% endif %}
+  {% endwith %}
+  {% endif %}
+
+  {# ─────────────────────────────── #}
+  {#  MAIN FORM                       #}
+  {# ─────────────────────────────── #}
+  <form id="pf-main-form" method="post" action="" novalidate>
+    {% csrf_token %}
+    {# Workflow action — set by JS before submitting confirm/cancel #}
+    <input type="hidden" name="_action" id="pf-action-input" value="">
+
+    {# Inline management forms — MUST be inside <form> #}
+    {% for inline_admin_formset in inline_admin_formsets %}
+    {{ inline_admin_formset.formset.management_form }}
+    {% endfor %}
+
+    {# Hidden fields from the main form (if any) #}
+    {% for hidden in adminform.form.hidden_fields %}
+    {{ hidden }}
+    {% endfor %}
+
+    {# ── Purchase header card ─────────────────────────────────── #}
+    <div class="pf-card">
+      <div class="pf-card-header pf-card-header--with-badge">
+        <h2 class="pf-card-title">اطلاعات خرید</h2>
+        {% if original %}
+          {% if original.status == 'PENDING' %}
+          <span class="pf-status-badge pf-status-badge--pending">در انتظار تأیید</span>
+          {% elif original.status == 'CONFIRMED' %}
+          <span class="pf-status-badge pf-status-badge--confirmed">تأیید شده ✔</span>
+          {% elif original.status == 'CANCELLED' %}
+          <span class="pf-status-badge pf-status-badge--cancelled">لغو شده ✕</span>
+          {% endif %}
+        {% endif %}
+      </div>
+      <div class="pf-card-body">
+
+        <div class="pf-field-grid">
+
+          {# ── Purchase date — shown first as requested ── #}
+          <div class="pf-field-group">
+            <label class="pf-label" for="id_purchase_date">تاریخ خرید</label>
+            {{ adminform.form.purchase_date }}
+            {% if adminform.form.purchase_date.errors %}
+            <ul class="pf-field-errors">
+              {% for e in adminform.form.purchase_date.errors %}<li>{{ e }}</li>{% endfor %}
+            </ul>
+            {% endif %}
+            <span class="pf-hint">نمونه: ۱۴۰۵/۰۴/۱۳</span>
+          </div>
+
+          {# ── Vendor ── #}
+          <div class="pf-field-group">
+            <label class="pf-label pf-label--required" for="id_vendor">نام تامین‌کننده</label>
+            {{ adminform.form.vendor }}
+            {% if adminform.form.vendor.errors %}
+            <ul class="pf-field-errors">
+              {% for e in adminform.form.vendor.errors %}<li>{{ e }}</li>{% endfor %}
+            </ul>
+            {% endif %}
+          </div>
+
+          {% if not original %}
+          <input type="hidden" name="status" value="PENDING">
+          {% endif %}
+
+          {# reference_number: kept for data integrity but not shown in UI #}
+          <div style="display:none">{{ adminform.form.reference_number }}</div>
+
+        </div>
+
+        {# ── Notes — full width ── #}
+        <div class="pf-field-group pf-field-group--full">
+          <label class="pf-label" for="id_notes">یادداشت</label>
+          {{ adminform.form.notes }}
+        </div>
+
+        {# ── Readonly info for existing purchases ── #}
+        {% if original %}
+        <div class="pf-readonly-row">
+          <div class="pf-readonly-item">
+            <span class="pf-readonly-label">موجودی اعمال شده</span>
+            <span class="pf-readonly-value">
+              {% if original.stock_applied %}
+              <span class="adm-badge adm-badge--green">بله ✔</span>
+              {% else %}
+              <span class="adm-badge adm-badge--gray">خیر</span>
+              {% endif %}
+            </span>
+          </div>
+          <div class="pf-readonly-item">
+            <span class="pf-readonly-label">تاریخ ایجاد</span>
+            <span class="pf-readonly-value">{{ original.created_at_jalali }}</span>
+          </div>
+          <div class="pf-readonly-item">
+            <span class="pf-readonly-label">آخرین ویرایش</span>
+            <span class="pf-readonly-value">{{ original.updated_at_jalali }}</span>
+          </div>
+        </div>
+        {% endif %}
+
+      </div>{# /.pf-card-body #}
+    </div>{# /.pf-card #}
+
+    {# ── Purchase items section ────────────────────────────────── #}
+    {% if inline_admin_formsets %}
+    {% with inline_fs=inline_admin_formsets.0 %}
+    {% with formset=inline_fs.formset %}
+
+    {# is_locked: True when items cannot be added/changed/deleted #}
+    {% with is_locked=inline_fs.has_add_permission|yesno:",locked," %}
+
+    <div class="pf-items-card{% if not inline_fs.has_add_permission %} pf-items-locked{% endif %}"
+         id="pf-items-section">
+
+      <div class="pf-items-header">
+        <h2 class="pf-items-title">
+          اقلام خرید
+          <span class="pf-items-count" id="pf-items-count">۰</span>
+        </h2>
+        {% if inline_fs.has_add_permission %}
+        <button type="button" id="pf-add-item-btn" class="adm-btn adm-btn--primary adm-btn--sm">+ افزودن قلم</button>
+        {% endif %}
+      </div>
+
+      <div class="pf-items-table-wrap">
+        <table class="pf-items-table" id="pf-items-table">
+          <thead>
+            <tr>
+              <th class="pf-th-product">محصول</th>
+              <th class="pf-th-qty">مقدار</th>
+              <th class="pf-th-unit">واحد</th>
+              <th class="pf-th-price">قیمت واحد (تومان)</th>
+              <th class="pf-th-total">جمع ردیف (تومان)</th>
+              <th class="pf-th-notes">یادداشت</th>
+              <th class="pf-th-del"></th>
+            </tr>
+          </thead>
+          <tbody id="pf-items-tbody">
+
+            {% for form in formset.forms %}
+            {# Check if this row is already deleted (re-render after validation error) #}
+            {% with del_field=form.fields.DELETE %}
+            {% with is_del=form.DELETE.value %}
+            <tr class="pf-item-row{% if is_del %} pf-item-deleted{% endif %}"
+                id="pf-item-{{ form.prefix }}"
+                data-row-prefix="{{ form.prefix }}">
+
+              {# ── Hidden fields: id + DELETE ── #}
+              {{ form.id }}
+              {% if del_field %}
+              <td style="display:none">{{ form.DELETE }}</td>
+              {% endif %}
+
+              {# ── Product ── #}
+              <td class="pf-item-cell pf-item-cell--product">
+                {{ form.product }}
+                {% if form.product.errors %}
+                <div class="pf-item-error">{{ form.product.errors.as_text }}</div>
+                {% endif %}
+              </td>
+
+              {# ── Quantity ── #}
+              <td class="pf-item-cell pf-item-cell--qty">
+                {{ form.quantity }}
+                {% if form.quantity.errors %}
+                <div class="pf-item-error">{{ form.quantity.errors.as_text }}</div>
+                {% endif %}
+              </td>
+
+              {# ── Unit (display-only, auto-filled on save) ── #}
+              <td class="pf-item-cell pf-item-cell--unit">
+                <span class="pf-unit-text">{{ form.instance.unit|default:"—" }}</span>
+              </td>
+
+              {# ── Unit price ── #}
+              <td class="pf-item-cell pf-item-cell--price">
+                {{ form.unit_price }}
+                {% if form.unit_price.errors %}
+                <div class="pf-item-error">{{ form.unit_price.errors.as_text }}</div>
+                {% endif %}
+              </td>
+
+              {# ── Row total (auto-calculated, manually overridable) ── #}
+              <td class="pf-item-cell pf-item-cell--total">
+                <div class="pf-row-total-wrap">
+                  {{ form.manual_total }}
+                  <button type="button" class="pf-row-total-reset"
+                          title="بازگشت به محاسبه خودکار">↺</button>
+                  {% if form.manual_total.errors %}
+                  <div class="pf-item-error">{{ form.manual_total.errors.as_text }}</div>
+                  {% endif %}
+                </div>
+              </td>
+
+              {# ── Notes ── #}
+              <td class="pf-item-cell pf-item-cell--notes">
+                {{ form.notes }}
+              </td>
+
+              {# ── Remove button ── #}
+              <td class="pf-item-cell pf-item-cell--del">
+                {% if inline_fs.has_delete_permission %}
+                <button type="button" class="pf-remove-btn"
+                        data-row-prefix="{{ form.prefix }}"
+                        title="حذف این ردیف">✕</button>
+                {% endif %}
+              </td>
+
+            </tr>
+            {% endwith %}
+            {% endwith %}
+            {% endfor %}
+
+          </tbody>
+        </table>
+
+        {# Empty state — shown by JS when no active rows #}
+        <div class="pf-items-empty" id="pf-items-empty"
+             style="{% if formset.forms %}display:none{% endif %}">
+          {% if inline_fs.has_add_permission %}
+          هنوز هیچ قلمی اضافه نشده است. برای ثبت خرید، حداقل یک قلم اضافه کنید.
+          {% else %}
+          این خرید فاقد قلم است.
+          {% endif %}
+        </div>
+
+      </div>{# /.pf-items-table-wrap #}
+
+      <div class="pf-items-footer">
+        <div class="pf-grand-total-wrap">
+          <span class="pf-grand-total-label">مجموع کل:</span>
+          <span class="pf-grand-total" id="pf-grand-total">۰</span>
+          <span class="pf-grand-total-unit">تومان</span>
+        </div>
+      </div>
+
+    </div>{# /.pf-items-card #}
+
+    {% comment %}
+      Empty-form row for JS row cloning.
+      JS reads innerHTML, replaces __prefix__ with the next index,
+      appends the result to #pf-items-tbody, then increments TOTAL_FORMS.
+    {% endcomment %}
+    {% if inline_fs.has_add_permission %}
+    <template id="pf-empty-form-container">
+      <tr class="pf-item-row pf-item-row--new"
+          id="pf-item-{{ formset.prefix }}-__prefix__"
+          data-row-prefix="{{ formset.prefix }}-__prefix__">
+        <td style="display:none">{{ formset.empty_form.id }}</td>
+        <td style="display:none"></td>
+        <td class="pf-item-cell pf-item-cell--product">{{ formset.empty_form.product }}</td>
+        <td class="pf-item-cell pf-item-cell--qty">{{ formset.empty_form.quantity }}</td>
+        <td class="pf-item-cell pf-item-cell--unit">
+          <span class="pf-unit-text">—</span>
+        </td>
+        <td class="pf-item-cell pf-item-cell--price">{{ formset.empty_form.unit_price }}</td>
+        <td class="pf-item-cell pf-item-cell--total">
+          <div class="pf-row-total-wrap">
+            {{ formset.empty_form.manual_total }}
+            <button type="button" class="pf-row-total-reset"
+                    title="بازگشت به محاسبه خودکار">↺</button>
+          </div>
+        </td>
+        <td class="pf-item-cell pf-item-cell--notes">{{ formset.empty_form.notes }}</td>
+        <td class="pf-item-cell pf-item-cell--del">
+          <button type="button" class="pf-remove-btn"
+                  data-row-prefix="{{ formset.prefix }}-__prefix__"
+                  title="حذف این ردیف">✕</button>
+        </td>
+      </tr>
+    </template>
+    {% endif %}
+
+    {% endwith %}{# is_locked #}
+    {% endwith %}{# formset #}
+    {% endwith %}{# inline_fs #}
+    {% endif %}{# inline_admin_formsets #}
+
+    {# ── Submit / workflow bar ────────────────────────────────────── #}
+    <div class="pf-submit-bar">
+      {# Confirm purchase — only for PENDING purchases #}
+      {% if show_confirm_btn %}
+      <button type="button" id="pf-confirm-purchase-btn" class="adm-btn pf-btn--workflow pf-btn--confirm">
+        ✔ تأیید خرید
+      </button>
+      {% endif %}
+
+      {# Cancel purchase — for PENDING and CONFIRMED #}
+      {% if show_cancel_btn %}
+      <button type="button" id="pf-cancel-purchase-btn" class="adm-btn pf-btn--workflow pf-btn--cancel-purchase">
+        ✕ لغو خرید
+      </button>
+      {% endif %}
+
+      {# Restore purchase — for CANCELLED only #}
+      {% if show_restore_btn %}
+      <button type="button" id="pf-restore-purchase-btn" class="adm-btn pf-btn--workflow pf-btn--restore">
+        ↩ بازگرداندن به انتظار تأیید
+      </button>
+      {% endif %}
+
+      {# Save buttons — always available to preserve non-financial edits #}
+      <button type="submit" name="_save" value="1" class="adm-btn adm-btn--secondary">ذخیره</button>
+      <button type="submit" name="_continue" value="1" class="adm-btn adm-btn--secondary">ذخیره و ادامه</button>
+
+      {% if original and has_delete_permission %}
+      <a href="{% url 'admin:inventory_purchase_delete' original.pk %}"
+         class="adm-btn adm-btn--danger"
+         style="margin-right: auto">حذف خرید</a>
+      {% endif %}
+    </div>
+
+  </form>
+
+  {# ── Confirm-purchase modal (outside form) ─────────────────── #}
+  {% if show_confirm_btn %}
+  <div id="pf-confirm-modal" class="pf-modal-overlay" style="display:none" role="dialog" aria-modal="true" dir="rtl">
+    <div class="pf-modal">
+      <div class="pf-modal-header">
+        <span class="pf-modal-icon pf-modal-icon--confirm">✔</span>
+        <h3 class="pf-modal-title">تأیید خرید</h3>
+      </div>
+      <div class="pf-modal-body">
+        <p>آیا از تأیید این خرید مطمئن هستید؟</p>
+        <p class="pf-modal-note">پس از تأیید، موجودی محصولات و اطلاعات مالی به‌روزرسانی می‌شود. اقلام پس از تأیید نیز قابل ویرایش هستند و هرگونه تغییر به‌طور خودکار در موجودی و مالی اعمال می‌شود.</p>
+      </div>
+      <div class="pf-modal-footer">
+        <button id="pf-confirm-modal-ok" class="adm-btn pf-btn--confirm">تأیید خرید</button>
+        <button id="pf-confirm-modal-cancel" class="adm-btn adm-btn--secondary">انصراف</button>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {# ── Cancel-purchase modal (outside form) ──────────────────── #}
+  {% if show_cancel_btn %}
+  <div id="pf-cancel-modal" class="pf-modal-overlay" style="display:none" role="dialog" aria-modal="true" dir="rtl">
+    <div class="pf-modal">
+      <div class="pf-modal-header">
+        <span class="pf-modal-icon pf-modal-icon--cancel">✕</span>
+        <h3 class="pf-modal-title">لغو خرید</h3>
+      </div>
+      <div class="pf-modal-body">
+        <p>آیا از لغو این خرید مطمئن هستید؟</p>
+        {% if purchase_was_confirmed %}
+        <p class="pf-modal-warning">⚠ این خرید قبلاً تأیید شده است. لغو آن موجودی محصولات را معکوس کرده و اثر مالی آن را حذف می‌کند.</p>
+        {% endif %}
+      </div>
+      <div class="pf-modal-footer">
+        <button id="pf-cancel-modal-ok" class="adm-btn adm-btn--danger">لغو خرید</button>
+        <button id="pf-cancel-modal-cancel" class="adm-btn adm-btn--secondary">انصراف</button>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {# ── Restore-purchase modal (outside form) ─────────────────── #}
+  {% if show_restore_btn %}
+  <div id="pf-restore-modal" class="pf-modal-overlay" style="display:none" role="dialog" aria-modal="true" dir="rtl">
+    <div class="pf-modal">
+      <div class="pf-modal-header">
+        <span class="pf-modal-icon">↩</span>
+        <h3 class="pf-modal-title">بازگرداندن خرید</h3>
+      </div>
+      <div class="pf-modal-body">
+        <p>آیا از بازگرداندن این خرید به وضعیت «در انتظار تأیید» مطمئن هستید؟</p>
+        <p class="pf-modal-note">موجودی معکوس نمی‌شود. برای اعمال مجدد موجودی باید خرید را دوباره تأیید کنید.</p>
+      </div>
+      <div class="pf-modal-footer">
+        <button id="pf-restore-modal-ok" class="adm-btn adm-btn--primary">بازگرداندن</button>
+        <button id="pf-restore-modal-cancel" class="adm-btn adm-btn--secondary">انصراف</button>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+</div>{# /#purchase-form-root #}
+{% endblock %}
+
+{% block extrascript %}
+<script>
+  window.PF_FORMSET_PREFIX = "{{ inline_admin_formsets.0.formset.prefix|default:'items' }}";
+  window.PF_PRODUCTS_API   = "/api/v2/inventory/products/";
+</script>
+<script src="{% static 'admin/js/purchase_form.js' %}?v=2"></script>
+{% if show_confirm_btn or show_cancel_btn or show_restore_btn %}
+<script>
+(function () {
+    'use strict';
+
+    var actionInput = document.getElementById('pf-action-input');
+    var mainForm    = document.getElementById('pf-main-form');
+
+    function submitWithAction(v) {
+        if (actionInput) actionInput.value = v;
+        if (mainForm)    mainForm.submit();
+    }
+
+    function closeModal(m) { if (m) m.style.display = 'none'; }
+
+    function bindModal(openBtnId, modalId, okBtnId, cancelBtnId, actionValue) {
+        var openBtn   = document.getElementById(openBtnId);
+        var modal     = document.getElementById(modalId);
+        var okBtn     = document.getElementById(okBtnId);
+        var cancelBtn = document.getElementById(cancelBtnId);
+        if (!openBtn || !modal) return;
+
+        openBtn.addEventListener('click', function () { modal.style.display = ''; });
+        if (okBtn)     okBtn.addEventListener('click', function () { submitWithAction(actionValue); });
+        if (cancelBtn) cancelBtn.addEventListener('click', function () { closeModal(modal); });
+        modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(modal); });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && modal.style.display !== 'none') closeModal(modal);
+        });
+    }
+
+    {% if show_confirm_btn %}
+    bindModal('pf-confirm-purchase-btn', 'pf-confirm-modal', 'pf-confirm-modal-ok', 'pf-confirm-modal-cancel', 'confirm');
+    {% endif %}
+    {% if show_cancel_btn %}
+    bindModal('pf-cancel-purchase-btn', 'pf-cancel-modal', 'pf-cancel-modal-ok', 'pf-cancel-modal-cancel', 'cancel');
+    {% endif %}
+    {% if show_restore_btn %}
+    bindModal('pf-restore-purchase-btn', 'pf-restore-modal', 'pf-restore-modal-ok', 'pf-restore-modal-cancel', 'restore');
+    {% endif %}
+}());
+</script>
+{% endif %}
+{% endblock %}
