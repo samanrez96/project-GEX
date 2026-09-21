@@ -1,6 +1,6 @@
 ### 📘 API Documentation – Surgeries App
 
-**Base URL**: `http://localhost:8000/api/v2/surgeries/`  
+**Base URL**: `http://localhost:8001/api/v2/surgeries/`  
 **Authentication**: JWT Token (Bearer) or Session  
 **Permissions**:
 - **Read** (GET): `IsAuthenticated` (any logged-in user)
@@ -16,7 +16,7 @@
 **GET/PUT/PATCH/DELETE** `/patients/{id}/` – retrieve/update/delete (write restricted)
 
 ```bash
-curl -X GET "http://localhost:8000/api/v2/surgeries/patients/?search=احمد" \
+curl -X GET "http://localhost:8001/api/v2/surgeries/patients/?search=احمد" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -54,7 +54,7 @@ curl -X GET "http://localhost:8000/api/v2/surgeries/patients/?search=احمد" \
 **POST** `/surgeries/{id}/complete/` – complete and consume stock (admin/finance)
 
 ```bash
-curl -X POST "http://localhost:8000/api/v2/surgeries/1/complete/" \
+curl -X POST "http://localhost:8001/api/v2/surgeries/1/complete/" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -67,7 +67,7 @@ curl -X POST "http://localhost:8000/api/v2/surgeries/1/complete/" \
 **GET/PUT/PATCH/DELETE** `/types/{id}/` – retrieve/update/delete (write restricted)
 
 ```bash
-curl -X GET "http://localhost:8000/api/v2/surgeries/types/?is_active=true&search=appendectomy" \
+curl -X GET "http://localhost:8001/api/v2/surgeries/types/?is_active=true&search=appendectomy" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -80,7 +80,7 @@ curl -X GET "http://localhost:8000/api/v2/surgeries/types/?is_active=true&search
 **GET/PUT/PATCH/DELETE** `/consumption-items/{id}/` – standard CRUD (write restricted)
 
 ```bash
-curl -X POST "http://localhost:8000/api/v2/surgeries/consumption-items/" \
+curl -X POST "http://localhost:8001/api/v2/surgeries/consumption-items/" \
   -H "Authorization: Token YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"surgery":1,"product":10,"quantity":2}'
@@ -96,7 +96,7 @@ curl -X POST "http://localhost:8000/api/v2/surgeries/consumption-items/" \
 **Excel Export** – add `?export=excel` to list endpoint.
 
 ```bash
-curl -X GET "http://localhost:8000/api/v2/surgeries/history/?status=COMPLETED&surgery_date_from=1404-01-01" \
+curl -X GET "http://localhost:8001/api/v2/surgeries/history/?status=COMPLETED&surgery_date_from=1404-01-01" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -137,7 +137,7 @@ curl -X GET "http://localhost:8000/api/v2/surgeries/history/?status=COMPLETED&su
 
 **POST create example**:
 ```bash
-curl -X POST "http://localhost:8000/api/v2/surgeries/history/" \
+curl -X POST "http://localhost:8001/api/v2/surgeries/history/" \
   -H "Authorization: Token YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -160,7 +160,7 @@ curl -X POST "http://localhost:8000/api/v2/surgeries/history/" \
 **GET/PUT/PATCH/DELETE** `/used-items/{id}/` – standard CRUD (write restricted) – updates/deletes also adjust stock via compensating movements.
 
 ```bash
-curl -X POST "http://localhost:8000/api/v2/surgeries/used-items/" \
+curl -X POST "http://localhost:8001/api/v2/surgeries/used-items/" \
   -H "Authorization: Token YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"surgery":10,"product":20,"quantity":1.5,"description":"مصرف برای عمل"}'
@@ -175,7 +175,7 @@ curl -X POST "http://localhost:8000/api/v2/surgeries/used-items/" \
 Query parameters: `start_date`, `end_date`, `surgery_type_id`, `doctor_id`, `patient_id`, `status`, `payment_status`, `group_by` (surgery|surgery_type|doctor), `min_profit`, `max_profit`, `page`, `page_size`, `export=excel`.
 
 ```bash
-curl -X GET "http://localhost:8000/api/v2/surgeries/reports/profit/?start_date=2026-01-01&end_date=2026-08-19&group_by=doctor" \
+curl -X GET "http://localhost:8001/api/v2/surgeries/reports/profit/?start_date=2026-01-01&end_date=2026-08-19&group_by=doctor" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 

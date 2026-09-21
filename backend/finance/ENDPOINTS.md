@@ -1,7 +1,7 @@
 
 # Finance API – Complete cURL Documentation
 
-**Base URL**: `http://localhost:8000/api/v2/finance`  
+**Base URL**: `http://localhost:8001/api/v2/finance`  
 **Authentication**: Token (`Authorization: Token YOUR_TOKEN`) or Session Cookie  
 **Permissions**: 
 - `GET` (list/retrieve): `IsAuthenticated` for categories & transactions  
@@ -16,7 +16,7 @@
 **GET** `/categories/?category_type=expense&is_active=true&search=salary`
 
 ```bash
-curl -X GET "http://localhost:8000/api/v2/finance/categories/?category_type=expense&is_active=true" \
+curl -X GET "http://localhost:8001/api/v2/finance/categories/?category_type=expense&is_active=true" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -55,7 +55,7 @@ curl -X GET "http://localhost:8000/api/v2/finance/categories/?category_type=expe
 **POST** `/categories/` – `slug` is now **required** and unique.
 
 ```bash
-curl -X POST "http://localhost:8000/api/v2/finance/categories/" \
+curl -X POST "http://localhost:8001/api/v2/finance/categories/" \
   -H "Authorization: Token YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -95,7 +95,7 @@ curl -X POST "http://localhost:8000/api/v2/finance/categories/" \
 **GET** `/transactions/?transaction_type=expense&payment_status=pending&transaction_date__gte=1404-01-01`
 
 ```bash
-curl -X GET "http://localhost:8000/api/v2/finance/transactions/?transaction_type=expense&payment_status=pending" \
+curl -X GET "http://localhost:8001/api/v2/finance/transactions/?transaction_type=expense&payment_status=pending" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -132,7 +132,7 @@ curl -X GET "http://localhost:8000/api/v2/finance/transactions/?transaction_type
 **POST** `/transactions/` – requires `IsAdminOrFinanceUser`.
 
 ```bash
-curl -X POST "http://localhost:8000/api/v2/finance/transactions/" \
+curl -X POST "http://localhost:8001/api/v2/finance/transactions/" \
   -H "Authorization: Token YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -186,7 +186,7 @@ Standard REST endpoints:
 
 ### 3.1 Full History (no filters)
 ```bash
-curl -X GET "http://localhost:8000/api/v2/finance/reports/balance/" \
+curl -X GET "http://localhost:8001/api/v2/finance/reports/balance/" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
@@ -214,20 +214,20 @@ curl -X GET "http://localhost:8000/api/v2/finance/reports/balance/" \
 
 ### 3.2 Filter by Date Range (Jalali)
 ```bash
-curl -X GET "http://localhost:8000/api/v2/finance/reports/balance/?start_date=1404-01-01&end_date=1404-06-30" \
+curl -X GET "http://localhost:8001/api/v2/finance/reports/balance/?start_date=1404-01-01&end_date=1404-06-30" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
 ### 3.3 Filter by Year and Month (Gregorian)
 ```bash
-curl -X GET "http://localhost:8000/api/v2/finance/reports/balance/?year=2026&month=3" \
+curl -X GET "http://localhost:8001/api/v2/finance/reports/balance/?year=2026&month=3" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 > ⚠️ `month` without `year` returns **400 Bad Request**.
 
 ### 3.4 Excel Export
 ```bash
-curl -X GET "http://localhost:8000/api/v2/finance/reports/balance/?start_date=1404-01-01&end_date=1404-06-30&export=excel" \
+curl -X GET "http://localhost:8001/api/v2/finance/reports/balance/?start_date=1404-01-01&end_date=1404-06-30&export=excel" \
   -H "Authorization: Token YOUR_TOKEN" \
   --output balance_report.xlsx
 ```
@@ -239,7 +239,7 @@ curl -X GET "http://localhost:8000/api/v2/finance/reports/balance/?start_date=14
 **GET** `/reports/trend/?year=2026` – optional `year` (Gregorian).
 
 ```bash
-curl -X GET "http://localhost:8000/api/v2/finance/reports/trend/?year=2026" \
+curl -X GET "http://localhost:8001/api/v2/finance/reports/trend/?year=2026" \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 

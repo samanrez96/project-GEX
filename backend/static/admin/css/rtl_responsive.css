@@ -1100,7 +1100,7 @@ ul.object-tools a:visited {
    VERIFIED before writing this revision:
    • Dev server (config.settings.development, DEBUG=True) serves
      static/admin/css/rtl_responsive.css through the staticfiles finder.
-     `curl http://127.0.0.1:8000/static/admin/css/rtl_responsive.css`
+     `curl http://127.0.0.1:8001/static/admin/css/rtl_responsive.css`
      → HTTP 200 and the response DID contain the rule. So the file +
      serving path were never the problem; the right file was edited.
    • The response carried only `Last-Modified` (no Cache-Control/ETag) and
